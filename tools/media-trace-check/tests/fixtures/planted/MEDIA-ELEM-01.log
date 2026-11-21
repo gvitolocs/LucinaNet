@@ -1,0 +1,17 @@
+[t+   0.100] lucinanet-media: media elem event=play paused=0 ended=0 seeking=0 potentially_playing=0 player_playing=0 cmd=play
+[t+   0.101] lucinanet-media: player play on Page#1 mirror(paused=true,can_resume=false)
+[t+   0.102] lucinanet-media: mixer stream 0 set_playing(true) resumed, latch 0 released from crates/lucinanet-media/src/mse_play.rs:418
+[t+   0.103] lucinanet-media: audio cmd Start pts=0 paused=true running=false
+[t+   0.104] lucinanet-media: audio cmd Paused false
+[t+   0.105] lucinanet-media: mixer stream 0 playing false -> true held=None from crates/lucinanet-media/src/mse_play.rs:418
+[t+   0.300] lucinanet-media: show pts=300000 now=Some(302000) sound=Some(302000)
+[t+   0.900] lucinanet-media: audio wait frame ENTER: queued=0 playing=true position_us=Some(900000) cursor_pts=None start_at=None frames=0 buffered_end_us=Some(30000000) generation=1 track=1 buffers=2 ended=false seeks=0
+[t+   1.100] lucinanet-media: show pts=1100000 now=Some(1101500) sound=Some(1101500)
+[t+   1.200] lucinanet-media: media elem event=waiting paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=1 cmd=none
+[t+   2.100] lucinanet-media: mixer stream 0: taken=48000 heard=43040 held=None queued=96000 playing=true in=144000 out=48000 | device written=48000 played=43040
+[t+   2.400] lucinanet-media: show pts=2400000 now=Some(2402000) sound=Some(2402000)
+[t+   3.000] lucinanet-media: media elem event=pause paused=1 ended=0 seeking=0 potentially_playing=0 player_playing=1 cmd=pause
+[t+   3.001] lucinanet-media: player pause on Page#1 mirror(paused=false,can_resume=false)
+[t+   3.010] lucinanet-media: mixer stream 0 playing true -> false held=Some(144048) queued=96000 from crates/lucinanet-media/src/mse_play.rs:418
+[t+   3.020] lucinanet-media: audio cmd Paused true
+[t+   3.500] lucinanet-media: played VP9 seconds=3.5 shown=84

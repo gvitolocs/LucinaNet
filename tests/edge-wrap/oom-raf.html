@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>OOM in an animation frame</title>
+<body>
+<p>Exhausts a capped JS heap inside requestAnimationFrame callbacks, so the context is poisoned
+during "update the rendering", outside any task of the sequential loop.
+<script>
+var keep = [];
+function frame() {
+  for (var i = 0; i < 20000; i++) {
+    keep.push({ a: "x".repeat(256), b: [i, i + 1, i + 2], c: function () { return i; } });
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>

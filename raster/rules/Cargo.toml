@@ -1,0 +1,11 @@
+[package]
+name = "lucinanet-raster-rules"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+description = "The rasterizer arithmetic Verus checks: clip, stripes, strides, blend table, 8-bit blending"
+
+[workspace]
+
+[lib]
+path = "src/lib.rs"

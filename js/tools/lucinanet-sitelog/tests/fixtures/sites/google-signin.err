@@ -1,0 +1,202 @@
+phase 51691.815221 main
+phase 51691.815784 engine thread
+phase 51691.818159 rendering context
+phase 51691.832073 servo built
+phase 51691.834134 web view built
+lucinanet: engine up in 18 ms, rss 35300 KiB
+phase 51691.843550 first frame painted
+phase font list: 8 faces in 0 ms
+netphase 51691.878663 fetch https://accounts.google.com/ 0.0 ms
+netphase 51691.883362 request https://accounts.google.com/ 0.0 ms
+netphase 51691.893209 dns accounts.google.com 4.1 ms
+netphase 51691.894059 dns-wait accounts.google.com 10.5 ms
+netphase 51691.918109 dns+tcp 34.7 ms
+netphase 51691.941754 certificate verification 0.7 ms
+netphase 51691.941912 connected https://accounts.google.com/ (dns+tcp+tls) 58.5 ms
+netphase 51692.002361 response headers https://accounts.google.com/ 119.0 ms
+netphase 51692.014370 request https://accounts.google.com/ServiceLogin?passive=1209600&continue=https%3A%2F%2F 0.0 ms
+netphase 51692.083510 response headers https://accounts.google.com/ServiceLogin?passive=1209600&continue=https%3A%2F%2F 69.1 ms
+netphase 51692.088578 request https://accounts.google.com/v3/signin/identifier?continue=https://accounts.googl 0.0 ms
+netphase 51692.201339 response headers https://accounts.google.com/v3/signin/identifier?continue=https://accounts.googl 112.8 ms
+lucinanet: history depth 3 over 1 tabs (was None)
+netphase 51692.210743 dns www.gstatic.com 0.9 ms
+netphase 51692.210783 dns-wait www.gstatic.com 0.9 ms
+netphase 51692.224155 dns+tcp 14.3 ms
+netphase 51692.249239 certificate verification 0.6 ms
+netphase 51692.249863 preconnected https://www.gstatic.com/ (made) 40.0 ms
+netphase 51692.309661 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.310152 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.310198 preconnected https://www.gstatic.com/ (used) 0.0 ms
+netphase 51692.310657 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.311342 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.312107 fetch https://www.gstatic.com/images/branding/googleg_gradient/svg/googleg_gradient_st 0.0 ms
+netphase 51692.312222 request https://www.gstatic.com/images/branding/googleg_gradient/svg/googleg_gradient_st 0.0 ms
+netphase 51692.314568 fetch https://www.gstatic.com/images/branding/googleg_gradient/svg/googleg_gradient_st 0.0 ms
+netphase 51692.314833 request https://www.gstatic.com/images/branding/googleg_gradient/svg/googleg_gradient_st 0.0 ms
+netphase 51692.323090 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.323297 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.323875 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.323933 dns fonts.gstatic.com 0.5 ms
+netphase 51692.323980 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324008 dns-wait fonts.gstatic.com 0.6 ms
+netphase 51692.324179 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324265 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324324 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324394 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324449 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324517 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324577 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324640 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324699 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324751 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324803 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324864 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.324958 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325030 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325070 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325211 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325251 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325311 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325354 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325412 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325452 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325601 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325619 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325640 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325656 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325673 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325692 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325714 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.325728 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326288 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326307 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326331 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326350 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326378 fetch https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326474 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326512 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326544 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326590 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326622 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326653 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326684 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326715 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326744 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326794 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326841 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.326874 request https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 0.0 ms
+netphase 51692.336079 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51692.345145 dns+tcp 21.8 ms
+netphase 51692.348069 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51692.348133 fetch data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' xml:s 0.0 ms
+netphase 51692.350268 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 40.1 ms
+netphase 51692.367496 certificate verification 0.7 ms
+netphase 51692.367653 connected https://fonts.gstatic.com/ (dns+tcp+tls) 44.3 ms
+netphase 51692.406040 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 94.7 ms
+netphase 51692.414657 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 91.4 ms
+netphase 51692.416268 response headers https://www.gstatic.com/images/branding/googleg_gradient/svg/googleg_gradient_st 101.4 ms
+netphase 51692.416572 response headers https://www.gstatic.com/images/branding/googleg_gradient/svg/googleg_gradient_st 104.4 ms
+netphase 51692.439655 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 115.0 ms
+netphase 51692.451209 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 124.7 ms
+netphase 51692.457265 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 132.0 ms
+netphase 51692.463260 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 139.3 ms
+netphase 51692.472731 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 146.2 ms
+netphase 51692.480739 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 154.0 ms
+netphase 51692.488871 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 162.2 ms
+netphase 51692.492989 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 168.0 ms
+netphase 51692.503649 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 177.1 ms
+netphase 51692.503950 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 178.5 ms
+netphase 51692.504037 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 179.6 ms
+netphase 51692.505111 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 178.5 ms
+netphase 51692.509140 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 183.9 ms
+netphase 51692.509963 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 185.2 ms
+netphase 51692.521714 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 195.1 ms
+netphase 51692.521912 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 197.6 ms
+netphase 51692.522512 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 196.9 ms
+netphase 51692.522617 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 195.9 ms
+netphase 51692.524108 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 197.3 ms
+netphase 51692.524270 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 197.8 ms
+netphase 51692.525212 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 200.3 ms
+netphase 51692.528137 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 203.6 ms
+netphase 51692.528456 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 201.6 ms
+netphase 51692.528552 response headers https://fonts.gstatic.com/s/googlesans/v62/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_ 201.7 ms
+netphase 51692.608098 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.610470 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.626627 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 16.2 ms
+netphase 51692.629075 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.629619 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.660427 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 30.8 ms
+netphase 51692.671128 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.671574 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.698103 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 26.5 ms
+netphase 51692.917083 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.917389 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51692.929096 fetch https://www.gstatic.com/feedback/js/help/prod/service/lazy.min.js 0.0 ms
+netphase 51692.929423 request https://www.gstatic.com/feedback/js/help/prod/service/lazy.min.js 0.0 ms
+netphase 51692.931525 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 14.1 ms
+netphase 51692.942849 response headers https://www.gstatic.com/feedback/js/help/prod/service/lazy.min.js 13.4 ms
+netphase 51693.071116 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.071491 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.085950 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 14.5 ms
+netphase 51693.102092 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.102488 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.108879 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.109210 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.119145 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 16.7 ms
+netphase 51693.131268 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 22.1 ms
+netphase 51693.150736 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+console Error: Error at https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi.en_US.WPIYAXhNuJU.es5.O/am=D_wgBAAAAAAc4UkAAIgAoL8BAAQI1oB7LYAJEDIAAAAAAAAAAMBFAACyCCA/d=1/excm=_b,_tp,identifierview/ed=1/dg=0/wt=2/ujg=1/rs=AOaEmlENE6KE9VgnV6vEIwkYQGZ_AYZW1w/dti=1/m=_b,_tp:105:147 TypeError: cannot set property `stack`
+netphase 51693.157230 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.157387 fetch https://accounts.youtube.com/accounts/CheckConnection?pmpo=https%3A%2F%2Faccount 0.0 ms
+netphase 51693.158790 request https://accounts.youtube.com/accounts/CheckConnection?pmpo=https%3A%2F%2Faccount 0.0 ms
+netphase 51693.172376 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 15.1 ms
+netphase 51693.174067 dns accounts.youtube.com 12.6 ms
+netphase 51693.175771 dns-wait accounts.youtube.com 16.9 ms
+netphase 51693.196965 dns+tcp 38.1 ms
+netphase 51693.197236 fetch https://accounts.google.com/v3/signin/_/AccountsSignInUi/data/batchexecute?rpcid 0.0 ms
+netphase 51693.197286 fetch https://accounts.google.com/_/bscframe 0.0 ms
+netphase 51693.197676 request https://accounts.google.com/_/bscframe 0.0 ms
+netphase 51693.201030 request https://accounts.google.com/v3/signin/_/AccountsSignInUi/data/batchexecute?rpcid 0.0 ms
+lucinanet: js idle trim done, 0 KiB of parse trees kept
+netphase 51693.219168 certificate verification 0.8 ms
+netphase 51693.219327 connected https://accounts.youtube.com/ (dns+tcp+tls) 60.5 ms
+netphase 51693.240219 response headers https://accounts.google.com/_/bscframe 42.5 ms
+lucinanet: js idle trim done, 0 KiB of parse trees kept
+netphase 51693.252253 fetch https://accounts.google.com/v3/signin/_/AccountsSignInUi/cspreport 0.0 ms
+netphase 51693.252308 fetch https://accounts.google.com/v3/signin/_/AccountsSignInUi/cspreport 0.0 ms
+netphase 51693.253120 request https://accounts.google.com/v3/signin/_/AccountsSignInUi/cspreport 0.0 ms
+netphase 51693.253195 request https://accounts.google.com/v3/signin/_/AccountsSignInUi/cspreport 0.0 ms
+netphase 51693.255002 fetch https://play.google.com/log?format=json&hasfast=true&authuser=0 0.0 ms
+netphase 51693.257856 request https://play.google.com/log?format=json&hasfast=true&authuser=0 0.0 ms
+netphase 51693.261502 fetch https://play.google.com/log?format=json&hasfast=true&authuser=0 0.0 ms
+netphase 51693.262096 request https://play.google.com/log?format=json&hasfast=true&authuser=0 0.0 ms
+netphase 51693.270225 dns play.google.com 11.9 ms
+netphase 51693.271059 dns-wait play.google.com 13.1 ms
+netphase 51693.271515 response headers https://accounts.google.com/v3/signin/_/AccountsSignInUi/data/batchexecute?rpcid 70.5 ms
+netphase 51693.282704 response headers https://accounts.youtube.com/accounts/CheckConnection?pmpo=https%3A%2F%2Faccount 123.9 ms
+netphase 51693.285033 dns+tcp 27.1 ms
+netphase 51693.310485 certificate verification 0.7 ms
+netphase 51693.310637 connected https://play.google.com/ (dns+tcp+tls) 52.7 ms
+netphase 51693.311177 response headers https://accounts.google.com/v3/signin/_/AccountsSignInUi/cspreport 58.1 ms
+netphase 51693.315357 response headers https://accounts.google.com/v3/signin/_/AccountsSignInUi/cspreport 62.2 ms
+netphase 51693.354800 response headers https://play.google.com/log?format=json&hasfast=true&authuser=0 96.9 ms
+netphase 51693.364792 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.365114 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+lucinanet: js idle trim done, 0 KiB of parse trees kept
+phase 51693.370360 load complete
+lucinanet: js idle trim done, 0 KiB of parse trees kept
+phase navigation Ok(String("[[\"https://accounts.google.com/v3/signin/identifier?continue=https://accounts.google.com/&followup=https://accounts.google.com/&passive=1209600&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S3462772:1794489433681759\",0,0,0,212.34,0,0,0,437.28,468.17,760.06,0,0,0],[\"first-paint\",null,null,null,null,null,null,null,null,null,null,null,null,485.25],[\"first-contentful-paint\",null,null,null,null,null,null,null,null,null,null,null,null,485.25]]"))
+netphase 51693.379937 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 14.8 ms
+lucinanet: js idle trim done, 0 KiB of parse trees kept
+netphase 51693.388702 fetch https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.389131 request https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 0.0 ms
+netphase 51693.406694 response headers https://play.google.com/log?format=json&hasfast=true&authuser=0 144.6 ms
+netphase 51693.413912 response headers https://www.gstatic.com/_/mss/boq-identity/_/js/k=boq-identity.AccountsSignInUi. 24.8 ms
+netphase 51703.121792 fetch https://play.google.com/log?format=json&hasfast=true&authuser=0 0.0 ms
+netphase 51703.122020 request https://play.google.com/log?format=json&hasfast=true&authuser=0 0.0 ms
+netphase 51703.148391 response headers https://play.google.com/log?format=json&hasfast=true&authuser=0 26.4 ms
+netphase 51703.149732 request https://play.google.com/log?format=json&hasfast=true&authuser=0 0.0 ms
+netphase 51703.195889 response headers https://play.google.com/log?format=json&hasfast=true&authuser=0 46.2 ms
+render: settled 12067 ms after load (23 frames, quiet 1500 ms, at most 12000 ms)
+render: complete true in 13622 ms, rss 206024 KiB
+rc=0

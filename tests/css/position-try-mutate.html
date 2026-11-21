@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset=utf-8>
+<title>@position-try read, then mutated</title>
+<!--
+  Spec 07 (B15), an at-rule stylo produces but this engine has no interface for: @position-try,
+  behind layout.css.anchor-positioning.enabled, which the runner switches on. Before the patch
+  the indexed read alone panicked `not implemented` at cssrule.rs:183; this page also changes the
+  sheet afterwards, so the update path is covered for a rule with no interface of its own.
+-->
+<style id=s0>
+@position-try --anchor { left: anchor(center) }
+p { color: rgb(0, 0, 255) }
+</style>
+<h1>position-try</h1>
+<pre id=out></pre>
+<script src="css-test.js"></script>
+<script>
+const log = cssTest.log;
+const sheet = document.styleSheets[0];
+let bad = 0;
+
+function readAll(what) {
+  const seen = [];
+  for (let i = 0; i < sheet.cssRules.length; i++) {
+    const r = sheet.cssRules[i];
+    const why = cssTest.honest(r);
+    seen.push(cssTest.className(r) + " type=" + r.type + ":" + JSON.stringify(cssTest.cssTextOf(r)) +
+      (why ? " FAIL " + why : ""));
+    if (why) bad++;
+  }
+  log(what + " [" + sheet.cssRules.length + "] " + seen.join(" | "));
+}
+readAll("read");
+
+try {
+  sheet.insertRule("h1 { color: red }", 0);
+} catch (e) {
+  log("FAIL insertRule threw " + e.name + ": " + e.message);
+  bad++;
+}
+readAll("after-insert");
+cssTest.finish("position-try-mutate", bad);
+</script>

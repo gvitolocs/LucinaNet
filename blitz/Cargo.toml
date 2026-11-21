@@ -1,0 +1,57 @@
+# LucinaNet on Blitz: its own workspace, because Blitz's Stylo is not Servo's.
+[workspace]
+
+[package]
+name = "lucinanet-blitz"
+version = "0.1.0"
+description = "LucinaNet on Blitz, painted by Vello CPU"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+
+[dependencies]
+anyrender = "0.14.0"
+anyrender_vello_cpu = "0.18.0"
+blitz-dom = { path = "../third_party/blitz/packages/blitz-dom", default-features = false, features = ["svg", "woff", "floats", "accessibility"] }
+
+blitz-html = { path = "../third_party/blitz/packages/blitz-html", default-features = false }
+
+blitz-net = { path = "../third_party/blitz/packages/blitz-net", features = ["http2", "cookies"] }
+
+blitz-paint = { path = "../third_party/blitz/packages/blitz-paint", default-features = false }
+
+blitz-traits = { path = "../third_party/blitz/packages/blitz-traits", default-features = false }
+
+image = { version = "0.25.6", default-features = false, features = ["png", "jpeg", "webp", "gif"] }
+keyboard-types = "0.8"
+linebender_resource_handle = "0.1"
+memmap2 = "0.9"
+lucinanet-ui = { path = "../crates/lucinanet-ui" }
+parley = { version = "0.12", default-features = false, features = ["std"] }
+peniko = "0.6.0"
+serde_json = "1"
+smol_str = "0.3"
+tokio = { version = "1", features = ["rt-multi-thread"] }
+url = "2"
+
+[profile.probe]
+inherits = "release"
+opt-level = 2
+debug = false
+lto = false
+codegen-units = 16
+incremental = false
+
+[profile.juno]
+inherits = "release"
+opt-level = "s"
+debug = false
+lto = "thin"
+codegen-units = 16
+panic = "abort"
+strip = true
+
+[profile.juno.package.vello_cpu]
+opt-level = 3
+[profile.juno.package.fearless_simd]
+opt-level = 3

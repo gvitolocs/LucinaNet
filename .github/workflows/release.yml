@@ -1,0 +1,401 @@
+# LucinaNet release. Runs on a tag `v*`. No secret is used: the macOS app is ad-hoc signed (`codesign -s -`) and NOT notarised
+# (the README says so), and the release is created with the job's own token.
+#
+#   preflight      the tag is a version, its commit is on main, and ci.yml succeeded on that exact commit
+#   build-linux    Linux x86_64 inside the pinned Debian 12 image (glibc floor), packaged as a tar.gz, smoke-tested from the extracted tar
+#   build-macos    macOS arm64 on a hosted runner, an ad-hoc signed LucinaNet.app in a zip, smoke-tested from the unzipped app
+#   publish        sha256 files, a build provenance attestation, a draft release, a check of the README download table, publish,
+#                  and a check that every link of that table resolves (the release goes back to draft if one does not)
+#
+# Windows and Android: their workflows (windows.yml, android.yml) are written separately and run by hand today. Their files join a release
+# in one of two ways, and nothing here builds them:
+#   1. Automatic: when such a workflow is callable (`workflow_call`) add a job `build-windows` (or `build-android`) that uses it, uploads
+#      its zip/apk, sha256 and linked-library list as an artifact named `release-windows` (or `release-android`), then add that job to
+#      `needs:` of `publish` below (see HOOK). `publish` downloads every artifact named `release-*`, so no other line changes.
+#   2. Manual, until then: after windows.yml or android.yml passes its own smoke on this tag's commit, download its artifact and run
+#        gh release upload "$TAG" <file> <file>.sha256 --repo gvitolocs/LucinaNet
+#      and add the README row only in the same change.
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions: {}
+
+concurrency:
+  # A release is never cancelled by another run.
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: never
+  CARGO_NET_RETRY: 10
+  # Fonts bundled in the Linux tar (assumption: the assembler keeps LucinaOS's crates/lucina-app/fonts at this path).
+  FONT_DIR: lucinaos/crates/lucina-app/fonts
+  # The README says the Linux build needs glibc 2.35 or newer; the build must not need a newer one.
+  GLIBC_MAX: GLIBC_2.35
+  # The shared libraries the Linux binary may be linked against (the README names the first four). Anything else is a stop.
+  LINUX_NEEDED_ALLOWED: "libc.so.6 libm.so.6 libstdc++.so.6 libgcc_s.so.1 ld-linux-x86-64.so.2"
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: v
+        name: The tag is a version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
+            echo "::error::the tag is not vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+      - name: The tagged commit is on main
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$SHA" origin/main || { echo "::error::the tagged commit is not on main"; exit 1; }
+      - name: ci.yml succeeded on this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+        run: |
+          n=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&event=push&status=success&per_page=5" --jq '.total_count')
+          echo "successful ci runs on $SHA: $n"
+          if [ "$n" -lt 1 ]; then echo "::error::no green ci.yml run on this commit: a release is cut only from a commit whose CI is green"; exit 1; fi
+
+  build-linux:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: The image recipe fetches no script from the network
+        run: |
+          # tools/release/Dockerfile.linux-desktop must install rustup from a pinned, checksummed rustup-init, not `curl | sh`.
+          if grep -nE 'curl[^|]*\|[^|&;]*[[:space:]]sh([[:space:]]|$)' tools/release/Dockerfile.linux-desktop; then
+            echo "::error::tools/release/Dockerfile.linux-desktop pipes a downloaded script into sh; pin rustup-init by sha256 first"
+            exit 1
+          fi
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: Build the old-glibc image (plain docker, no privileged)
+        run: |
+          channel=$(sed -n 's/^channel *= *"\(.*\)".*/\1/p' rust-toolchain.toml)
+          test -n "$channel"
+          mkdir -p "$RUNNER_TEMP/ctx"
+          docker build -f tools/release/Dockerfile.linux-desktop --build-arg "RUST_TOOLCHAIN=$channel" -t lucinanet-linux-desktop-build:debian12 "$RUNNER_TEMP/ctx"
+      - name: Build the browser in the image (release, desktop and media)
+        run: |
+          mkdir -p "$RUNNER_TEMP/target/home"
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$GITHUB_WORKSPACE:/src:ro" \
+            -v "$RUNNER_TEMP/target:/target" \
+            -e CARGO_HOME=/target/cargo-home -e CARGO_TARGET_DIR=/target/out -e RUSTUP_HOME=/opt/rustup -e HOME=/target/home \
+            -e CC=clang -e CXX=clang++ -e PYTHON3=python3 -e CARGO_INCREMENTAL=0 -e CARGO_NET_RETRY=10 \
+            -w /src lucinanet-linux-desktop-build:debian12 \
+            cargo build --release --locked -j 4 -p lucinanet-servo --features desktop,media
+          test -x "$RUNNER_TEMP/target/out/release/lucinanet-servo"
+      - name: glibc floor and linked libraries
+        run: |
+          bin="$RUNNER_TEMP/target/out/release/lucinanet-servo"
+          max=$(objdump -T "$bin" | grep -o 'GLIBC_[0-9.]*' | sort -Vu | tail -1)
+          echo "highest GLIBC symbol: $max (limit $GLIBC_MAX)"
+          top=$(printf '%s\n%s\n' "$max" "$GLIBC_MAX" | sort -V | tail -1)
+          if [ "$top" != "$GLIBC_MAX" ]; then echo "::error::the binary needs $max, newer than the README's floor $GLIBC_MAX"; exit 1; fi
+          mkdir -p "$RUNNER_TEMP/dist"
+          needed=$(readelf -d "$bin" | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p' | LC_ALL=C sort -u)
+          printf '%s\n' "$needed" > "$RUNNER_TEMP/dist/lucinanet-$VERSION-linux-x86_64.linked-libraries.txt"
+          cat "$RUNNER_TEMP/dist/lucinanet-$VERSION-linux-x86_64.linked-libraries.txt"
+          for lib in $needed; do
+            case " $LINUX_NEEDED_ALLOWED " in
+              *" $lib "*) ;;
+              *) echo "::error::the binary is linked against $lib, which the README does not list"; exit 1 ;;
+            esac
+          done
+      - name: Package (bin/, share/lucinanet/fonts/, LICENSE, NOTICE)
+        run: |
+          name="lucinanet-$VERSION-linux-x86_64"
+          stage="$RUNNER_TEMP/pkg/$name"
+          mkdir -p "$stage/bin" "$stage/share/lucinanet/fonts"
+          install -m 0755 "$RUNNER_TEMP/target/out/release/lucinanet-servo" "$stage/bin/lucinanet"
+          for f in DejaVuSans.ttf DejaVuSans-Bold.ttf DejaVuSansMono.ttf LICENSE; do
+            test -f "$FONT_DIR/$f" || { echo "::error::$FONT_DIR/$f is missing"; exit 1; }
+            install -m 0644 "$FONT_DIR/$f" "$stage/share/lucinanet/fonts/$f"
+          done
+          test -f LICENSE && test -f NOTICE
+          install -m 0644 LICENSE NOTICE "$stage/"
+          epoch=$(git log -1 --format=%ct)
+          tar -C "$RUNNER_TEMP/pkg" --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$epoch" -cf - "$name" | gzip -n > "$RUNNER_TEMP/dist/$name.tar.gz"
+          (cd "$RUNNER_TEMP/dist" && sha256sum "$name.tar.gz" > "$name.tar.gz.sha256" && cat "$name.tar.gz.sha256")
+      - name: Smoke, from the extracted tar (starts and renders a local page)
+        run: |
+          name="lucinanet-$VERSION-linux-x86_64"
+          rm -rf "$RUNNER_TEMP/smoke" && mkdir -p "$RUNNER_TEMP/smoke/x"
+          tar -C "$RUNNER_TEMP/smoke/x" -xzf "$RUNNER_TEMP/dist/$name.tar.gz"
+          bin="$RUNNER_TEMP/smoke/x/$name/bin/lucinanet"
+          out="$RUNNER_TEMP/smoke"
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><title>blank</title>' > "$out/blank.html"
+          cat > "$out/smoke.html" <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>smoke</title>
+          <body style="margin:0;background:#fff;font:32px sans-serif">
+          <div style="width:300px;height:200px;background:#1a73e8;color:#fff;padding:20px">LucinaNet smoke</div>
+          <div style="width:200px;height:100px;background:#e8711a"></div>
+          <p>The quick brown fox jumps over the lazy dog 0123456789</p>
+          HTML
+          # No LUCINANET_FONT_DIRS: the browser must find the fonts the tar carries beside bin/.
+          export LUCINANET_PROFILE_DIR=none LUCINANET_MEDIA_SINK=none
+          timeout 180 "$bin" --render "file://$out/blank.html" "$out/blank.png" 1280x800
+          timeout 180 "$bin" --render "file://$out/smoke.html" "$out/smoke.png" 1280x800
+          for f in blank smoke; do
+            test -s "$out/$f.png"
+            magic=$(head -c 8 "$out/$f.png" | od -An -tx1 | tr -d ' \n')
+            test "$magic" = 89504e470d0a1a0a || { echo "::error::$f.png is not a PNG"; exit 1; }
+          done
+          b=$(wc -c < "$out/blank.png" | tr -d ' ')
+          s=$(wc -c < "$out/smoke.png" | tr -d ' ')
+          echo "blank.png $b bytes, smoke.png $s bytes"
+          if cmp -s "$out/blank.png" "$out/smoke.png" || [ "$s" -lt 4000 ] || [ "$s" -lt $((b + 1000)) ]; then
+            echo "::error::the render of the smoke page is empty or one colour"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-linux-x86_64
+          path: ${{ runner.temp }}/dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  build-macos:
+    needs: preflight
+    runs-on: macos-15 # arm64 (Apple silicon), pinned like ci.yml
+    timeout-minutes: 300
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+      CC: clang
+      CXX: clang++
+      PYTHON3: python3
+      CARGO_BUILD_JOBS: 3
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Toolchain (the channel of rust-toolchain.toml)
+        run: |
+          channel=$(sed -n 's/^channel *= *"\(.*\)".*/\1/p' rust-toolchain.toml)
+          test -n "$channel"
+          rustup toolchain install "$channel" --profile minimal --no-self-update
+      - name: Build the browser (release, desktop and media)
+        run: |
+          cargo build --release --locked -p lucinanet-servo --features desktop,media
+          test -x target/release/lucinanet-servo
+      - name: Linked libraries (system frameworks only)
+        run: |
+          bin=target/release/lucinanet-servo
+          mkdir -p "$RUNNER_TEMP/dist"
+          list="$RUNNER_TEMP/dist/lucinanet-$VERSION-macos-arm64.linked-libraries.txt"
+          otool -L "$bin" | tail -n +2 | awk '{print $1}' | LC_ALL=C sort -u > "$list"
+          cat "$list"
+          bad=$(grep -vE '^(/usr/lib/|/System/Library/)' "$list" || true)
+          if [ -n "$bad" ]; then echo "::error::the binary is linked against a library outside /usr/lib and /System/Library:"; echo "$bad"; exit 1; fi
+      - name: Assemble LucinaNet.app, ad-hoc sign, zip with ditto (not notarised)
+        run: |
+          name="lucinanet-$VERSION-macos-arm64"
+          short=${VERSION#v}
+          short=${short%%-*}
+          stage="$RUNNER_TEMP/pkg/$name"
+          app="$stage/LucinaNet.app"
+          mkdir -p "$stage" "$RUNNER_TEMP/pkg-manifest"
+          tools/release/package-macos.sh \
+            --executable target/release/lucinanet-servo \
+            --fonts "$FONT_DIR" \
+            --output "$app" \
+            --version "$short" \
+            --source "release.yml $VERSION $GITHUB_SHA" \
+            --manifest "$RUNNER_TEMP/pkg-manifest/$name.manifest.txt" \
+            --bin-name lucinanet-servo
+          test -f LICENSE && test -f NOTICE
+          install -m 0644 LICENSE NOTICE "$stage/"
+          codesign --verify --deep --strict --verbose=2 "$app"
+          codesign -dv "$app" 2>&1 | grep -q 'Signature=adhoc' || { echo "::error::the app is not ad-hoc signed"; exit 1; }
+          ditto -c -k --keepParent "$stage" "$RUNNER_TEMP/dist/$name.zip"
+          (cd "$RUNNER_TEMP/dist" && shasum -a 256 "$name.zip" > "$name.zip.sha256" && cat "$name.zip.sha256")
+      - name: Smoke, from the unzipped app (starts and renders a local page)
+        run: |
+          name="lucinanet-$VERSION-macos-arm64"
+          out="$RUNNER_TEMP/smoke"
+          rm -rf "$out" && mkdir -p "$out/x"
+          ditto -x -k "$RUNNER_TEMP/dist/$name.zip" "$out/x"
+          bin="$out/x/$name/LucinaNet.app/Contents/MacOS/lucinanet-servo"
+          test -x "$bin"
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><title>blank</title>' > "$out/blank.html"
+          cat > "$out/smoke.html" <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>smoke</title>
+          <body style="margin:0;background:#fff;font:32px sans-serif">
+          <div style="width:300px;height:200px;background:#1a73e8;color:#fff;padding:20px">LucinaNet smoke</div>
+          <div style="width:200px;height:100px;background:#e8711a"></div>
+          <p>The quick brown fox jumps over the lazy dog 0123456789</p>
+          HTML
+          export LUCINANET_PROFILE_DIR=none LUCINANET_MEDIA_SINK=none
+          "$bin" --render "file://$out/blank.html" "$out/blank.png" 1280x800
+          "$bin" --render "file://$out/smoke.html" "$out/smoke.png" 1280x800
+          for f in blank smoke; do
+            test -s "$out/$f.png"
+            magic=$(head -c 8 "$out/$f.png" | od -An -tx1 | tr -d ' \n')
+            test "$magic" = 89504e470d0a1a0a || { echo "::error::$f.png is not a PNG"; exit 1; }
+          done
+          b=$(wc -c < "$out/blank.png" | tr -d ' ')
+          s=$(wc -c < "$out/smoke.png" | tr -d ' ')
+          echo "blank.png $b bytes, smoke.png $s bytes"
+          if cmp -s "$out/blank.png" "$out/smoke.png" || [ "$s" -lt 4000 ] || [ "$s" -lt $((b + 1000)) ]; then
+            echo "::error::the render of the smoke page is empty or one colour"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-macos-arm64
+          path: ${{ runner.temp }}/dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    # HOOK(windows, android): to attach those builds, add their job names to `needs` (for example `build-windows`), once the job has run
+    # its own smoke and uploaded an artifact named `release-windows` / `release-android`. Do not add them before; see the top of this file.
+    needs: [preflight, build-linux, build-macos]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      TAG: ${{ github.ref_name }}
+      REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: release-*
+          path: dist
+          merge-multiple: true
+      - name: The files, and their sha256 checked again
+        run: |
+          ls -l dist
+          cd dist
+          n=$(find . -maxdepth 1 -name '*.sha256' | wc -l)
+          test "$n" -ge 2
+          sha256sum -c ./*.sha256
+          for f in *.tar.gz *.zip; do test -f "$f.sha256" || { echo "::error::$f has no .sha256"; exit 1; }; done
+      - name: Build provenance attestation
+        id: attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.zip
+      - name: Release notes and the attestation bundle
+        env:
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          cp "$BUNDLE" "dist/lucinanet-$TAG.intoto.jsonl"
+          {
+            echo "LucinaNet $TAG."
+            echo
+            echo "The macOS app is ad-hoc signed and not notarised: the first launch needs the override described in the README."
+            echo
+            echo "| File | Size (bytes) | sha256 |"
+            echo "| --- | --- | --- |"
+            for f in dist/*.tar.gz dist/*.zip; do
+              b=$(basename "$f")
+              size=$(wc -c < "$f" | tr -d ' ')
+              sum=$(cut -d' ' -f1 "$f.sha256")
+              echo "| $b | $size | $sum |"
+            done
+            echo
+            echo "Each archive has a build provenance attestation: \`gh attestation verify <file> --repo $REPO\`."
+            echo "The \`.linked-libraries.txt\` files list the shared libraries each binary links."
+          } > notes.md
+          cat notes.md
+      - name: Create the release as a draft
+        run: |
+          gh release create "$TAG" dist/* --repo "$REPO" --draft --verify-tag --title "$TAG" --notes-file notes.md
+      - name: Every row of the README download table names an uploaded file
+        run: |
+          trim() { local v=$1; v=${v#"${v%%[![:space:]]*}"}; v=${v%"${v##*[![:space:]]}"}; printf '%s' "${v//\`/}"; }
+          rows=$(awk '/^## Download/{f=1;next} f && /^###? /{exit} f && /^\|/' README.md)
+          count=0
+          while IFS='|' read -r _ platform file _ size sha _; do
+            platform=$(trim "$platform")
+            file=$(trim "$file")
+            case "$platform" in Platform*|---*|'') continue ;; esac
+            case "$file$size$sha" in *TODO*) echo "::error::the README table row for $platform still holds a TODO"; exit 1 ;; esac
+            name=$file
+            case "$file" in '['*) { name=${file#*](}; name=${name%)}; } ;; esac
+            name=${name##*/}
+            test -f "dist/$name" || { echo "::error::README row $platform names $name, which this release does not attach"; exit 1; }
+            hash=$(trim "$sha")
+            if printf '%s' "$hash" | grep -Eq '^[0-9a-f]{64}$'; then
+              want=$(cut -d' ' -f1 "dist/$name.sha256")
+              test "$hash" = "$want" || { echo "::error::README sha256 of $name is not the built one"; exit 1; }
+            fi
+            count=$((count + 1))
+          done <<< "$rows"
+          if [ "$count" -lt 1 ]; then echo "::error::the README download table has no row"; exit 1; fi
+          echo "README download table rows checked: $count"
+      - name: Publish the release
+        id: publish
+        run: gh release edit "$TAG" --repo "$REPO" --draft=false
+      - name: Every link of the README download table resolves
+        run: |
+          trim() { local v=$1; v=${v#"${v%%[![:space:]]*}"}; v=${v%"${v##*[![:space:]]}"}; printf '%s' "${v//\`/}"; }
+          rows=$(awk '/^## Download/{f=1;next} f && /^###? /{exit} f && /^\|/' README.md)
+          count=0
+          while IFS='|' read -r _ platform file _; do
+            platform=$(trim "$platform")
+            file=$(trim "$file")
+            case "$platform" in Platform*|---*|'') continue ;; esac
+            case "$file" in
+              '['*) { url=${file#*](}; url=${url%)}; } ;;
+              http*) url=$file ;;
+              *) url="https://github.com/$REPO/releases/download/$TAG/$file" ;;
+            esac
+            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -r 0-0 -o /dev/null "$url" || { echo "::error::$url does not resolve"; exit 1; }
+            echo "resolves: $url"
+            count=$((count + 1))
+          done <<< "$rows"
+          test "$count" -ge 1
+      - name: Back to draft when a link did not resolve
+        if: failure() && steps.publish.outcome == 'success'
+        run: gh release edit "$TAG" --repo "$REPO" --draft=true

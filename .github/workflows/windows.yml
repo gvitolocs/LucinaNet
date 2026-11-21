@@ -1,0 +1,204 @@
+# Windows probe for LucinaNet. THERE IS NO WINDOWS BUILD TODAY (README, "Planned"):
+# the crash reporter, media backend, font list and profile path call POSIX APIs,
+# and the window toolkit is wired for X11 only. This workflow measures the gap.
+# The build steps are allowed to fail; the job summary lists every blocker.
+name: windows-probe
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - "crates/**"
+      - "Cargo.lock"
+
+permissions: {}
+
+env:
+  CARGO_TERM_COLOR: never
+  TARGET: x86_64-pc-windows-msvc
+
+jobs:
+  check:
+    name: cargo check (probe)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    outputs:
+      check_ok: ${{ steps.check.outcome == 'success' }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: |
+          rustup toolchain install --profile minimal --no-self-update
+          rustup target add "$TARGET"
+          rustc --version
+
+      - name: cargo check
+        id: check
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          cargo check --locked -p lucinanet-servo --features desktop,media \
+            --target "$TARGET" --message-format short 2>&1 | tee check.log
+
+      - name: Blocker summary
+        if: always()
+        env:
+          STEP_OUTCOME: ${{ steps.check.outcome }}
+        run: |
+          {
+            echo "## Windows probe: cargo check ($TARGET)"
+            echo
+            echo "Step outcome: **${STEP_OUTCOME}**. There is no Windows build today; this is a probe."
+            echo
+            if [ ! -f check.log ]; then echo "No log was written (the step did not start)."; exit 0; fi
+            # An error line is either `path:line:col: error[...]: text` (short format),
+            # `error: ...`, or `error[Exxxx]: ...`.
+            grep -E "(^|: )error(\[E[0-9]+\])?:" check.log > errors.txt || true
+            total=$(wc -l < errors.txt | tr -d " ")
+            echo "Error lines: **${total}**"
+            echo
+            echo "### First 30 error lines, grouped by crate"
+            echo
+            # Crate = `crates/<name>/` for our code, `<name>-<version>/` for registry or vendored code.
+            awk -F: '
+              function crate(p,   a, n, i) {
+                gsub(/\\/, "/", p)
+                if (match(p, /crates\/[^\/]+\//)) return substr(p, RSTART+7, RLENGTH-8)
+                n = split(p, a, "/")
+                for (i = 1; i <= n; i++) if (a[i] ~ /^[A-Za-z0-9_.+-]+-[0-9]+\.[0-9]+/) return a[i]
+                if (match(p, /^(patches|blitz|parity|raster|swgl)\/[^\/]+/)) return substr(p, RSTART, RLENGTH)
+                return "(no path)"
+              }
+              /could not compile `/ { next }
+              NR > 0 && FNR <= 100000 && n < 30 {
+                c = "(no path)"
+                if ($0 ~ /^[A-Za-z]:\//) c = crate($1 ":" $2)
+                else if ($0 ~ /^[^ ]+\.rs:[0-9]+/) c = crate($1)
+                grp[c] = grp[c] "\n- `" $0 "`"
+                if (!(c in seen)) { seen[c] = 1; order[++k] = c }
+                n++
+              }
+              END { for (i = 1; i <= k; i++) printf "#### %s%s\n\n", order[i], grp[order[i]]; if (k == 0) print "(none)" }
+            ' errors.txt
+            echo
+            echo "### Blockers: blocker -> crate -> first error line"
+            echo
+            echo "| blocker | crate | first error line |"
+            echo "| --- | --- | --- |"
+            # One row per crate that failed to compile, with its first matching error line.
+            grep -oE "could not compile \`[^\`]+\`" check.log | sed -E "s/.*\`([^\`]+)\`/\1/" | sort -u > failed.txt || true
+            while read -r crate; do
+              [ -n "$crate" ] || continue
+              first=$(grep -E "(^|[/\\\\])${crate}[^ ]*\.rs:[0-9]+.*error" check.log | head -n 1 | tr "|" "/" | cut -c1-240)
+              [ -n "$first" ] || first=$(grep -E "error.*${crate}" check.log | head -n 1 | tr "|" "/" | cut -c1-240)
+              echo "| compile failure | ${crate} | \`${first:-see log}\` |"
+            done < failed.txt
+            echo
+            echo "Known blockers from the platform table (STEP 0): crash_bt.rs (signals, backtrace, dladdr), media/src/sys.rs (std::os::fd, libc::pipe/fcntl), fonts.rs (Linux dirs, colon split), engine.rs (XDG_DATA_HOME/HOME profile path), no WASAPI sink, toolkit wired for X11 only."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the full log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-check-log
+          path: check.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+  build:
+    name: cargo build --release and smoke
+    needs: check
+    if: needs.check.outputs.check_ok == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain (rust-toolchain.toml)
+        run: |
+          rustup toolchain install --profile minimal --no-self-update
+          rustup target add "$TARGET"
+
+      - name: cargo build --release
+        id: build
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          cargo build --locked --release -p lucinanet-servo --features desktop,media \
+            --target "$TARGET" --message-format short 2>&1 | tee build.log
+
+      - name: Smoke, render a local page to PNG
+        id: smoke
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        env:
+          LUCINANET_MEDIA_SINK: none
+          LUCINANET_PROFILE_DIR: none
+        run: |
+          mkdir smoke
+          cat > smoke/page.html <<HTML
+          <!doctype html><meta charset="utf-8"><title>smoke</title>
+          <body style="margin:24px"><h1>LucinaNet render check</h1>
+          <div style="width:240px;height:120px;background:#2e7d32"></div></body>
+          HTML
+          exe="target/$TARGET/release/lucinanet-servo.exe"
+          "$exe" --render "file:///$(pwd -W | sed "s|\\\\|/|g")/smoke/page.html" smoke/out.png 800x600 2>&1 | tee smoke/run.log
+          test -s smoke/out.png
+
+      - name: Package (only when the smoke passed)
+        id: package
+        if: steps.smoke.outcome == 'success'
+        run: |
+          mkdir dist
+          cp "target/$TARGET/release/lucinanet-servo.exe" dist/lucinanet.exe
+          7z a lucinanet-windows-x86_64.zip ./dist/lucinanet.exe
+
+      - name: Upload the zip (only when the smoke passed)
+        if: steps.package.outcome == 'success'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lucinanet-windows-x86_64
+          path: lucinanet-windows-x86_64.zip
+          if-no-files-found: error
+
+      - name: Summary
+        if: always()
+        env:
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
+        run: |
+          {
+            echo "## Windows probe: release build and smoke"
+            echo
+            echo "- cargo build --release: **${BUILD_OUTCOME}**"
+            echo "- smoke (render a local page to PNG): **${SMOKE_OUTCOME}**"
+            if [ "$BUILD_OUTCOME" != "success" ] && [ -f build.log ]; then
+              echo
+              echo "First 30 error lines:"
+              echo
+              echo "\`\`\`"
+              grep -E "(^|: )error(\[E[0-9]+\])?:" build.log | head -n 30
+              echo "\`\`\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

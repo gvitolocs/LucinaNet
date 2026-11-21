@@ -1,0 +1,18 @@
+[package]
+name = "lucinanet-ax"
+version = "0.1.0"
+description = "The page's accessibility tree as Servo's AccessKit updates build it, served to Lucina through Juno's AccessKit adapter (lucina-ax), acted on by node id"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+
+[dependencies]
+# The version Servo pins (LucinaNet-servo Cargo.toml), so its TreeUpdates pass through unchanged.
+accesskit = { version = "=0.24.0", features = ["serde"] }
+# Juno's AccessKit adapter (LucinaOS stage B): the socket, its requests and replies, the version and the rules every
+# Juno app goes through. It is on AccessKit 0.25; the tree crosses by its serde form.
+lucina-ax = { path = "../../lucinaos/crates/lucina-ax" }
+
+serde_json = "1"
+# poll(2) on the socket instead of a sleep loop.
+libc = "0.2"

@@ -1,0 +1,123 @@
+[workspace]
+members = [
+  "src",
+  "src/brimstone_icu_collections",
+  "src/brimstone_intl_data",
+  "src/brimstone_macros",
+  "src/js",
+  "src/brimstone_serialized_heap",
+  "tests",
+  "tests/fuzz",
+  "tests/gc_hook_types",
+  "tests/harness",
+  "tests/perf",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+version = "0.1.0"
+authors = ["hanshalverson <hansghalverson@gmail.com>"]
+
+[workspace.dependencies]
+# Internal Crates
+brimstone = { path = "src" }
+brimstone_core = { path = "src/js" }
+brimstone_icu_collections = { path = "src/brimstone_icu_collections" }
+brimstone_intl_data = { path = "src/brimstone_intl_data" }
+brimstone_macros = { path = "src/brimstone_macros" }
+brimstone_serialized_heap = { path = "src/brimstone_serialized_heap" }
+
+# External Crates
+allocator-api2 = "0.2.21"
+bitflags = "2.1.0"
+bumpalo = "3.17.0"
+clap = "4.0.29"
+criterion = "0.5.1"
+half = "2.4.1"
+hashbrown = "0.15.2"
+indexmap-allocator-api = "2.7.1"
+memchr = "2.8.3"
+num-bigint = "0.4.3"
+num-traits = "0.2.16"
+quote = "1.0.32"
+rand = "0.8.5"
+regex = "1.7.1"
+rustc-hash = "2.1.3"
+ryu-js = "1.0.2"
+serde = "1.0.152"
+serde_json = "1.0.91"
+siphasher = "1.0.3"
+supports-color = "3.0.2"
+syn = "2.0.27"
+tikv-jemallocator = "0.6"
+threadpool = "1.8.1"
+writeable = "0.6.4"
+xsum = "0.1.6"
+yaml-rust = "0.4.5"
+
+# These generated-data/unstable APIs are validated at these exact versions.
+# Pin them for browser workspace resolution too; a library Cargo.lock is not inherited.
+# The whole ICU4X family moves together (never two generations in one engine); the
+# collator, locale and provider crates carry the 2.3.1 patches of the 2.3 release train.
+# icu_experimental 0.6.0 is the 2.3-generation companion crate (its `icu_*` dependencies are
+# all ~2.3.0), and it is taken without `compiled_data` so that Intl reads only the baked data of
+# brimstone_intl_data, never tables for locales this build does not have. icu_pattern stays at
+# 0.5.0 for the same reason: 0.5.1 asks for zerovec 0.11.9, which is past the pin below.
+fixed_decimal = "=0.7.3"
+icu_calendar = "=2.3.0"
+icu_casemap = "=2.3.0"
+icu_collator = "=2.3.1"
+icu_datetime = { version = "=2.3.0", default-features = false }
+icu_decimal = "=2.3.0"
+icu_collections = "=2.3.0"
+icu_experimental = { version = "=0.6.0", default-features = false }
+# `ListFormatter` (ECMA-402 14) reads only the three list markers this build bakes, so it is the one
+# ICU4X crate of the set that is wanted without its `compiled_data`: the CLDR list tables it would
+# carry are the same ones `icu/generate_intl_data.sh` bakes for our own provider.
+icu_list = { version = "=2.3.0", default-features = false, features = ["alloc"] }
+icu_locale = "=2.3.1"
+icu_locale_core = "=2.3.0"
+icu_locale_fallback = "=2.3.0"
+icu_normalizer = "=2.3.0"
+icu_pattern = { version = "=0.5.0", default-features = false }
+# `unstable` is what names PluralsRangesV1 and the `PluralRulesWithRanges` type, which
+# `Intl.PluralRules.prototype.selectRange` (17.3.4) is built on.
+icu_plurals = { version = "=2.3.0", default-features = false, features = ["unstable"] }
+icu_properties = "=2.3.0"
+icu_provider = "=2.3.1"
+icu_provider_baked = "=2.3.0"
+icu_provider_adapters = "=2.3.0"
+# `Intl.Segmenter` (ECMA-402 19) takes the three rule-based segmenters and nothing else: with the
+# `auto` and `lstm` features off, ICU4X does not even name the dictionary or LSTM constructors, so
+# this build cannot silently pull in the models that cost 2.4 MB for a wider locale set
+# (design doc section 3, and the measured fallback for a script that has no model in
+# NOTES-intl-segmenter.md section 3). The two crates that read the baked break tables ask for the
+# `unstable` feature, which is what names the `SegmenterBreak*V1` markers.
+icu_segmenter = { version = "=2.3.0", default-features = false }
+# The datetime and time crates carry the zone and calendar name tables, which are far too big to
+# take from ICU4X's own compiled data: Intl reads them from `brimstone_intl_data` instead.
+icu_time = { version = "=2.3.0", default-features = false }
+zerotrie = "=0.2.5"
+zerovec = "=0.11.8"
+
+# Temporal crates must all be the same version. 0.2.4 is the release that moved
+# temporal_rs off icu_calendar ~2.1 onto icu_calendar ^2.2 (2.3-compatible), which the
+# ICU4X 2.3 Intl pins require so the engine never carries two ICU4X generations at once.
+temporal_rs = { version = "=0.2.4", default-features = false }
+timezone_provider = "=0.2.4"
+
+[workspace.lints.clippy]
+collapsible_else_if = "allow"
+collapsible_if = "allow"
+comparison_chain = "allow"
+explicit_counter_loop = "allow"
+len_without_is_empty = "allow"
+mutable_key_type = "allow"
+new_ret_no_self = "allow"
+new_without_default = "allow"
+too_many_arguments = "allow"
+
+[patch.crates-io]
+# A version of indexmap 2.7.1 patched to support the allocator API
+indexmap-allocator-api = { git = 'https://github.com/Hans-Halverson/indexmap-allocator-api.git' }

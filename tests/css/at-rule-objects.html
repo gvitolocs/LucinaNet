@@ -1,0 +1,57 @@
+<!doctype html>
+<meta charset=utf-8>
+<title>cssRules with at-rules that have no interface</title>
+<!--
+  Spec 07 (B15): reading document.styleSheets[0].cssRules must never panic the engine, whatever
+  at-rules the sheet holds. One sheet, one read of every index, one assertion per index.
+  See at-rule-objects.sh for how to run it.
+-->
+<style id=s0>
+@counter-style bulbs { system: additive; additive-symbols: 3 10; range: 1 3; }
+@container (min-width: 20ch) { p { color: green } }
+@-moz-document url-prefix() { p { color: green } }
+@font-palette-values --cool { font-family: Fancy; base-palette: 1; }
+@position-try --anchor { left: anchor(center) }
+@font-feature-values Fancy { @styleset { ss01: 1 } }
+@scope (:scope) to (div) { p { color: green } }
+@custom-media --narrow (max-width: 30em);
+@page { margin: 1cm }
+@not-a-real-rule { p { color: green } }
+@supports (display: grid) { h1 { color: blue } }
+@media screen { h2 { color: blue } }
+p { color: rgb(0, 0, 255) }
+</style>
+<h1>at-rule objects</h1>
+<pre id=out></pre>
+<script src="css-test.js"></script>
+<script>
+// The register's recipe: a sheet with each at-rule, `cssRules.length`, then one indexed read.
+const log = cssTest.log;
+const rules = document.styleSheets[0].cssRules;
+log("read length=" + rules.length);
+let bad = 0;
+for (let i = 0; i < rules.length; i++) {
+  let r;
+  try {
+    r = rules[i];
+  } catch (e) {
+    log("FAIL index " + i + " threw " + e.name + ": " + e.message);
+    bad++;
+    continue;
+  }
+  const why = cssTest.honest(r);
+  log("read index " + i + " class=" + cssTest.className(r) + " type=" + (why === "" ? r.type : "?") +
+      " cssText=" + JSON.stringify(cssTest.cssTextOf(r)) + (why ? " -> FAIL " + why : ""));
+  if (why) bad++;
+  // A grouping rule's own list is a second indexed read.
+  if (r && r.cssRules) {
+    for (let j = 0; j < r.cssRules.length; j++) {
+      const inner = r.cssRules[j];
+      const innerWhy = cssTest.honest(inner);
+      if (innerWhy) { log("FAIL index " + i + "/" + j + " " + innerWhy); bad++; }
+    }
+  }
+}
+log("read item(0)=" + cssTest.className(rules.item(0)));
+cssTest.finish("at-rule-objects", bad);
+</script>

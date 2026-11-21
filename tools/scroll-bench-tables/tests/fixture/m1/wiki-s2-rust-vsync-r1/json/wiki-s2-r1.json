@@ -1,0 +1,9 @@
+{
+  "meta": {"url": "https://en.wikipedia.org/wiki/Rust_(programming_language)", "steps": 60, "delta_css_px": 120.000, "scale": 2.000, "device_px": [3480, 2180], "css_px": [1740, 1090], "paced": true, "raster": "rust", "raster_threads": "default", "nominal_ms": 16.7, "step_timeout_ms": 2000, "log": "/dev/stderr"},
+  "steps_without_frame": 60,
+  "summary": {"frames": 0, "display_lists": 0, "stepped_frames": 0, "window_device_px": 7586400, "tiles_redrawn_pct": 0.000, "colour_dirty_pct": 0.000, "full_paint_frames": 0, "layout_diag": true, "async_evidence": "no frame was presented while the steps went out, so the run says nothing about the scroll", "swgl_ms": -0.0, "swgl_window_ms": -0},
+  "stats": {
+  },
+  "frames": [
+  ]
+}

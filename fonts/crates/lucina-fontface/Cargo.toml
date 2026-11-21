@@ -1,0 +1,12 @@
+[package]
+name = "lucina-fontface"
+version = "0.1.0"
+description = "The FT_Face numbers Servo's FreeType PlatformFont read, from read-fonts and skrifa"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+lucina-ftcompat = { path = "../lucina-ftcompat" }
+read-fonts = "0.46"
+skrifa = "0.49"

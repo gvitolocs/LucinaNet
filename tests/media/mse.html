@@ -1,0 +1,68 @@
+<!doctype html><meta charset="utf-8"><title>mse</title>
+<body style="margin:0;background:#222">
+<video id="m" muted style="width:640px;height:360px"></video>
+<script src="common.js"></script>
+<script>
+// Media Source Extensions as YouTube uses them: one SourceBuffer for video, one for sound, fragmented MP4 appended a segment at
+// a time, a seek forward, the played start removed, endOfStream() at the end. ?single plays one muxed file in one buffer.
+const log = (s) => console.log("media-test: " + s);
+const base = "../../crates/lucinanet-media/tests/media/";
+const single = location.search.includes("single");
+const tracks = single
+  ? [{ url: "frag-av.mp4", type: 'video/mp4; codecs="avc1.64001e, mp4a.40.2"' }]
+  : [{ url: "frag-v.mp4", type: 'video/mp4; codecs="avc1.64001e"' }, { url: "frag-a.mp4", type: 'audio/mp4; codecs="mp4a.40.2"' }];
+
+// Top-level boxes: [ftyp+moov], then each moof+mdat pair.
+function segments(buf) {
+  const v = new DataView(buf), out = [];
+  let at = 0, start = 0, inInit = true;
+  while (at + 8 <= buf.byteLength) {
+    const size = v.getUint32(at), type = String.fromCharCode(v.getUint8(at + 4), v.getUint8(at + 5), v.getUint8(at + 6), v.getUint8(at + 7));
+    if (type === "moof") {
+      if (inInit) { out.push(buf.slice(start, at)); inInit = false; }
+      start = at;
+    }
+    at += size;
+    if (type === "mdat" && !inInit) { out.push(buf.slice(start, at)); start = at; }
+  }
+  return out;
+}
+
+function appendAll(sb, segs) {
+  return new Promise((resolve, reject) => {
+    let i = 0;
+    const next = () => {
+      if (i >= segs.length) { sb.removeEventListener("updateend", next); return resolve(); }
+      try { sb.appendBuffer(segs[i++]); } catch (e) { reject(e); }
+    };
+    sb.addEventListener("updateend", next);
+    sb.addEventListener("error", () => reject(new Error("SourceBuffer error")));
+    next();
+  });
+}
+
+if (!window.MediaSource) {
+  log("FAIL no MediaSource");
+} else {
+  for (const t of tracks) log("isTypeSupported " + t.type + " = " + MediaSource.isTypeSupported(t.type));
+  log("isTypeSupported webm/opus = " + MediaSource.isTypeSupported('audio/webm; codecs="opus"'));
+  const ms = new MediaSource();
+  const el = document.getElementById("m");
+  el.src = URL.createObjectURL(ms);
+  ms.addEventListener("sourceopen", async () => {
+    log("sourceopen readyState=" + ms.readyState);
+    try {
+      const bufs = await Promise.all(tracks.map((t) => fetch(base + t.url).then((r) => r.arrayBuffer())));
+      const sbs = tracks.map((t) => ms.addSourceBuffer(t.type));
+      await Promise.all(sbs.map((sb, i) => appendAll(sb, segments(bufs[i]))));
+      const ranges = (tr) => Array.from({ length: tr.length }, (_, i) => tr.start(i).toFixed(2) + "-" + tr.end(i).toFixed(2)).join(",");
+      log("appended buffered=" + ranges(el.buffered) + " " + sbs.map((sb) => ranges(sb.buffered)).join(" | "));
+      ms.endOfStream();
+      log("ended duration=" + ms.duration.toFixed(3) + " readyState=" + ms.readyState);
+    } catch (e) {
+      log("FAIL " + e);
+    }
+  });
+  mediaTest(el, { name: "mse" + (single ? "-single" : ""), seekTo: 2.5, seekAfter: 1.0 });
+}
+</script>

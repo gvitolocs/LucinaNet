@@ -1,0 +1,227 @@
+phase 51722.483028 main
+phase 51722.484128 engine thread
+phase 51722.486403 rendering context
+phase 51722.494528 servo built
+phase 51722.495555 web view built
+lucinanet: engine up in 11 ms, rss 32788 KiB
+phase font list: 8 faces in 0 ms
+phase 51722.502448 first frame painted
+netphase 51722.525228 fetch https://example-site.com/ 0.0 ms
+netphase 51722.530409 request https://example-site.com/ 0.0 ms
+netphase 51722.535384 dns example-site.com 4.3 ms
+netphase 51722.535474 dns-wait example-site.com 4.9 ms
+netphase 51722.542267 dns+tcp 11.8 ms
+netphase 51722.554777 certificate verification 1.0 ms
+netphase 51722.555984 connected https://example-site.com/ (dns+tcp+tls) 25.5 ms
+netphase 51722.580618 response headers https://example-site.com/ 50.2 ms
+lucinanet: history depth 3 over 1 tabs (was None)
+netphase 51722.587504 fetch https://example-site.com/home/landing.css?v=20261111-paint 0.0 ms
+netphase 51722.587563 fetch https://example-site.com/home/home.css?v=20261111-paint 0.0 ms
+netphase 51722.591484 request https://example-site.com/home/landing.css?v=20261111-paint 0.0 ms
+netphase 51722.591671 request https://example-site.com/home/home.css?v=20261111-paint 0.0 ms
+netphase 51722.591838 fetch https://example-site.com/market/flags/en.svg 0.0 ms
+netphase 51722.591873 fetch https://cdn.example-site.com/825064_umbreon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.591893 fetch https://cdn.example-site.com/790994_charizard_homepage.webp?v=t480 0.0 ms
+netphase 51722.591911 fetch https://cdn.example-site.com/813464_sylveon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.591930 fetch https://cdn.example-site.com/251437_snorlax-181-165-pokemon-card-151_homepage.webp?v=t 0.0 ms
+netphase 51722.591946 fetch https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 0.0 ms
+netphase 51722.591964 fetch https://cdn.example-site.com/261291_bulbasaur-illustration-rare-166-165-151_homepage.w 0.0 ms
+netphase 51722.591981 fetch https://cdn.example-site.com/287883_eevee-illustration-rare-188-167-twilight-masquerad 0.0 ms
+netphase 51722.591998 fetch https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 0.0 ms
+netphase 51722.592024 fetch https://cdn.example-site.com/825058_espeon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.592044 fetch https://cdn.example-site.com/166430_dragonite-v-192-203-evolving-skies_homepage.webp?v 0.0 ms
+netphase 51722.592060 fetch https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 0.0 ms
+netphase 51722.592081 fetch https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 0.0 ms
+netphase 51722.592096 fetch https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 0.0 ms
+netphase 51722.592111 fetch https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 0.0 ms
+netphase 51722.592126 fetch https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 0.0 ms
+netphase 51722.592143 fetch https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 0.0 ms
+netphase 51722.592159 fetch https://example-site.com/home/example-site-mascot.png 0.0 ms
+netphase 51722.592175 fetch https://example-site.com/home/landing.js?v=20261031-wordmark 0.0 ms
+netphase 51722.592198 fetch https://example-site.com/market/s/landing-island-BV_4j-KC.js 0.0 ms
+netphase 51722.592318 request https://example-site.com/market/flags/en.svg 0.0 ms
+netphase 51722.592366 request https://cdn.example-site.com/825064_umbreon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.592440 request https://cdn.example-site.com/790994_charizard_homepage.webp?v=t480 0.0 ms
+netphase 51722.592468 request https://cdn.example-site.com/813464_sylveon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.592515 request https://cdn.example-site.com/251437_snorlax-181-165-pokemon-card-151_homepage.webp?v=t 0.0 ms
+netphase 51722.592543 request https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 0.0 ms
+netphase 51722.592575 request https://cdn.example-site.com/261291_bulbasaur-illustration-rare-166-165-151_homepage.w 0.0 ms
+netphase 51722.592601 request https://cdn.example-site.com/287883_eevee-illustration-rare-188-167-twilight-masquerad 0.0 ms
+netphase 51722.592637 request https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 0.0 ms
+netphase 51722.592679 request https://cdn.example-site.com/825058_espeon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.592707 request https://cdn.example-site.com/166430_dragonite-v-192-203-evolving-skies_homepage.webp?v 0.0 ms
+netphase 51722.592741 request https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 0.0 ms
+netphase 51722.592774 request https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 0.0 ms
+netphase 51722.592804 request https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 0.0 ms
+netphase 51722.592833 request https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 0.0 ms
+netphase 51722.592865 request https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 0.0 ms
+netphase 51722.592899 request https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 0.0 ms
+netphase 51722.592926 request https://example-site.com/home/example-site-mascot.png 0.0 ms
+netphase 51722.593019 request https://example-site.com/home/landing.js?v=20261031-wordmark 0.0 ms
+netphase 51722.593084 request https://example-site.com/market/s/landing-island-BV_4j-KC.js 0.0 ms
+netphase 51722.593960 fetch https://example-site.com/favicon-48x48.png 0.0 ms
+netphase 51722.594028 fetch https://example-site.com/favicon-96x96.png 0.0 ms
+netphase 51722.594054 fetch https://example-site.com/example-site-192.png 0.0 ms
+netphase 51722.594073 fetch https://example-site.com/favicon.ico 0.0 ms
+netphase 51722.594090 fetch https://example-site.com/apple-touch-icon.png 0.0 ms
+netphase 51722.594110 fetch https://example-site.com/home/satoshi.woff2 0.0 ms
+netphase 51722.594129 fetch https://example-site.com/home/landing-boot.js?v=20261031-wordmark 0.0 ms
+netphase 51722.596201 request https://example-site.com/favicon-48x48.png 0.0 ms
+netphase 51722.596326 request https://example-site.com/favicon-96x96.png 0.0 ms
+netphase 51722.596435 request https://example-site.com/example-site-192.png 0.0 ms
+netphase 51722.596456 dns cdn.example-site.com 3.8 ms
+netphase 51722.596488 request https://example-site.com/favicon.ico 0.0 ms
+netphase 51722.596538 request https://example-site.com/apple-touch-icon.png 0.0 ms
+netphase 51722.596591 request https://example-site.com/home/satoshi.woff2 0.0 ms
+netphase 51722.596638 request https://example-site.com/home/landing-boot.js?v=20261031-wordmark 0.0 ms
+netphase 51722.596678 dns-wait cdn.example-site.com 4.3 ms
+netphase 51722.602927 dns+tcp 10.5 ms
+netphase 51722.612381 certificate verification 1.0 ms
+netphase 51722.612583 connected https://cdn.example-site.com/ (dns+tcp+tls) 20.2 ms
+netphase 51722.614029 response headers https://example-site.com/home/landing.css?v=20261111-paint 22.5 ms
+netphase 51722.632255 response headers https://example-site.com/favicon-96x96.png 35.9 ms
+netphase 51722.637181 response headers https://example-site.com/apple-touch-icon.png 40.6 ms
+netphase 51722.638242 response headers https://example-site.com/home/home.css?v=20261111-paint 46.6 ms
+netphase 51722.638707 response headers https://example-site.com/market/s/landing-island-BV_4j-KC.js 45.6 ms
+netphase 51722.639361 response headers https://example-site.com/example-site-192.png 42.9 ms
+netphase 51722.639474 response headers https://example-site.com/home/landing-boot.js?v=20261031-wordmark 42.8 ms
+netphase 51722.639685 request https://test.example-site.com/poko/in-192.png 0.0 ms
+netphase 51722.640430 response headers https://example-site.com/favicon.ico 43.9 ms
+netphase 51722.640684 response headers https://example-site.com/home/example-site-mascot.png 47.8 ms
+netphase 51722.640865 response headers https://example-site.com/market/flags/en.svg 48.5 ms
+netphase 51722.641245 response headers https://example-site.com/home/landing.js?v=20261031-wordmark 48.2 ms
+netphase 51722.642575 response headers https://example-site.com/home/satoshi.woff2 46.0 ms
+netphase 51722.648868 dns test.example-site.com 9.1 ms
+netphase 51722.648981 dns-wait test.example-site.com 9.3 ms
+netphase 51722.651342 response headers https://example-site.com/favicon-48x48.png 55.1 ms
+netphase 51722.653715 fetch https://example-site.com/home/landing.css?v=20261111-paint 0.0 ms
+netphase 51722.653814 request https://example-site.com/home/landing.css?v=20261111-paint 0.0 ms
+netphase 51722.653972 fetch https://example-site.com/home/home.css?v=20261111-paint 0.0 ms
+netphase 51722.654041 request https://example-site.com/home/home.css?v=20261111-paint 0.0 ms
+netphase 51722.661769 fetch https://example-site.com/market/flags/en.svg 0.0 ms
+netphase 51722.661924 request https://example-site.com/market/flags/en.svg 0.0 ms
+netphase 51722.662074 fetch https://cdn.example-site.com/825064_umbreon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.662179 request https://cdn.example-site.com/825064_umbreon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.662236 fetch https://cdn.example-site.com/790994_charizard_homepage.webp?v=t480 0.0 ms
+netphase 51722.662293 request https://cdn.example-site.com/790994_charizard_homepage.webp?v=t480 0.0 ms
+netphase 51722.662492 fetch https://cdn.example-site.com/813464_sylveon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.662515 fetch https://cdn.example-site.com/261291_bulbasaur-illustration-rare-166-165-151_homepage.w 0.0 ms
+netphase 51722.662532 fetch https://cdn.example-site.com/251437_snorlax-181-165-pokemon-card-151_homepage.webp?v=t 0.0 ms
+netphase 51722.662546 fetch https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 0.0 ms
+netphase 51722.662560 fetch https://cdn.example-site.com/287883_eevee-illustration-rare-188-167-twilight-masquerad 0.0 ms
+netphase 51722.662575 fetch https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 0.0 ms
+netphase 51722.662591 fetch https://cdn.example-site.com/825058_espeon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.662605 fetch https://cdn.example-site.com/166430_dragonite-v-192-203-evolving-skies_homepage.webp?v 0.0 ms
+netphase 51722.662620 fetch https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 0.0 ms
+netphase 51722.662638 fetch https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 0.0 ms
+netphase 51722.662654 fetch https://example-site.com/home/example-site-mascot.png 0.0 ms
+netphase 51722.662668 fetch https://example-site.com/home/landing.js?v=20261031-wordmark 0.0 ms
+netphase 51722.662723 fetch https://example-site.com/market/s/landing-island-BV_4j-KC.js 0.0 ms
+netphase 51722.662795 request https://cdn.example-site.com/813464_sylveon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.662833 request https://cdn.example-site.com/261291_bulbasaur-illustration-rare-166-165-151_homepage.w 0.0 ms
+netphase 51722.662870 request https://cdn.example-site.com/251437_snorlax-181-165-pokemon-card-151_homepage.webp?v=t 0.0 ms
+netphase 51722.662906 request https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 0.0 ms
+netphase 51722.662936 request https://cdn.example-site.com/287883_eevee-illustration-rare-188-167-twilight-masquerad 0.0 ms
+netphase 51722.662972 request https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 0.0 ms
+netphase 51722.663059 request https://cdn.example-site.com/825058_espeon-ex_homepage.webp?v=t480 0.0 ms
+netphase 51722.663094 request https://cdn.example-site.com/166430_dragonite-v-192-203-evolving-skies_homepage.webp?v 0.0 ms
+netphase 51722.663128 request https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 0.0 ms
+netphase 51722.663158 request https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 0.0 ms
+netphase 51722.663247 request https://example-site.com/home/landing.js?v=20261031-wordmark 0.0 ms
+netphase 51722.665655 dns+tcp 25.9 ms
+netphase 51722.672873 response headers https://cdn.example-site.com/825064_umbreon-ex_homepage.webp?v=t480 80.5 ms
+netphase 51722.677474 response headers https://example-site.com/home/landing.css?v=20261111-paint 23.7 ms
+netphase 51722.685613 response headers https://cdn.example-site.com/825064_umbreon-ex_homepage.webp?v=t480 23.4 ms
+netphase 51722.687376 response headers https://cdn.example-site.com/261291_bulbasaur-illustration-rare-166-165-151_homepage.w 24.5 ms
+netphase 51722.687527 response headers https://cdn.example-site.com/251437_snorlax-181-165-pokemon-card-151_homepage.webp?v=t 24.7 ms
+netphase 51722.687580 response headers https://cdn.example-site.com/813464_sylveon-ex_homepage.webp?v=t480 95.1 ms
+netphase 51722.687389 response headers https://cdn.example-site.com/261291_bulbasaur-illustration-rare-166-165-151_homepage.w 94.8 ms
+netphase 51722.696095 response headers https://example-site.com/market/flags/en.svg 34.2 ms
+netphase 51722.696731 response headers https://example-site.com/home/home.css?v=20261111-paint 42.7 ms
+netphase 51722.696810 response headers https://example-site.com/home/landing.js?v=20261031-wordmark 33.6 ms
+netphase 51722.696899 response headers https://cdn.example-site.com/166430_dragonite-v-192-203-evolving-skies_homepage.webp?v 104.2 ms
+netphase 51722.696984 response headers https://cdn.example-site.com/166430_dragonite-v-192-203-evolving-skies_homepage.webp?v 33.9 ms
+netphase 51722.697044 response headers https://cdn.example-site.com/825058_espeon-ex_homepage.webp?v=t480 34.0 ms
+netphase 51722.697090 response headers https://cdn.example-site.com/825058_espeon-ex_homepage.webp?v=t480 104.4 ms
+netphase 51722.697124 response headers https://cdn.example-site.com/287883_eevee-illustration-rare-188-167-twilight-masquerad 104.5 ms
+netphase 51722.697159 response headers https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 34.0 ms
+netphase 51722.697211 response headers https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 104.5 ms
+netphase 51722.697243 response headers https://cdn.example-site.com/287883_eevee-illustration-rare-188-167-twilight-masquerad 34.3 ms
+netphase 51722.697279 response headers https://cdn.example-site.com/200493_gengar-vmax-271-264-fusion-strike_homepage.webp?v= 104.4 ms
+netphase 51722.697317 response headers https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 104.5 ms
+netphase 51722.697360 response headers https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 34.4 ms
+netphase 51722.697407 response headers https://cdn.example-site.com/261377_charizard-ex-special-illustration-rare-199-165-151 104.8 ms
+netphase 51722.697444 response headers https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 104.5 ms
+netphase 51722.697482 response headers https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 104.7 ms
+netphase 51722.697519 response headers https://cdn.example-site.com/790994_charizard_homepage.webp?v=t480 35.2 ms
+netphase 51722.697559 response headers https://cdn.example-site.com/790994_charizard_homepage.webp?v=t480 105.1 ms
+netphase 51722.697594 response headers https://cdn.example-site.com/251437_snorlax-181-165-pokemon-card-151_homepage.webp?v=t 105.1 ms
+netphase 51722.697626 response headers https://cdn.example-site.com/166456_rayquaza-vmax-secret-rare-218-203-evolving-skies_h 34.5 ms
+netphase 51722.697669 response headers https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 34.8 ms
+netphase 51722.697715 response headers https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 105.2 ms
+netphase 51722.697747 response headers https://cdn.example-site.com/261321_pikachu-illustration-rare-173-165-151_homepage.web 104.9 ms
+netphase 51722.697777 response headers https://cdn.example-site.com/813464_sylveon-ex_homepage.webp?v=t480 35.0 ms
+netphase 51722.709124 fetch https://example-site.com/home/satoshi.woff2 0.0 ms
+netphase 51722.710879 certificate verification 0.4 ms
+netphase 51722.710964 connected https://test.example-site.com/ (dns+tcp+tls) 71.3 ms
+netphase 51722.803666 response headers https://test.example-site.com/poko/in-192.png 164.0 ms
+netphase 51722.888112 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51722.888161 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51722.888176 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51722.888192 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51722.888208 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51722.888226 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51722.888252 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51722.888266 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51722.888284 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51723.047058 fetch https://example-site.com/market/games/pokemon.svg 0.0 ms
+netphase 51723.047250 request https://example-site.com/market/games/pokemon.svg 0.0 ms
+netphase 51723.047419 fetch https://example-site.com/market/s/LandingRail--HBD7mty.js 0.0 ms
+netphase 51723.047552 request https://example-site.com/market/s/LandingRail--HBD7mty.js 0.0 ms
+netphase 51723.047651 fetch https://example-site.com/market/s/image-urls-CYt74RCO.js 0.0 ms
+netphase 51723.047736 request https://example-site.com/market/s/image-urls-CYt74RCO.js 0.0 ms
+netphase 51723.047822 fetch https://example-site.com/market/s/rolldown-runtime-DK3Fl9T5.js 0.0 ms
+netphase 51723.047898 request https://example-site.com/market/s/rolldown-runtime-DK3Fl9T5.js 0.0 ms
+netphase 51723.047981 fetch https://example-site.com/market/s/api-Cuhq6lR1.js 0.0 ms
+netphase 51723.048065 request https://example-site.com/market/s/api-Cuhq6lR1.js 0.0 ms
+netphase 51723.048150 fetch https://example-site.com/market/s/identity-QddcxpoZ.js 0.0 ms
+netphase 51723.048215 request https://example-site.com/market/s/identity-QddcxpoZ.js 0.0 ms
+netphase 51723.048300 fetch https://example-site.com/market/s/tcg-eras-D9FaZ-rT.js 0.0 ms
+netphase 51723.048367 request https://example-site.com/market/s/tcg-eras-D9FaZ-rT.js 0.0 ms
+netphase 51723.048446 fetch https://example-site.com/market/s/CardArt-BxeMj8Og.js 0.0 ms
+netphase 51723.048508 request https://example-site.com/market/s/CardArt-BxeMj8Og.js 0.0 ms
+netphase 51723.048584 fetch https://example-site.com/market/s/auth-session-Dk-KdvwZ.js 0.0 ms
+netphase 51723.048645 request https://example-site.com/market/s/auth-session-Dk-KdvwZ.js 0.0 ms
+netphase 51723.069129 response headers https://example-site.com/market/games/pokemon.svg 21.9 ms
+netphase 51723.086537 response headers https://example-site.com/market/s/tcg-eras-D9FaZ-rT.js 38.2 ms
+netphase 51723.089298 response headers https://example-site.com/market/s/identity-QddcxpoZ.js 41.1 ms
+netphase 51723.089750 response headers https://example-site.com/market/s/LandingRail--HBD7mty.js 42.2 ms
+netphase 51723.090940 response headers https://example-site.com/market/s/rolldown-runtime-DK3Fl9T5.js 43.0 ms
+netphase 51723.091782 response headers https://example-site.com/market/s/api-Cuhq6lR1.js 43.7 ms
+netphase 51723.098208 response headers https://example-site.com/market/s/CardArt-BxeMj8Og.js 49.7 ms
+netphase 51723.098655 response headers https://example-site.com/market/s/auth-session-Dk-KdvwZ.js 50.0 ms
+netphase 51723.103006 response headers https://example-site.com/market/s/image-urls-CYt74RCO.js 55.3 ms
+lucinanet: js idle trim done, 11898 KiB of parse trees kept
+console Error: Unhandled promise rejection: ReferenceError: `Intl` is not defined
+phase 51723.519893 load complete
+phase navigation Ok(String("[[\"https://example-site.com/\",0,0,0,14.7,0,0,0,65.54,146.29,359.38,773.92,773.93,0],[\"first-paint\",null,null,null,null,null,null,null,null,null,null,null,null,1003.33],[\"first-contentful-paint\",null,null,null,null,null,null,null,null,null,null,null,null,1003.33]]"))
+netphase 51724.087047 fetch https://example-site.com/market/s/LandingSearch-DikKrhmk.js 0.0 ms
+netphase 51724.088393 fetch https://example-site.com/market/s/search-hot-DAKc0F5I.js 0.0 ms
+netphase 51724.088417 fetch https://example-site.com/market/s/LandingSearch-BADc5GEx.css 0.0 ms
+netphase 51724.088402 fetch https://example-site.com/market/s/search-warmup-Cehyc3gP.js 0.0 ms
+netphase 51724.418687 request https://example-site.com/market/s/LandingSearch-DikKrhmk.js 0.0 ms
+netphase 51724.418798 request https://example-site.com/market/s/search-hot-DAKc0F5I.js 0.0 ms
+netphase 51724.418925 request https://example-site.com/market/s/LandingSearch-BADc5GEx.css 0.0 ms
+netphase 51724.418978 request https://example-site.com/market/s/search-warmup-Cehyc3gP.js 0.0 ms
+netphase 51724.435028 response headers https://example-site.com/market/s/search-hot-DAKc0F5I.js 16.2 ms
+netphase 51724.435436 response headers https://example-site.com/market/s/LandingSearch-DikKrhmk.js 16.8 ms
+netphase 51724.450829 response headers https://example-site.com/market/s/search-warmup-Cehyc3gP.js 31.9 ms
+netphase 51724.452419 response headers https://example-site.com/market/s/LandingSearch-BADc5GEx.css 33.5 ms
+console Error: Unhandled promise rejection: ReferenceError: `Intl` is not defined
+console Error: Unhandled promise rejection: ReferenceError: `Intl` is not defined
+console Error: Unhandled promise rejection: ReferenceError: `Intl` is not defined
+console Error: Unhandled promise rejection: ReferenceError: `Intl` is not defined
+console Error: Unhandled promise rejection: ReferenceError: `Intl` is not defined
+render: settled 12020 ms after load (33 frames, quiet 1500 ms, at most 12000 ms)
+render: complete true in 13057 ms, rss 274140 KiB
+rc=0

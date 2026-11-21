@@ -1,0 +1,416 @@
+use std::collections::VecDeque;
+
+use crate::{
+    completion_value, eval_err, handle_scope,
+    runtime::{
+        Context, EvalResult, HeapItemKind, HeapPtr, Realm, Value,
+        abstract_operations::{call, call_object},
+        async_generator_object::{AsyncGeneratorObject, async_generator_resume},
+        builtin_generator::BuiltinGenerator,
+        bytecode::function::ClosureObject,
+        gc::{AnyHeapItem, HeapVisitor},
+        generator_object::{GeneratorCompletionType, GeneratorObject},
+        intrinsics::promise_constructor::execute_then,
+        object_value::ObjectValue,
+        promise_object::{PromiseCapability, PromiseObject, PromiseReactionKind},
+    },
+};
+
+pub struct TaskQueue {
+    tasks: VecDeque<Task>,
+    /// Set when an embedder host is installed. Enqueued tasks are then handed to the host as job
+    /// objects instead of staying in this queue.
+    has_host: bool,
+}
+
+pub enum Task {
+    Callback1(Callback1Task),
+    AwaitResume(AwaitResumeTask),
+    PromiseThenReaction(PromiseThenReactionTask),
+    PromiseThenSettle(PromiseThenSettleTask),
+}
+
+/// Enqueues tasks onto the task queue of a context. Returned by `Context::task_queue`.
+///
+/// Holds the context instead of a reference to the queue, so an embedder host can be handed the
+/// new task once the queue is no longer borrowed.
+pub struct TaskEnqueuer {
+    cx: Context,
+}
+
+impl TaskEnqueuer {
+    pub fn new(cx: Context) -> Self {
+        Self { cx }
+    }
+
+    pub fn enqueue(mut self, task: Task) {
+        let queue = self.cx.task_queue_mut();
+        queue.tasks.push_back(task);
+
+        if queue.has_host {
+            embed_jobs_hand_over(self.cx);
+        }
+    }
+
+    pub fn enqueue_callback_1_task(self, func: Value, arg: Value) {
+        self.enqueue(Task::Callback1(Callback1Task::new(func, arg)));
+    }
+
+    pub fn enqueue_await_resume_task(
+        self,
+        kind: PromiseReactionKind,
+        generator: HeapPtr<AnyHeapItem>,
+        result: Value,
+    ) {
+        self.enqueue(Task::AwaitResume(AwaitResumeTask::new(kind, generator, result)));
+    }
+
+    pub fn enqueue_promise_then_reaction_task(
+        self,
+        kind: PromiseReactionKind,
+        handler: Option<HeapPtr<ObjectValue>>,
+        capability: Option<HeapPtr<PromiseCapability>>,
+        result: Value,
+        realm: Option<HeapPtr<Realm>>,
+    ) {
+        self.enqueue(Task::PromiseThenReaction(PromiseThenReactionTask::new(
+            kind, handler, capability, result, realm,
+        )));
+    }
+
+    pub fn enqueue_promise_then_settle_task(
+        self,
+        then_function: HeapPtr<ObjectValue>,
+        resolution: HeapPtr<ObjectValue>,
+        promise: HeapPtr<PromiseObject>,
+        realm: HeapPtr<Realm>,
+    ) {
+        self.enqueue(Task::PromiseThenSettle(PromiseThenSettleTask::new(
+            then_function,
+            resolution,
+            promise,
+            realm,
+        )));
+    }
+}
+
+impl TaskQueue {
+    pub fn new() -> Self {
+        Self { tasks: VecDeque::new(), has_host: false }
+    }
+
+    /// Hand all future tasks to the installed embedder host.
+    pub fn set_has_host(&mut self) {
+        self.has_host = true;
+    }
+
+    pub fn pop_front(&mut self) -> Option<Task> {
+        self.tasks.pop_front()
+    }
+
+    pub fn push_front(&mut self, task: Task) {
+        self.tasks.push_front(task);
+    }
+
+    pub fn visit_roots(&mut self, visitor: &mut impl HeapVisitor) {
+        for task in &mut self.tasks {
+            task.visit_roots(visitor);
+        }
+    }
+}
+
+impl Task {
+    pub fn visit_roots(&mut self, visitor: &mut impl HeapVisitor) {
+        match self {
+            Task::Callback1(Callback1Task { func, arg }) => {
+                visitor.visit_value(func);
+                visitor.visit_value(arg);
+            }
+            Task::AwaitResume(AwaitResumeTask { generator, result, .. }) => {
+                visitor.visit_pointer(generator);
+                visitor.visit_value(result);
+            }
+            Task::PromiseThenReaction(PromiseThenReactionTask {
+                kind: _,
+                handler,
+                capability,
+                result,
+                realm,
+            }) => {
+                visitor.visit_pointer_opt(handler);
+                visitor.visit_pointer_opt(capability);
+                visitor.visit_value(result);
+                visitor.visit_pointer_opt(realm);
+            }
+            Task::PromiseThenSettle(PromiseThenSettleTask {
+                then_function,
+                resolution,
+                promise,
+                realm,
+            }) => {
+                visitor.visit_pointer(then_function);
+                visitor.visit_pointer(resolution);
+                visitor.visit_pointer(promise);
+                visitor.visit_pointer(realm);
+            }
+        }
+    }
+
+    /// Run this task. Must be called within a handle scope.
+    pub fn execute(&self, cx: Context) -> EvalResult<()> {
+        match self {
+            Task::Callback1(task) => task.execute(cx),
+            Task::AwaitResume(task) => task.execute(cx),
+            Task::PromiseThenReaction(task) => task.execute(cx),
+            Task::PromiseThenSettle(task) => task.execute(cx),
+        }
+    }
+
+    /// The promise this task settles (if known) and the realm it runs in (if known). Reported to an
+    /// embedder host along with the job.
+    pub fn host_job_info(&self) -> (Option<HeapPtr<ObjectValue>>, Option<HeapPtr<Realm>>) {
+        match self {
+            // The realm of the callback function, if it is a closure
+            Task::Callback1(task) => {
+                let realm = task
+                    .func
+                    .as_opt::<ClosureObject>()
+                    .map(|closure| closure.function_ptr().realm_ptr());
+                (None, realm)
+            }
+            // The realm the suspended function resumes in
+            Task::AwaitResume(task) => (None, task.resume_realm()),
+            Task::PromiseThenReaction(task) => (None, task.realm),
+            Task::PromiseThenSettle(task) => (Some(task.promise.as_object()), Some(task.realm)),
+        }
+    }
+}
+
+/// Hand enqueued tasks to the embedder host. Kept out of line since it only runs with a host.
+#[inline(never)]
+fn embed_jobs_hand_over(cx: Context) {
+    crate::runtime::embed::hand_tasks_to_host(cx);
+}
+
+impl Context {
+    /// Run all tasks until the task queue is empty.
+    pub fn run_all_tasks(&mut self) -> EvalResult<()> {
+        while let Some(task) = self.task_queue_mut().tasks.pop_front() {
+            handle_scope!(*self, task.execute(*self))?;
+        }
+
+        Ok(())
+    }
+}
+
+/// Call a function with a single argument.
+pub struct Callback1Task {
+    func: Value,
+    arg: Value,
+}
+
+impl Callback1Task {
+    fn new(func: Value, arg: Value) -> Self {
+        Self { func, arg }
+    }
+
+    fn execute(&self, mut cx: Context) -> EvalResult<()> {
+        let func = self.func.to_handle(cx);
+        let arg = self.arg.to_handle(cx);
+
+        // Realm is only used to create errors before setting up the stack frame (e.g. non-callable
+        // a stack overflow). Create these errors in the default realm for this context.
+        let default_realm = cx.initial_realm_ptr();
+
+        cx.with_initial_realm_stack_frame(default_realm, |cx| {
+            call(cx, func, cx.undefined(), &[arg])?;
+            Ok(())
+        })
+    }
+}
+
+/// Resume an async function that was paused at an `await` expression.
+pub struct AwaitResumeTask {
+    /// Whether the awaited promise was resolved or rejected.
+    kind: PromiseReactionKind,
+    /// The suspended async function that should be resumed with the provided completion.
+    /// - For regular async functions this is a GeneratorObject
+    /// - For async generators this is an AsyncGeneratorObject
+    /// - For builtin functions this is a BuiltinGenerator
+    generator: HeapPtr<AnyHeapItem>,
+    /// The value the await expression completes to, whether a normal value or thrown error.
+    result: Value,
+}
+
+impl AwaitResumeTask {
+    /// The realm the suspended function resumes in, the same realm `execute` enters.
+    fn resume_realm(&self) -> Option<HeapPtr<Realm>> {
+        match self.generator.shape().kind() {
+            HeapItemKind::GeneratorObject => Some(
+                self.generator
+                    .cast::<GeneratorObject>()
+                    .closure_ptr()
+                    .function_ptr()
+                    .realm_ptr(),
+            ),
+            HeapItemKind::AsyncGeneratorObject => {
+                Some(self.generator.cast::<AsyncGeneratorObject>().realm_ptr())
+            }
+            HeapItemKind::BuiltinGenerator => {
+                Some(self.generator.cast::<BuiltinGenerator>().realm_ptr())
+            }
+            _ => None,
+        }
+    }
+
+    fn new(kind: PromiseReactionKind, generator: HeapPtr<AnyHeapItem>, result: Value) -> Self {
+        Self { kind, generator, result }
+    }
+
+    fn execute(&self, mut cx: Context) -> EvalResult<()> {
+        let generator = self.generator.to_handle();
+        let completion_value = self.result.to_handle(cx);
+        let completion_type = match self.kind {
+            PromiseReactionKind::Fulfill => GeneratorCompletionType::Normal,
+            PromiseReactionKind::Reject => GeneratorCompletionType::Throw,
+        };
+
+        match generator.shape().kind() {
+            HeapItemKind::GeneratorObject => {
+                let generator = generator.cast::<GeneratorObject>();
+                let realm = generator.closure_ptr().function_ptr().realm_ptr();
+                cx.with_initial_realm_stack_frame(realm, |mut cx| {
+                    cx.vm()
+                        .resume_generator(generator, completion_value, completion_type)?;
+                    Ok(())
+                })
+            }
+            HeapItemKind::AsyncGeneratorObject => {
+                let async_generator = generator.cast::<AsyncGeneratorObject>();
+
+                // Must execute in the realm of the async generator since AsyncGeneratorResume may need
+                // to drain the async queue when the VM stack is empty.
+                cx.with_initial_realm_stack_frame(async_generator.realm_ptr(), |cx| {
+                    async_generator_resume(cx, async_generator, completion_value, completion_type)?;
+                    Ok(())
+                })
+            }
+            HeapItemKind::BuiltinGenerator => {
+                let builtin_generator = generator.cast::<BuiltinGenerator>();
+
+                let completion_result = match self.kind {
+                    PromiseReactionKind::Fulfill => Ok(completion_value),
+                    PromiseReactionKind::Reject => eval_err!(completion_value),
+                };
+
+                cx.with_initial_realm_stack_frame(builtin_generator.realm_ptr(), |cx| {
+                    builtin_generator.resume(cx, completion_result)?;
+                    Ok(())
+                })
+            }
+            _ => panic!("Unexpected generator type"),
+        }
+    }
+}
+
+pub struct PromiseThenReactionTask {
+    /// Whether the promise was resolved or rejected.
+    kind: PromiseReactionKind,
+    /// A function to call on the result value.
+    handler: Option<HeapPtr<ObjectValue>>,
+    /// A promise capability to resolve or reject with the result of the handler function.
+    capability: Option<HeapPtr<PromiseCapability>>,
+    /// The value that the promise was resolved or rejected with.
+    result: Value,
+    /// The realm to set as the topmost execution context before executing the handler.
+    realm: Option<HeapPtr<Realm>>,
+}
+
+impl PromiseThenReactionTask {
+    fn new(
+        kind: PromiseReactionKind,
+        handler: Option<HeapPtr<ObjectValue>>,
+        capability: Option<HeapPtr<PromiseCapability>>,
+        result: Value,
+        realm: Option<HeapPtr<Realm>>,
+    ) -> Self {
+        Self { kind, handler, capability, result, realm }
+    }
+
+    fn execute(&self, mut cx: Context) -> EvalResult<()> {
+        // A null realm indicates there is no handler and no user code will be executed. However
+        // we still set the initial realm to the current realm to be safe in case any intrinsics
+        // need to be accessed (e.g. for creating errors).
+        let realm = self.realm.unwrap_or_else(|| cx.initial_realm_ptr());
+
+        cx.with_initial_realm_stack_frame(realm, |cx| {
+            let result = self.result.to_handle(cx);
+            let capability = self.capability.map(|c| c.to_handle());
+
+            // Call the handler if it exists on the result value
+            let handler_result = if let Some(handler) = self.handler {
+                let handler = handler.to_handle();
+                call_object(cx, handler, cx.undefined(), &[result])
+            } else {
+                // If no handler was provided treat the handler result as a default normal or throw
+                match self.kind {
+                    PromiseReactionKind::Fulfill => Ok(result),
+                    PromiseReactionKind::Reject => eval_err!(result),
+                }
+            };
+
+            if let Some(capability) = capability {
+                // Resolve or reject the capability with the result of the handler
+                match completion_value!(handler_result) {
+                    Ok(handler_result) => {
+                        let resolve = capability.resolve();
+                        call_object(cx, resolve, cx.undefined(), &[handler_result])?;
+                    }
+                    Err(handler_result) => {
+                        let reject = capability.reject();
+                        call_object(cx, reject, cx.undefined(), &[handler_result])?;
+                    }
+                }
+            } else {
+                debug_assert!(handler_result.is_ok());
+            };
+
+            Ok(())
+        })
+    }
+}
+
+/// Call a `then` function with new `resolve` and `reject` functions in order to settle a promise.
+pub struct PromiseThenSettleTask {
+    /// The `then` function that should be called.
+    then_function: HeapPtr<ObjectValue>,
+    /// The object that contains the `then` function, used as the `this` value when calling `then`.
+    resolution: HeapPtr<ObjectValue>,
+    /// The promise that will be settled by calling `then`.
+    promise: HeapPtr<PromiseObject>,
+    /// The realm to set as the topmost execution context before executing the `then` function.
+    realm: HeapPtr<Realm>,
+}
+
+impl PromiseThenSettleTask {
+    fn new(
+        then_function: HeapPtr<ObjectValue>,
+        resolution: HeapPtr<ObjectValue>,
+        promise: HeapPtr<PromiseObject>,
+        realm: HeapPtr<Realm>,
+    ) -> Self {
+        Self { then_function, resolution, promise, realm }
+    }
+
+    fn execute(&self, mut cx: Context) -> EvalResult<()> {
+        cx.with_initial_realm_stack_frame(self.realm, |cx| {
+            let then_function = self.then_function.to_handle();
+            let resolution = self.resolution.to_handle().into();
+            let promise = self.promise.to_handle();
+
+            execute_then(cx, then_function, resolution, promise)?;
+
+            Ok(())
+        })
+    }
+}

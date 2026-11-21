@@ -1,0 +1,19 @@
+[package]
+name = "lucinanet-wpt-jsshell"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+publish = false
+description = "LucinaNet WPT jsshell runner: one .any.js test in the engine used as a JavaScript shell"
+
+[dependencies]
+# Same mozjs features as tools/lucinanet-test262, so both share one engine build.
+mozjs = { path = "../../mozjs", default-features = false, features = ["intl", "libz-sys"] }
+mozjs_sys = { path = "../../mozjs-sys" }
+serde_json = "1"
+
+[patch.crates-io]
+indexmap-allocator-api = { path = "../../../third_party/indexmap-allocator-api" }
+
+
+[workspace]

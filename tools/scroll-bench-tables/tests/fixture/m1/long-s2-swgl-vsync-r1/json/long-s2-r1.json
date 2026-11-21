@@ -1,0 +1,31 @@
+{
+  "meta": {"url": "file://<work-dir>/lucinanet/scroll-bench/m1/long-s2-swgl-vsync-r1/pages/long.html", "steps": 60, "delta_css_px": 120.000, "scale": 2.000, "device_px": [3480, 2180], "css_px": [1740, 1090], "paced": true, "raster": "swgl", "raster_threads": "default", "nominal_ms": 16.7, "step_timeout_ms": 2000, "log": "/dev/stderr"},
+  "steps_without_frame": 54,
+  "summary": {"frames": 6, "display_lists": 0, "stepped_frames": 6, "window_device_px": 7586400, "tiles_redrawn_pct": 74.407, "colour_dirty_pct": 4.236, "full_paint_frames": 6, "layout_diag": true, "async_evidence": "6 frames followed a step and none reported a reflow at all: the compositor moved the scroll tree alone", "swgl_ms": 841.6, "swgl_window_ms": 3176},
+  "stats": {
+    "frame interval: ms": {"unit": "ms", "n": 5, "p50": 65.861, "p90": 185.297, "p99": 255.803, "max": 263.637, "mean": 103.013, "over_16_7": 5, "over_33_3": 5},
+    "scroll to present: ms": {"unit": "ms", "n": 6, "p50": 6.882, "p90": 12.968, "p99": 14.267, "max": 14.412, "mean": 8.220, "over_16_7": 0, "over_33_3": 0},
+    "paint: wr update+render: ms": {"unit": "ms", "n": 6, "p50": 48.745, "p90": 158.723, "p99": 248.692, "max": 258.689, "mean": 79.676, "over_16_7": 5, "over_33_3": 5},
+    "present: swgl flush: ms": {"unit": "ms", "n": 6, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "copy into page: ms": {"unit": "ms", "n": 6, "p50": 3.787, "p90": 25.438, "p99": 44.764, "max": 46.911, "mean": 10.877, "over_16_7": 1, "over_33_3": 1},
+    "wr update (stats): ms": {"unit": "ms", "n": 6, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "wr render (stats): ms": {"unit": "ms", "n": 6, "p50": 48.000, "p90": 158.000, "p99": 248.000, "max": 258.000, "mean": 78.833, "over_16_7": 5, "over_33_3": 5},
+    "cache: tiles redrawn: count": {"unit": "count", "n": 6, "p50": 21.000, "p90": 26.000, "p99": 26.000, "max": 26.000, "mean": 16.333, "over_16_7": 4, "over_33_3": 0},
+    "cache: tiles time: ms": {"unit": "ms", "n": 6, "p50": 25.750, "p90": 49.900, "p99": 59.440, "max": 60.500, "mean": 26.683, "over_16_7": 4, "over_33_3": 2},
+    "cache: tiles area: kpx": {"unit": "kpx", "n": 6, "p50": 6696.500, "p90": 9347.500, "p99": 9366.850, "max": 9369.000, "mean": 5644.833, "over_16_7": 5, "over_33_3": 5},
+    "cache: alpha targets: ms": {"unit": "ms", "n": 6, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "cache: colour pass: ms": {"unit": "ms", "n": 6, "p50": 7.000, "p90": 39.700, "p99": 58.600, "max": 60.700, "mean": 15.583, "over_16_7": 2, "over_33_3": 1},
+    "cache: colour area: kpx": {"unit": "kpx", "n": 6, "p50": 482.000, "p90": 482.000, "p99": 482.000, "max": 482.000, "mean": 321.333, "over_16_7": 4, "over_33_3": 4},
+    "cache: texture cache: ms": {"unit": "ms", "n": 6, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "wr composite: ms": {"unit": "ms", "n": 6, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "draw calls: count": {"unit": "count", "n": 6, "p50": 52.500, "p90": 72.000, "p99": 72.900, "max": 73.000, "mean": 44.000, "over_16_7": 4, "over_33_3": 4}
+  },
+  "frames": [
+    {"step": 25, "interval_ms": 0.000, "latency_ms": 11.524, "paint_ms": 47.083, "present_ms": 0.000, "copy_ms": 3.932, "wr_update_ms": 0.000, "wr_render_ms": 46.000, "wr_draws": 58, "wr_full_paint": true, "wr_cache_ms": 0.000, "wr_tiles": 22, "wr_tiles_ms": 39.300, "wr_tiles_kpx": 7587, "wr_alpha_ms": 0.000, "wr_color_ms": 3.200, "wr_color_kpx": 482, "wr_composite_ms": 0.000},
+    {"step": 29, "interval_ms": 65.861, "latency_ms": 4.871, "paint_ms": 16.038, "present_ms": 0.000, "copy_ms": 46.911, "wr_update_ms": 0.000, "wr_render_ms": 15.000, "wr_draws": 0, "wr_full_paint": true, "wr_cache_ms": 0.000, "wr_tiles": 0, "wr_tiles_ms": 0.000, "wr_tiles_kpx": 0, "wr_alpha_ms": 0.000, "wr_color_ms": 0.000, "wr_color_kpx": 0, "wr_composite_ms": 0.000},
+    {"step": 45, "interval_ms": 263.637, "latency_ms": 5.082, "paint_ms": 258.689, "present_ms": 0.000, "copy_ms": 3.607, "wr_update_ms": 0.000, "wr_render_ms": 258.000, "wr_draws": 71, "wr_full_paint": true, "wr_cache_ms": 0.000, "wr_tiles": 26, "wr_tiles_ms": 60.500, "wr_tiles_kpx": 9369, "wr_alpha_ms": 0.000, "wr_color_ms": 60.700, "wr_color_kpx": 482, "wr_composite_ms": 0.000},
+    {"step": 49, "interval_ms": 67.787, "latency_ms": 4.750, "paint_ms": 58.757, "present_ms": 0.000, "copy_ms": 3.208, "wr_update_ms": 0.000, "wr_render_ms": 58.000, "wr_draws": 15, "wr_full_paint": true, "wr_cache_ms": 0.000, "wr_tiles": 4, "wr_tiles_ms": 8.800, "wr_tiles_kpx": 1781, "wr_alpha_ms": 0.000, "wr_color_ms": 0.100, "wr_color_kpx": 0, "wr_composite_ms": 0.000},
+    {"step": 52, "interval_ms": 55.736, "latency_ms": 14.412, "paint_ms": 48.474, "present_ms": 0.000, "copy_ms": 3.964, "wr_update_ms": 0.000, "wr_render_ms": 48.000, "wr_draws": 47, "wr_full_paint": true, "wr_cache_ms": 0.000, "wr_tiles": 20, "wr_tiles_ms": 23.200, "wr_tiles_kpx": 5806, "wr_alpha_ms": 0.000, "wr_color_ms": 18.700, "wr_color_kpx": 482, "wr_composite_ms": 0.000},
+    {"step": 56, "interval_ms": 62.045, "latency_ms": 8.683, "paint_ms": 49.016, "present_ms": 0.000, "copy_ms": 3.642, "wr_update_ms": 0.000, "wr_render_ms": 48.000, "wr_draws": 73, "wr_full_paint": true, "wr_cache_ms": 0.000, "wr_tiles": 26, "wr_tiles_ms": 28.300, "wr_tiles_kpx": 9326, "wr_alpha_ms": 0.000, "wr_color_ms": 10.800, "wr_color_kpx": 482, "wr_composite_ms": 0.000}
+  ]
+}

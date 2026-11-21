@@ -1,0 +1,32 @@
+# Marker data of tools/sweep-score. Data, not code: it grows here. Tab separated: kind <TAB> value.
+# Matching is case-insensitive substring on the page's visible text (the render dump's `text`, or the log text
+# when there is no dump). Lines starting with # and blank lines are ignored.
+#
+# kind `param`  : a number the rules use (name <TAB> value is carried in the value column as `name=value`).
+# kind `consent`, `bot`, `login` : wall markers. A page is only `walled` when a marker matches AND the page
+#                 has a small visible-text amount (param wall_max_text_chars; with no dump, wall_max_log_bytes).
+# kind `error`  : text of the engine's own error page. It makes the page `broken`, never `walled`.
+#
+# A marker needs to be a phrase a content page almost never contains; a long article that mentions
+# "captcha" is not a wall, which is why the text-size limit exists.
+param	wall_max_text_chars=1500
+param	wall_max_log_bytes=20000
+param	blank_content_ratio_pct=0.5
+param	errlines_top3_threshold=20
+consent	before you continue
+consent	consent
+consent	accept all
+consent	reject all
+consent	inden du fortsætter
+bot	verify you are human
+bot	checking your browser
+bot	captcha
+bot	access denied
+bot	attention required
+bot	just a moment
+bot	performing security verification
+bot	verifies you are not a bot
+bot	something went wrong on our end
+login	sign in to continue
+error	could not load the requested page
+error	certificate error

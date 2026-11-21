@@ -1,0 +1,55 @@
+[CompiledRegExp: /\b/] {
+  Flags: ""
+  Match Start: Unknown
+     0: AssertWordBoundary(false)
+     2: Accept
+}
+
+[CompiledRegExp: /\b/] {
+  Flags: "u"
+  Match Start: Unknown
+     0: AssertWordBoundary(false)
+     2: Accept
+}
+
+[CompiledRegExp: /\b/] {
+  Flags: "i"
+  Match Start: Unknown
+     0: AssertWordBoundary(false)
+     2: Accept
+}
+
+[CompiledRegExp: /\b/] {
+  Flags: "iu"
+  Match Start: Unknown
+     0: AssertWordBoundary(false)
+     2: Accept
+}
+
+[CompiledRegExp: /\B/] {
+  Flags: ""
+  Match Start: Unknown
+     0: AssertWordBoundary(true)
+     2: Accept
+}
+
+[CompiledRegExp: /\B/] {
+  Flags: "u"
+  Match Start: Unknown
+     0: AssertWordBoundary(true)
+     2: Accept
+}
+
+[CompiledRegExp: /\B/] {
+  Flags: "i"
+  Match Start: Unknown
+     0: AssertWordBoundary(true)
+     2: Accept
+}
+
+[CompiledRegExp: /\B/] {
+  Flags: "iu"
+  Match Start: Unknown
+     0: AssertWordBoundary(true)
+     2: Accept
+}

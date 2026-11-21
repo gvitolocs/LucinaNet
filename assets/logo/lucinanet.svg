@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="t d">
+  <title id="t">LucinaNet</title>
+  <desc id="d">A ray of light bent inside a violet glass tile, passing a point of light held above the bend.</desc>
+  <!-- The LucinaNet mark: a ray of light bent inside a glass tile, passing a point of light above the bend.
+       The tile is 56 units in a 64-unit box at corner radius 18, inset 4; the ink stroke is 8.5 % of the box
+       (5.4 units) with round caps and joins, the same weight as the interface icons. Colours: tile #7f8fe0, rim
+       white at 0.275, ray #f2f2f7 with a ghost beam of the same line at 0.55. The point of light is a filled disc
+       of radius 9.35 — three times the area of a disc of radius 5.4 — centred (46,17): 2.25 units inside the
+       tile's corner arc, 3.65 from its top edge and 4.65 from its right edge, and 5.64 units clear of the ray,
+       so nothing of the mark crosses the edge of the tile at any size. -->
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="#7f8fe0"/>
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="none" stroke="#ffffff" stroke-opacity="0.275" stroke-width="2"/>
+  <circle cx="46" cy="17" r="9.35" fill="#f2f2f7"/>
+  <g fill="none" stroke="#f2f2f7" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 19 L33 29 L51 47"/>
+    <path d="M13 36 L26 42.5" stroke-opacity="0.55"/>
+  </g>
+</svg>

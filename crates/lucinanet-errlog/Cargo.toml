@@ -1,0 +1,10 @@
+[package]
+name = "lucinanet-errlog"
+version = "0.1.0"
+description = "the browser's own session error log: which pages broke, kept as hosts, names and counts"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+serde_json = "1"

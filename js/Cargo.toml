@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = ["mozjs", "mozjs-sys", "mozjs-sys/engine-shim"]
+exclude = ["tools/gen-jsapi"]
+
+[patch.crates-io]
+# Brimstone needs its author's indexmap 2.7.1 with the allocator API (pinned as in Brimstone's Cargo.lock at 64d6698).
+indexmap-allocator-api = { path = "../third_party/indexmap-allocator-api" }
+

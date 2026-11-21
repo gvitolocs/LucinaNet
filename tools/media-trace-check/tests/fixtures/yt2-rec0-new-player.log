@@ -1,0 +1,38 @@
+lucinanet-media: audio wait room LEAVE: progress, 10 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(7334145) cursor_pts=Some(8441000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (13 ms): queued=96000 playing=true position_us=Some(7348145) cursor_pts=Some(8441000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=7341000 now=Some(7348250) sound=Some(7348250)
+lucinanet-media: audio wait room LEAVE: progress, 7 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(7355375) cursor_pts=Some(8461000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (4 ms): queued=96000 playing=true position_us=Some(7360458) cursor_pts=Some(8461000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: played VP9 seconds=9.4 shown=177 dropped=0 jumps=0 decoded=191 on_venus=0 skipped=0 decode_ms_mean=5.7 decode_ms_worst=130.0 sound_frames=176 late_ms_mean=3.0 late_ms_worst=10.9
+lucinanet-media: mixer stream 0 playing true -> false held=Some(353545) queued=96000 from crates/lucinanet-media/src/mse_play.rs:398
+[2026-11-18T17:10:07Z INFO  lucinanet_media::hold] lucinanet-media: screen hold off
+phase 584066.098360 load started
+phase 584066.126646 first frame painted
+phase 584066.483988 load complete
+phase 584067.162077 load started
+phase 584067.177998 first frame painted
+[2026-11-18T17:10:10Z INFO  lucinanet_media::player] lucinanet-media: no pictures: cannot read: the player closed
+[2026-11-18T17:10:10Z INFO  lucinanet_media::player] lucinanet-media: no sound: not a format this plays: unsupported feature: core (probe): no suitable format reader found
+lucinanet-media: opened: no
+lucinanet-media: audio wait start ENTER: queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio cmd Paused true
+lucinanet-media: audio wait start still (0 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: mixer stream 0: taken=0 heard=0 held=None queued=0 playing=false | device written=0 played=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio wait start still (42 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: show pts=0 now=Some(0) sound=None
+[2026-11-18T17:10:10Z INFO  lucinanet_media::player] lucinanet-media: first frame after 116 ms
+lucinanet-media: audio cmd Start pts=0 paused=true running=false
+lucinanet-media: audio wait start LEAVE: progress, 11 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (52 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0

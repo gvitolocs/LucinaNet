@@ -1,0 +1,183 @@
+// @generated
+/// Implement `DataProvider<TimezoneNamesSpecificLongV1>` on the given struct using the data
+/// hardcoded in this file. This allows the struct to be used with
+/// `icu`'s `_unstable` constructors.
+///
+/// Using this implementation will embed the following data in the binary's data segment:
+/// * 62B for the lookup data structure (6 data identifiers)
+/// * 13589B[^1] for the actual data (6 unique structs)
+///
+/// [^1]: these numbers can be smaller in practice due to linker deduplication
+///
+/// This macro requires the following crates:
+/// * `icu_datetime`
+/// * `icu_locale_fallback/compiled_data`
+/// * `icu_provider`
+/// * `icu_provider/baked`
+/// * `zerovec`
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_timezone_names_specific_long_v1 {
+    ($ provider : ty) => {
+        #[clippy::msrv = "1.88"]
+        const _: () = <$provider>::MUST_USE_MAKE_PROVIDER_MACRO;
+        #[clippy::msrv = "1.88"]
+        impl $provider {
+            #[doc(hidden)]
+            pub const TIMEZONE_NAMES_SPECIFIC_LONG_V1_CHECKSUM: u64 = 3766337918522167878u64;
+            const DATA_TIMEZONE_NAMES_SPECIFIC_LONG_V1: icu_provider::baked::zerotrie::Data<icu_datetime::provider::time_zones::TimezoneNamesSpecificLongV1> = {
+                const TRIE: icu_provider::baked::zerotrie::ZeroTrieSimpleAscii<&'static [u8]> = icu_provider::baked::zerotrie::ZeroTrieSimpleAscii {
+                    store: b"\xC5dehiu\x02\x08\x0F\x11a\x80n\x81-AU\x82i-Latn\x83t\x84nd\x85",
+                };
+                const VALUES: &'static [<icu_datetime::provider::time_zones::TimezoneNamesSpecificLongV1 as icu_provider::baked::zerotrie::DynamicDataMarker>::DataStruct] = &[
+                    icu_datetime::provider::time_zones::MetazoneSpecificNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x01\0\x07\0\x07\x01\x08\0\x08\x01\t\0\t\x01\n\0\n\x01\x0B\0\x0B\x01\x0C\0\x0C\x01\r\0\r\x01\x0E\0\x0F\0\x10\0\x11\0\x11\x01\x12\0\x12\x01\x13\0\x14\0\x14\x01\x15\0\x16\0\x16\x01\x1B\0\x1B\x01!\0!\x01\"\0%\0'\0'\x01-\0-\x01.\0.\x01/\0/\x011\x001\x017\0:\0:\x01;\0;\x01?\0?\x01A\0A\x01H\0H\x01I\0J\0J\x01K\0L\0P\0R\0V\0]\0]\x01_\0d\0d\x01e\0e\x01k\0n\0n\x01o\0p\0r\0r\x01x\0y\0\x81\0\x84\0\x84\x01\x86\0\x87\0\x89\0\x89\x01\x8B\0\x8E\0\x93\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"Y\0\x0E\0\x1E\0.\0@\0R\0c\0t\0\x85\0\x96\0\xA8\0\xBA\0\xCB\0\xDC\0\xEA\0\xF8\0\t\x01\x1D\x01.\x01@\x01R\x01l\x01\x86\x01\xA8\x01\xBF\x01\xD6\x01\xED\x01\x05\x02\x1D\x022\x02G\x02Y\x02k\x02}\x02\x92\x02\xA3\x02\xB4\x02\xCF\x02\xEA\x02\x02\x03\x1A\x032\x03J\x03\\\x03n\x03\x80\x03\x99\x03\xB2\x03\xCB\x03\xE4\x03\xFD\x03\x16\x04$\x042\x04B\x04R\x04c\x04u\x04\x87\x04\x98\x04\xBA\x04\xCC\x04\xE1\x04\xF2\x04\r\x05(\x058\x05N\x05d\x05|\x05\x94\x05\xA8\x05\xBE\x05\xD4\x05\xE8\x05\xFC\x05\x1F\x06B\x06R\x06d\x06t\x06\x86\x06\x98\x06\xA9\x06\xBC\x06\xD1\x06\xE6\x06\xF8\x06\r\x07Acre-normaltidAlaska-normaltidAlaska-sommertidAmazonas-normaltidAmazonas-sommertidCentral-normaltidCentral-sommertidEastern-normaltidEastern-sommertidMountain-normaltidMountain-sommertidPacific-normaltidPacific-sommertidApia-normaltidApia-sommertidArabisk normaltidArgentinsk normaltidArmensk normaltidAtlantic-normaltidAtlantic-sommertidCentralaustralsk normaltidCentralaustralsk sommertidVestlig centralaustralsk normaltid\xC3\x98staustralsk normaltid\xC3\x98staustralsk sommertidVestaustralsk normaltidAserbajdsjansk normaltidAserbajdsjansk sommertidBrasiliansk normaltidBrasiliansk sommertidChilensk normaltidChilensk sommertidKinesisk normaltidColombiansk normaltidCubansk normaltidCubansk sommertidCentraleurop\xC3\xA6isk normaltidCentraleurop\xC3\xA6isk sommertid\xC3\x98steurop\xC3\xA6isk normaltid\xC3\x98steurop\xC3\xA6isk sommertidVesteurop\xC3\xA6isk normaltidVesteurop\xC3\xA6isk sommertidFijiansk normaltidFijiansk sommertidGeorgisk normaltid\xC3\x98stgr\xC3\xB8nlandsk normaltid\xC3\x98stgr\xC3\xB8nlandsk sommertidVestgr\xC3\xB8nlandsk normaltidVestgr\xC3\xB8nlandsk sommertidHawaii-Aleutian-normaltidHawaii-Aleutian-sommertidHovd-normaltidHovd-sommertidIransk normaltidIransk sommertidIrkutsk-normaltidIsraelsk normaltidIsraelsk sommertidJapansk normaltidPetropavlovsk-Kamchatski normaltidKoreansk normaltidKrasnojarsk-normaltidMagadan-normaltidMexicansk Pacific-normaltidMexicansk Pacific-sommertidMoskva-normaltidNewzealandsk normaltidNewzealandsk sommertidNewfoundlandsk normaltidNewfoundlandsk sommertidPakistansk normaltidParaguayansk normaltidParaguayansk sommertidPeruviansk normaltidFilippinsk normaltidSaint Pierre- og Miquelon-normaltidSaint Pierre- og Miquelon-sommertidSamara-normaltidSamoansk normaltidTaipei-normaltidTongansk normaltidTongansk sommertidTyrkisk normaltidTurkmensk normaltidUruguayansk normaltidUruguayansk sommertidUsbekisk normaltidVladivostok-normaltidJakutsk-normaltid") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"gblon\0\0\0\x01iedub\0\0\0\x01utc\0\0\0\0\0\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x03\0\x11\0\x1F\0Britisk sommertidIrsk normaltidKoordineret universaltid") },
+                            )
+                        },
+                        use_standard: unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x02\x03\x04\x05\x06\x19\x1A\x1C\x1F()*,234568<=>BCDEFGMNOQSTWXYZ\\`abflmqstuvwz{|}~\x7F\x80\x82\x83\x85\x88\x8D\x90\x91\x92\x95") },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneSpecificNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x01\0\x07\0\x07\x01\x08\0\x08\x01\t\0\t\x01\n\0\n\x01\x0B\0\x0B\x01\x0C\0\x0C\x01\x0E\0\x0F\0\x11\0\x11\x01\x12\0\x12\x01\x13\0\x14\0\x14\x01\x15\0\x16\x01\x17\x01\x1B\0\x1B\x01 \0 \x01!\0!\x01\"\0+\x01-\0-\x01.\0.\x01/\0/\x011\x019\09\x01:\0:\x01;\0;\x01?\0?\x01A\x01I\0L\0P\0R\0U\0U\x01V\0]\0]\x01^\x01_\0d\0d\x01e\0e\x01n\x01p\0x\0y\0\x84\x01\x89\x01\x8B\0\x8E\0\x93\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"I\0\x12\0&\0:\0N\0`\0u\0\x8A\0\x9F\0\xB4\0\xCA\0\xE0\0\xF5\0\n\x01\x1F\x016\x01L\x01b\x01\x82\x01\xA2\x01\xCA\x01\xEA\x01\n\x02*\x02@\x02R\x02h\x02|\x02\x91\x02\xA6\x02\xB9\x02\xCA\x02\xDD\x02\xF6\x02\x14\x030\x03N\x03j\x03\x88\x03\xA4\x03\xB4\x03\xCB\x03\xE0\x03\xFC\x03\x16\x042\x04L\x04i\x04\x86\x04\x97\x04\xAC\x04\xC3\x04\xD7\x04\xF0\x04\x07\x05\x1E\x053\x05P\x05m\x05\x84\x05\x98\x05\xB1\x05\xCA\x05\xE4\x05\xFE\x05\x12\x06*\x06>\x06Z\x06k\x06~\x06\x96\x06\xAF\x06Acre Standard TimeAlaska Standard TimeAlaska Daylight TimeAmazon Standard TimeAmazon Summer TimeCentral Standard TimeCentral Daylight TimeEastern Standard TimeEastern Daylight TimeMountain Standard TimeMountain Daylight TimePacific Standard TimePacific Daylight TimeArabian Standard TimeArgentina Standard TimeAtlantic Standard TimeAtlantic Daylight TimeAustralian Central Standard TimeAustralian Central Daylight TimeAustralian Central Western Standard TimeAustralian Eastern Standard TimeAustralian Eastern Daylight TimeAustralian Western Standard TimeAzerbaijan Summer TimeAzores Summer TimeBrasilia Standard TimeBrasilia Summer TimeChatham Standard TimeChatham Daylight TimeChile Standard TimeChile Summer TimeChina Standard TimeEaster Island Summer TimeCentral European Standard TimeCentral European Summer TimeEastern European Standard TimeEastern European Summer TimeWestern European Standard TimeWestern European Summer TimeFiji Summer TimeGreenland Standard TimeGreenland Summer TimeEast Greenland Standard TimeEast Greenland Summer TimeWest Greenland Standard TimeWest Greenland Summer TimeHawaii-Aleutian Standard TimeHawaii-Aleutian Daylight TimeKhovd Summer TimeIrkutsk Standard TimeKamchatka Standard TimeKorean Standard TimeKrasnoyarsk Standard TimeLord Howe Standard TimeLord Howe Daylight TimeMagadan Standard TimeMexican Pacific Standard TimeMexican Pacific Daylight TimeUlaanbaatar Summer TimeMoscow Standard TimeNew Zealand Standard TimeNew Zealand Daylight TimeNewfoundland Standard TimeNewfoundland Daylight TimeParaguay Summer TimePhilippine Standard TimeSamara Standard TimeAmerican Samoa Standard TimeTonga Summer TimeUruguay Summer TimeUzbekistan Standard TimeVladivostok Standard TimeYakutsk Standard Time") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"gblon\0\0\0\x01iedub\0\0\0\x01utc\0\0\0\0\0\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x03\0\x13\0&\0British Summer TimeIrish Standard TimeCoordinated Universal Time") },
+                            )
+                        },
+                        use_standard: unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x02\x03\x04\x05\x06\x19\x1A\x1C\x1E\x1F#$()*,234568<=>BCDEFGMNOQSTWXYZ\\`abflmqstuvwz|}~\x7F\x80\x82\x83\x85\x88\x8D\x90\x91\x92\x95") },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneSpecificNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x01\0\x07\0\x07\x01\x08\0\x08\x01\t\0\t\x01\n\0\n\x01\x0B\0\x0B\x01\x0C\0\x0C\x01\x0E\0\x0F\0\x11\0\x11\x01\x12\0\x12\x01\x13\0\x14\0\x14\x01\x15\0\x16\x01\x17\x01\x1B\0\x1B\x01 \0 \x01!\0!\x01\"\0+\x01-\0-\x01.\0.\x01/\0/\x011\x019\09\x01:\0:\x01;\0;\x01?\0?\x01A\x01I\0L\0P\0R\0U\0U\x01V\0]\0]\x01^\x01_\0d\0d\x01e\0e\x01n\x01p\0r\0r\x01x\0y\0\x84\x01\x89\x01\x8B\0\x8E\0\x93\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"K\0\x12\0&\0:\0N\0`\0u\0\x8A\0\x9F\0\xB4\0\xCA\0\xE0\0\xF5\0\n\x01\x1F\x016\x01L\x01b\x01\x82\x01\xA2\x01\xCA\x01\xEA\x01\n\x02*\x02@\x02R\x02h\x02|\x02\x91\x02\xA6\x02\xB9\x02\xCA\x02\xDD\x02\xF6\x02\x14\x030\x03N\x03j\x03\x88\x03\xA4\x03\xB4\x03\xCB\x03\xE0\x03\xFC\x03\x16\x042\x04L\x04i\x04\x86\x04\x97\x04\xAC\x04\xC3\x04\xD7\x04\xF0\x04\x07\x05\x1E\x053\x05P\x05m\x05\x84\x05\x98\x05\xB1\x05\xCA\x05\xE4\x05\xFE\x05\x12\x06*\x06L\x06n\x06\x82\x06\x9E\x06\xAF\x06\xC2\x06\xDA\x06\xF3\x06Acre Standard TimeAlaska Standard TimeAlaska Daylight TimeAmazon Standard TimeAmazon Summer TimeCentral Standard TimeCentral Daylight TimeEastern Standard TimeEastern Daylight TimeMountain Standard TimeMountain Daylight TimePacific Standard TimePacific Daylight TimeArabian Standard TimeArgentina Standard TimeAtlantic Standard TimeAtlantic Daylight TimeAustralian Central Standard TimeAustralian Central Daylight TimeAustralian Central Western Standard TimeAustralian Eastern Standard TimeAustralian Eastern Daylight TimeAustralian Western Standard TimeAzerbaijan Summer TimeAzores Summer TimeBrasilia Standard TimeBrasilia Summer TimeChatham Standard TimeChatham Daylight TimeChile Standard TimeChile Summer TimeChina Standard TimeEaster Island Summer TimeCentral European Standard TimeCentral European Summer TimeEastern European Standard TimeEastern European Summer TimeWestern European Standard TimeWestern European Summer TimeFiji Summer TimeGreenland Standard TimeGreenland Summer TimeEast Greenland Standard TimeEast Greenland Summer TimeWest Greenland Standard TimeWest Greenland Summer TimeHawaii-Aleutian Standard TimeHawaii-Aleutian Daylight TimeKhovd Summer TimeIrkutsk Standard TimeKamchatka Standard TimeKorean Standard TimeKrasnoyarsk Standard TimeLord Howe Standard TimeLord Howe Daylight TimeMagadan Standard TimeMexican Pacific Standard TimeMexican Pacific Daylight TimeUlaanbaatar Summer TimeMoscow Standard TimeNew Zealand Standard TimeNew Zealand Daylight TimeNewfoundland Standard TimeNewfoundland Daylight TimeParaguay Summer TimePhilippine Standard TimeSt Pierre & Miquelon Standard TimeSt Pierre & Miquelon Daylight TimeSamara Standard TimeAmerican Samoa Standard TimeTonga Summer TimeUruguay Summer TimeUzbekistan Standard TimeVladivostok Standard TimeYakutsk Standard Time") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"gblon\0\0\0\x01iedub\0\0\0\x01utc\0\0\0\0\0\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x03\0\x13\0&\0British Summer TimeIrish Standard TimeCoordinated Universal Time") },
+                            )
+                        },
+                        use_standard: unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x02\x03\x04\x05\x06\x19\x1A\x1C\x1E\x1F#$()*,234568<=>BCDEFGMNOQSTWXYZ\\`abflmqstuvwz|}~\x7F\x80\x82\x83\x85\x88\x8D\x90\x91\x92\x95") },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneSpecificNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x01\0\x07\0\x07\x01\x08\0\x08\x01\t\0\t\x01\n\0\n\x01\x0B\0\x0B\x01\x0C\0\x0C\x01\x0E\0\x0F\0\x11\0\x11\x01\x12\0\x12\x01\x13\0\x14\0\x14\x01\x15\0\x16\x01\x17\x01\x1B\0\x1B\x01 \0 \x01!\0!\x01\"\0+\x01-\0-\x01.\0.\x01/\0/\x011\x019\09\x01:\0:\x01;\0;\x01?\0?\x01A\x01I\0L\0P\0R\0U\0U\x01V\0]\0]\x01^\x01_\0d\0d\x01e\0e\x01n\x01p\0x\0y\0\x84\x01\x86\0\x89\x01\x8B\0\x8E\0\x93\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"J\0\x12\0&\0:\0N\0`\0\x83\0\xA6\0\xC9\0\xEC\0\x10\x014\x01W\x01z\x01\x8F\x01\xA6\x01\xBC\x01\xD2\x01\xF2\x01\x12\x02:\x02Z\x02z\x02\x9A\x02\xB0\x02\xC2\x02\xD8\x02\xEC\x02\x01\x03\x16\x03)\x03:\x03M\x03f\x03\x84\x03\xA0\x03\xBE\x03\xDA\x03\xF8\x03\x14\x04$\x04;\x04P\x04l\x04\x86\x04\xA2\x04\xBC\x04\xD9\x04\xF6\x04\x07\x05\x1C\x053\x05G\x05`\x05w\x05\x8E\x05\xA3\x05\xC0\x05\xDD\x05\xF4\x05\x08\x06!\x06:\x06T\x06n\x06\x82\x06\x9A\x06\xAE\x06\xCA\x06\xDB\x06\xF1\x06\x04\x07\x1C\x075\x07Acre Standard TimeAlaska Standard TimeAlaska Daylight TimeAmazon Standard TimeAmazon Summer TimeNorth America Central Standard TimeNorth America Central Daylight TimeNorth America Eastern Standard TimeNorth America Eastern Daylight TimeNorth America Mountain Standard TimeNorth America Mountain Daylight TimeNorth America Pacific Standard TimeNorth America Pacific Daylight TimeArabian Standard TimeArgentina Standard TimeAtlantic Standard TimeAtlantic Daylight TimeAustralian Central Standard TimeAustralian Central Daylight TimeAustralian Central Western Standard TimeAustralian Eastern Standard TimeAustralian Eastern Daylight TimeAustralian Western Standard TimeAzerbaijan Summer TimeAzores Summer TimeBrasilia Standard TimeBrasilia Summer TimeChatham Standard TimeChatham Daylight TimeChile Standard TimeChile Summer TimeChina Standard TimeEaster Island Summer TimeCentral European Standard TimeCentral European Summer TimeEastern European Standard TimeEastern European Summer TimeWestern European Standard TimeWestern European Summer TimeFiji Summer TimeGreenland Standard TimeGreenland Summer TimeEast Greenland Standard TimeEast Greenland Summer TimeWest Greenland Standard TimeWest Greenland Summer TimeHawaii-Aleutian Standard TimeHawaii-Aleutian Daylight TimeKhovd Summer TimeIrkutsk Standard TimeKamchatka Standard TimeKorean Standard TimeKrasnoyarsk Standard TimeLord Howe Standard TimeLord Howe Daylight TimeMagadan Standard TimeMexican Pacific Standard TimeMexican Pacific Daylight TimeUlaanbaatar Summer TimeMoscow Standard TimeNew Zealand Standard TimeNew Zealand Daylight TimeNewfoundland Standard TimeNewfoundland Daylight TimeParaguay Summer TimePhilippine Standard TimeSamara Standard TimeAmerican Samoa Standard TimeTonga Summer TimeT\xC3\xBCrkiye Standard TimeUruguay Summer TimeUzbekistan Standard TimeVladivostok Standard TimeYakutsk Standard Time") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"gblon\0\0\0\x01iedub\0\0\0\x01utc\0\0\0\0\0\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x03\0\x13\0&\0British Summer TimeIrish Standard TimeCoordinated Universal Time") },
+                            )
+                        },
+                        use_standard: unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x02\x03\x04\x05\x06\x19\x1A\x1C\x1E\x1F#$()*,234568<=>BCDEFGMNOQSTWXYZ\\`abflmqstuvwz|}~\x7F\x80\x82\x83\x85\x88\x8D\x90\x91\x92\x95") },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneSpecificNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x07\0\x07\x01\x08\0\x08\x01\t\0\t\x01\n\0\n\x01\x0B\0\x0B\x01\x0C\0\x0C\x01\r\0\r\x01\x0E\0\x0F\0\x10\0\x11\0\x11\x01\x12\0\x12\x01\x13\0\x14\0\x14\x01\x15\0\x16\0\x16\x01\x17\0\x17\x01\x18\0\x1B\0\x1B\x01\x1D\0 \0 \x01!\0!\x01\"\0%\0&\0'\0'\x01+\0+\x01-\0-\x01.\0.\x01/\0/\x010\x001\x001\x017\0:\0:\x01;\0;\x01?\0?\x01@\0A\0A\x01H\0H\x01I\0J\0J\x01K\0L\0P\0R\0U\0U\x01V\0[\0]\0]\x01^\0^\x01_\0c\0d\0d\x01e\0e\x01g\0g\x01h\0i\0j\0k\0n\0n\x01o\0p\0r\0r\x01x\0y\0\x81\0\x84\0\x84\x01\x87\0\x89\0\x89\x01\x8B\0\x8C\0\x8E\0\x8F\0\x93\0\x94\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"p\0\x1A\x002\0O\0j\0\x83\0\x9A\0\xB4\0\xCC\0\xEE\0\x0E\x01+\x01F\x01Z\x01l\x01~\x01\x9B\x01\xB6\x01\xD3\x01\xEE\x01\x14\x028\x02f\x02\x8D\x02\xB2\x02\xDB\x02\xFA\x02\x17\x031\x03I\x03d\x03|\x03\x92\x03\xAC\x03\xC6\x03\xDE\x03\xF3\x03\x06\x04\x1D\x048\x04U\x04i\x04{\x04\x9E\x04\xBF\x04\xE2\x04\x03\x05'\x05I\x05o\x05\x93\x05\xB4\x05\xCB\x05\xE0\x05\xFA\x05\"\x06H\x06r\x06\x9A\x06\xC2\x06\xE8\x06\x01\x07\x15\x07'\x07?\x07U\x07l\x07\x83\x07\x98\x07\xB1\x07\xD9\x07\xED\x07\x08\x08!\x088\x08O\x08k\x08\x8E\x08\xAF\x08\xC9\x08\xE1\x08\xF6\x08\x18\t8\tV\to\t\x86\t\xA6\t\xC4\t\xE7\t\x02\n\x16\n/\nH\n_\nu\n\x91\n\xB8\n\xDD\n\xF3\n\x08\x0B\x1E\x0B3\x0BF\x0Bc\x0B~\x0B\x97\x0B\xB5\x0B\xCD\x0B\xE8\x0B\x01\x0C\x18\x0COra standard dell\xE2\x80\x99AlaskaOra legale dell\xE2\x80\x99AlaskaOra standard dell\xE2\x80\x99AmazzoniaOra legale dell\xE2\x80\x99AmazzoniaOra standard centrale USAOra legale centrale USAOra standard orientale USAOra legale orientale USAOra standard Montagne Rocciose USAOra legale Montagne Rocciose USAOra standard del Pacifico USAOra legale del Pacifico USAOra standard di ApiaOra legale di ApiaOra standard arabaOra standard dell\xE2\x80\x99ArgentinaOra standard dell\xE2\x80\x99ArmeniaOra standard dell\xE2\x80\x99AtlanticoOra legale dell\xE2\x80\x99AtlanticoOra standard dell\xE2\x80\x99Australia centraleOra legale dell\xE2\x80\x99Australia centraleOra standard dell\xE2\x80\x99Australia centroccidentaleOra standard dell\xE2\x80\x99Australia orientaleOra legale dell\xE2\x80\x99Australia orientaleOra standard dell\xE2\x80\x99Australia occidentaleOra standard dell\xE2\x80\x99AzerbaigianOra legale dell\xE2\x80\x99AzerbaigianOra standard delle AzzorreOra legale delle AzzorreOra standard del BangladeshOra standard di BrasiliaOra legale di BrasiliaOra standard di Capo VerdeOra standard delle ChathamOra legale delle ChathamOra standard del CileOra legale del CileOra standard della CinaOra standard della ColombiaOra standard delle isole CookOra standard di CubaOra legale di CubaOra standard dell\xE2\x80\x99Isola di PasquaOra legale dell\xE2\x80\x99Isola di PasquaOra standard dell\xE2\x80\x99Europa centraleOra legale dell\xE2\x80\x99Europa centraleOra standard dell\xE2\x80\x99Europa orientaleOra legale dell\xE2\x80\x99Europa orientaleOra standard dell\xE2\x80\x99Europa occidentaleOra legale dell\xE2\x80\x99Europa occidentaleOra standard delle Isole FalklandOra standard delle FigiOra legale delle FigiOra standard della GeorgiaOra standard della Groenlandia orientaleOra legale della Groenlandia orientaleOra standard della Groenlandia occidentaleOra legale della Groenlandia occidentaleOra standard delle Isole Hawaii-AleutineOra legale delle Isole Hawaii-AleutineOra standard di Hong KongOra standard di HovdOra legale di HovdOra standard dell\xE2\x80\x99IranOra legale dell\xE2\x80\x99IranOra standard di IrkutskOra standard di IsraeleOra legale di IsraeleOra standard del GiapponeOra standard di Petropavlovsk-KamchatskiOra standard coreanaOra standard di KrasnoyarskOra standard di Lord HoweOra legale di Lord HoweOra standard di MagadanOra standard delle MauritiusOra standard del Pacifico (Messico)Ora legale del Pacifico (Messico)Ora standard di Ulan BatorOra legale di Ulan BatorOra standard di MoscaOra standard della Nuova CaledoniaOra standard della Nuova ZelandaOra legale della Nuova ZelandaOra standard di TerranovaOra legale di TerranovaOra standard delle Isole NorfolkOra legale delle Isole NorfolkOra standard di Fernando de NoronhaOra standard di NovosibirskOra standard di OmskOra standard del PakistanOra standard del ParaguayOra legale del ParaguayOra standard del Per\xC3\xB9Ora standard delle FilippineOra standard di Saint-Pierre e MiquelonOra legale di Saint-Pierre e MiquelonOra standard di SamaraOra standard di SamoaOra standard di TaipeiOra standard di TongaOra legale di TongaOra standard del TurkmenistanOra standard dell\xE2\x80\x99UruguayOra legale dell\xE2\x80\x99UruguayOra standard dell\xE2\x80\x99UzbekistanOra standard del VanuatuOra standard di VladivostokOra standard di VolgogradOra standard di YakutskOra standard di Ekaterinburg") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"gblon\0\0\0\x01iedub\0\0\0\x01utc\0\0\0\0\0\0") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x03\0\x1A\x003\0Ora legale del Regno UnitoOra legale dell\xE2\x80\x99IrlandaTempo coordinato universale") },
+                            )
+                        },
+                        use_standard: unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x02\x03\x04\x05\x06\x19\x1A\x1C\x1F#$()*,234568<=>BCDEFGMNOQSTWXYZ\\`abflmqstuvwz{|}~\x7F\x80\x82\x83\x85\x88\x8D\x90\x91\x92\x95") },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneSpecificNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(zerovec::ZeroVec::new(), zerovec::vecs::VarZeroVec16::new())
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(zerovec::ZeroVec::new(), zerovec::vecs::VarZeroVec16::new())
+                        },
+                        use_standard: zerovec::ZeroVec::new(),
+                    },
+                ];
+                unsafe { icu_provider::baked::zerotrie::Data::from_trie_and_values_unchecked(TRIE, VALUES) }
+            };
+        }
+        #[clippy::msrv = "1.88"]
+        impl icu_provider::DataProvider<icu_datetime::provider::time_zones::TimezoneNamesSpecificLongV1> for $provider {
+            fn load(&self, req: icu_provider::DataRequest) -> Result<icu_provider::DataResponse<icu_datetime::provider::time_zones::TimezoneNamesSpecificLongV1>, icu_provider::DataError> {
+                let mut metadata = icu_provider::DataResponseMetadata::default().with_checksum(Self::TIMEZONE_NAMES_SPECIFIC_LONG_V1_CHECKSUM);
+                let payload = if let Some(payload) = icu_provider::baked::DataStore::get(
+                    &Self::DATA_TIMEZONE_NAMES_SPECIFIC_LONG_V1,
+                    req.id,
+                    req.metadata.attributes_prefix_match,
+                ) {
+                    payload
+                } else {
+                    const FALLBACKER: icu_locale_fallback::LocaleFallbackerWithConfig<'static> = icu_locale_fallback::LocaleFallbacker::new().for_config(<icu_datetime::provider::time_zones::TimezoneNamesSpecificLongV1 as icu_provider::DataMarker>::INFO.fallback_config);
+                    let mut fallback_iterator = FALLBACKER.fallback_for(req.id.locale.clone());
+                    loop {
+                        if let Some(payload) = icu_provider::baked::DataStore::get(
+                            &Self::DATA_TIMEZONE_NAMES_SPECIFIC_LONG_V1,
+                            icu_provider::DataIdentifierBorrowed::for_marker_attributes_and_locale(req.id.marker_attributes, fallback_iterator.get()),
+                            req.metadata.attributes_prefix_match,
+                        ) {
+                            metadata.locale = Some(fallback_iterator.take());
+                            break payload;
+                        }
+                        if fallback_iterator.get().is_unknown() {
+                            return Err(icu_provider::DataErrorKind::IdentifierNotFound.with_req(
+                                <icu_datetime::provider::time_zones::TimezoneNamesSpecificLongV1 as icu_provider::DataMarker>::INFO,
+                                req,
+                            ));
+                        }
+                        fallback_iterator.step();
+                    }
+                };
+                Ok(icu_provider::DataResponse { payload, metadata })
+            }
+        }
+    };
+    ($ provider : ty , ITER) => {
+        __impl_timezone_names_specific_long_v1!($provider);
+        #[clippy::msrv = "1.88"]
+        impl icu_provider::IterableDataProvider<icu_datetime::provider::time_zones::TimezoneNamesSpecificLongV1> for $provider {
+            fn iter_ids(&self) -> Result<std::collections::BTreeSet<icu_provider::DataIdentifierCow<'static>>, icu_provider::DataError> {
+                Ok(icu_provider::baked::DataStore::iter(&Self::DATA_TIMEZONE_NAMES_SPECIFIC_LONG_V1).collect())
+            }
+        }
+    };
+    ($ provider : ty , DRY) => {};
+    ($ provider : ty , DRY , ITER) => {
+        __impl_timezone_names_specific_long_v1!($provider, ITER);
+    };
+}
+#[doc(inline)]
+pub use __impl_timezone_names_specific_long_v1 as impl_timezone_names_specific_long_v1;

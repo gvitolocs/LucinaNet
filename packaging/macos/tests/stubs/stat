@@ -1,0 +1,12 @@
+#!/bin/bash
+# Stub of BSD `stat -f FORMAT FILE`, which the manifest uses for the mode of every staged file. Only %OLp (the octal
+# permission bits, the form macOS prints) is implemented, on top of the host's stat.
+set -u
+if [ "${1-}" != "-f" ]; then echo "stat(stub): pass -f FORMAT FILE" >&2; exit 2; fi
+fmt=${2-}
+f=${3-}
+case $fmt in
+  '%OLp'|%OLp) /usr/bin/stat -c '%a' "$f";;
+  '%z'|%z) /usr/bin/stat -c '%s' "$f";;
+  *) echo "stat(stub): unsupported format $fmt" >&2; exit 1;;
+esac

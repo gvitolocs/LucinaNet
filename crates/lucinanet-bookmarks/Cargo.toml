@@ -1,0 +1,12 @@
+[package]
+name = "lucinanet-bookmarks"
+version = "0.1.0"
+description = "Bookmark tree with ordering, search and dedupe rules, plus Netscape HTML and Firefox places JSON import/export"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+url = "2"

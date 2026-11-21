@@ -1,0 +1,16 @@
+# Generated: lucina-ci inventory --write. Do not edit. unit<TAB>group<TAB>kind<TAB>target<TAB>inputs
+mutants/call-position	brimstone	mutants	verification/call-position/mutants.sh	verification/call-position/
+mutants/fncache	brimstone	mutants	verification/fncache/mutants.sh	verification/fncache/
+mutants/gc-accounting	brimstone	mutants	verification/gc-accounting/mutants.sh	verification/gc-accounting/
+mutants/gc-sizing	brimstone	mutants	verification/gc-sizing/mutants.sh	verification/gc-sizing/
+mutants/reparse	brimstone	mutants	verification/reparse/mutants.sh	verification/reparse/
+mutations/global	unhosted	mutations	scripts/verify-mutations.sh	scripts/verify-mutations.sh,verification/
+shipped/bytecode/disk_rules	brimstone	shipped	src/js/runtime/bytecode/fncache/disk_rules.rs	src/js/runtime/bytecode/fncache/disk_rules.rs
+shipped/bytecode/partition	brimstone	shipped	src/js/runtime/bytecode/fncache/partition.rs	src/js/runtime/bytecode/fncache/partition.rs
+shipped/bytecode/patch_rules	brimstone	shipped	src/js/runtime/bytecode/fncache/patch_rules.rs	src/js/runtime/bytecode/fncache/patch_rules.rs
+shipped/bytecode/prov_rules	brimstone	shipped	src/js/runtime/bytecode/fncache/prov_rules.rs	src/js/runtime/bytecode/fncache/prov_rules.rs
+shipped/bytecode/wire	brimstone	shipped	src/js/runtime/bytecode/fncache/wire.rs	src/js/runtime/bytecode/fncache/wire.rs
+shipped/js/reparse_rules	brimstone	shipped	src/js/parser/reparse_rules.rs	src/js/parser/reparse_rules.rs
+shipped/runtime/accounting	brimstone	shipped	src/js/runtime/gc/accounting.rs	src/js/runtime/gc/accounting.rs
+shipped/runtime/call_position	brimstone	shipped	src/js/runtime/bytecode/call_position.rs	src/js/runtime/bytecode/call_position.rs
+shipped/runtime/sizing	brimstone	shipped	src/js/runtime/gc/sizing.rs	src/js/runtime/gc/sizing.rs

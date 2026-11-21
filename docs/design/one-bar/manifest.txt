@@ -1,0 +1,48 @@
+1-one-tab-classic-1x.png	1x	band=44px	page_y=44px	field=360dp	Full	shed=0
+2-three-tabs-classic-1x.png	1x	band=44px	page_y=44px	field=360dp	Full	shed=0
+3-twelve-tabs-classic-1x.png	1x	band=44px	page_y=44px	field=360dp	Compact	shed=0
+4-editing-suggestions-classic-1x.png	1x	band=44px	page_y=44px	field=640dp	Compact	shed=0
+5-loading-classic-1x.png	1x	band=44px	page_y=44px	field=360dp	Full	shed=0
+6-mac-inset-classic-1x.png	1x	band=44px	page_y=44px	field=360dp	Full	shed=0
+1-one-tab-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+2-three-tabs-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+3-twelve-tabs-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Compact	shed=0
+4-editing-suggestions-classic-2x.png	2x	band=88px	page_y=88px	field=640dp	Compact	shed=0
+5-loading-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+6-mac-inset-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+1-one-tab-glass-1x.png	1x	band=44px	page_y=44px	field=360dp	Full	shed=0
+2-three-tabs-glass-1x.png	1x	band=44px	page_y=44px	field=360dp	Full	shed=0
+3-twelve-tabs-glass-1x.png	1x	band=44px	page_y=44px	field=360dp	Compact	shed=0
+4-editing-suggestions-glass-1x.png	1x	band=44px	page_y=44px	field=640dp	Compact	shed=0
+5-loading-glass-1x.png	1x	band=44px	page_y=44px	field=360dp	Full	shed=0
+6-mac-inset-glass-1x.png	1x	band=44px	page_y=44px	field=360dp	Full	shed=0
+1-one-tab-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+2-three-tabs-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+3-twelve-tabs-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Compact	shed=0
+4-editing-suggestions-glass-2x.png	2x	band=88px	page_y=88px	field=640dp	Compact	shed=0
+5-loading-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+6-mac-inset-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+3b-twelve-tabs-floor-classic.png	0.6x	band=26px	page_y=26px	field=247dp	Folded	shed=6
+3b-twelve-tabs-floor-glass.png	0.6x	band=26px	page_y=26px	field=247dp	Folded	shed=6
+security-https-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+security-http-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+security-editing-classic-2x.png	2x	band=88px	page_y=88px	field=640dp	Full	shed=0
+security-https-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+security-http-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+security-editing-glass-2x.png	2x	band=88px	page_y=88px	field=640dp	Full	shed=0
+emphasis-signin-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+emphasis-bbc-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+emphasis-io-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+emphasis-ip-classic-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+emphasis-signin-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+emphasis-bbc-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+emphasis-io-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+emphasis-ip-glass-2x.png	2x	band=88px	page_y=88px	field=360dp	Full	shed=0
+emphasis-signin-classic-2x.png	field=(212, 14, 608, 60)	strong=125px@150..319	top=631	strong_med=631	dim_med=300	ratio=2.10
+emphasis-bbc-classic-2x.png	field=(212, 14, 608, 60)	strong=98px@164..304	top=631	strong_med=631	dim_med=300	ratio=2.10
+emphasis-io-classic-2x.png	field=(212, 14, 608, 60)	strong=126px@173..356	top=631	strong_med=631	dim_med=300	ratio=2.10
+emphasis-ip-classic-2x.png	field=(212, 14, 608, 60)	strong=90px@239..374	top=631	strong_med=631	dim_med=300	ratio=2.10
+emphasis-signin-glass-2x.png	field=(212, 14, 608, 60)	strong=115px@140..286	top=610	strong_med=592	dim_med=367	ratio=1.61
+emphasis-bbc-glass-2x.png	field=(212, 14, 608, 60)	strong=92px@172..293	top=610	strong_med=587	dim_med=367	ratio=1.60
+emphasis-io-glass-2x.png	field=(212, 14, 608, 60)	strong=117px@189..346	top=610	strong_med=592	dim_med=367	ratio=1.61
+emphasis-ip-glass-2x.png	field=(212, 14, 608, 60)	strong=90px@251..370	top=605	strong_med=605	dim_med=367	ratio=1.65

@@ -1,0 +1,15 @@
+[CompiledRegExp: /aBc/] {
+  Flags: "i"
+  Match Start: Code Points("A", "a")
+     0: CodePointSet("A", "a")
+     2: CodePointSet("B", "b")
+     4: CodePointSet("C", "c")
+     6: Accept
+}
+
+[CompiledRegExp: /-/] {
+  Flags: "i"
+  Match Start: Code Points("-")
+     0: CodePointLiteral(-)
+     1: Accept
+}

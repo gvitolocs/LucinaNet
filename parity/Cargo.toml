@@ -1,0 +1,16 @@
+# M1: scores an engine against headless Chromium, per site. Its own workspace: it links no engine.
+[workspace]
+
+[package]
+name = "lucinanet-parity"
+version = "0.1.0"
+description = "Scores LucinaNet's engines against headless Chromium, per site"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+
+[dependencies]
+base64 = "0.22"
+image = { version = "0.25", default-features = false, features = ["png"] }
+serde_json = "1"
+tungstenite = "0.26"

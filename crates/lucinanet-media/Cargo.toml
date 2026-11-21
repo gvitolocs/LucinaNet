@@ -1,0 +1,58 @@
+[package]
+name = "lucinanet-media"
+version = "0.1.0"
+description = "servo-media on Juno's Rust decoders: <video>, <audio> and WebAudio without GStreamer"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[features]
+default = ["mse"]
+# Media Source Extensions: lucina_video::mse and lucina_audio_decode::packet (LucinaOS), and the `mse_*` methods on servo-media's
+# Player (LucinaNet Servo patch). Off builds against a Servo without that patch.
+mse = []
+
+[dependencies]
+libc = "0.2"
+log = "0.4"
+
+# LucinaOS: the Video app's demuxers, decoders, Venus client, pacing and clock, and the sound decoder and device.
+# Path dependencies into lucinaos/ (the crates are MIT; see lucinaos/LICENSE).
+lucina-video = { path = "../../lucinaos/crates/lucina-video" }
+
+lucina-video-play = { path = "../../lucinaos/crates/lucina-video-play", default-features = false }
+
+lucina-audio-decode = { path = "../../lucinaos/crates/lucina-audio-decode" }
+
+
+# servo-media's traits, from the engine fork under third_party/servo that lucinanet-servo builds.
+servo-base = { path = "../../third_party/servo/components/shared/base" }
+
+servo-media = { path = "../../third_party/servo/components/media/servo-media" }
+
+servo-media-audio = { path = "../../third_party/servo/components/media/audio" }
+
+servo-media-dummy = { path = "../../third_party/servo/components/media/backends/dummy" }
+
+servo-media-player = { path = "../../third_party/servo/components/media/player" }
+
+servo-media-streams = { path = "../../third_party/servo/components/media/streams" }
+
+servo-media-traits = { path = "../../third_party/servo/components/media/traits" }
+
+servo-media-webrtc = { path = "../../third_party/servo/components/media/webrtc" }
+
+
+# macOS: CoreAudio is the sound server, and `mixer`'s sink is one output stream (src/coreaudio.rs).
+# Linux builds never compile it. 0.18.2 because that cpal wants the cached coreaudio-rs 0.14.2;
+# 0.15.3 wants coreaudio-rs 0.11, which is not in the offline cache.
+[target.'cfg(target_os = "macos")'.dependencies]
+cpal = { version = "0.18.2", default-features = false }
+
+[dev-dependencies]
+md-5 = "0.10"
+libc = "0.2"
+lucina-video = { path = "../../lucinaos/crates/lucina-video" }
+
+lucina-video-play = { path = "../../lucinaos/crates/lucina-video-play", default-features = false }
+

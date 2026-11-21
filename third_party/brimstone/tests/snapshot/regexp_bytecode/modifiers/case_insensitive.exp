@@ -1,0 +1,9 @@
+[CompiledRegExp: /a(?i:b(?-i:c(?i:d)))/] {
+  Flags: ""
+  Match Start: Code Points("a")
+     0: CodePointLiteral(a)
+     1: CodePointSet("B", "b")
+     3: CodePointLiteral(c)
+     4: CodePointSet("D", "d")
+     6: Accept
+}

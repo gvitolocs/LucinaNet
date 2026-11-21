@@ -1,0 +1,10 @@
+[package]
+name = "lucinanet-net-policy"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+description = "LucinaNet: the pure rules of the connector (name cache lifetimes, single-flight, per-origin connection slots), checked by Verus"
+
+[lib]
+path = "src/lib.rs"

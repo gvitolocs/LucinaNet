@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<meta charset=utf-8>
+<title>opaque parent: CSP sandbox directive</title>
+<h1 style="font: 20px sans-serif">CSP <code>sandbox</code> frame</h1>
+<p style="font: 13px sans-serif">The frame below is an ordinary http document, but it is served with
+the response header <code>Content-Security-Policy: sandbox allow-scripts; script-src 'self'</code>, so its
+document is given an opaque origin by its own CSP. The frame nested inside it has a CSP of its own.
+<code>allow-scripts</code> keeps the nested child able to run; the origin stays opaque because
+<code>allow-same-origin</code> is absent.</p>
+<iframe src="csp-sandbox-container.html" width="420" height="140" title="csp sandbox container"></iframe>

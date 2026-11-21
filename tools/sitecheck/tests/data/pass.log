@@ -1,0 +1,9 @@
+# url https://example.com/
+lucinanet: load Complete in 1532 ms, rss 170484 KiB
+render: down to frame 12000 us
+render: up to frame 9000 us
+render: down to frame 15000 us
+render: down to frame 14000 us
+render: up to frame 11000 us
+render: down to frame 18000 us
+render: complete true in 5310 ms, rss 170816 KiB

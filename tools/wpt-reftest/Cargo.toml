@@ -1,0 +1,25 @@
+# WPT reftest/testharness/crashtest runner for the real Rust renderer. Its own workspace: it links no
+# engine, it drives the built `lucinanet-servo --render` over a local `wpt serve`. See README.md.
+[workspace]
+
+[package]
+name = "lucinanet-wpt-reftest"
+version = "0.1.0"
+description = "Runs vendored Web Platform Tests against lucinanet-servo --render, with WPT fuzzy reftest scoring"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+
+[[bin]]
+name = "wpt-reftest"
+path = "src/main.rs"
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+serde = { version = "1", default-features = false, features = ["std"] }
+serde_json = "1"
+
+[profile.release]
+debug = false
+lto = "thin"
+codegen-units = 1

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<meta charset=utf-8>
+<title>opaque parent: sandboxed srcdoc frame</title>
+<h1 style="font: 20px sans-serif">sandboxed srcdoc frame</h1>
+<p style="font: 13px sans-serif">The frame below has <code>sandbox="allow-scripts"</code>, so its document
+gets a fresh opaque origin; its own <code>srcdoc</code> document inherits/creates that opaque origin.
+The frame nested inside it has a CSP of its own. <code>allow-scripts</code> is what lets the nested
+child run: a bare <code>sandbox=""</code> forbids scripting in the whole subtree, and opaque-ness comes
+from the missing <code>allow-same-origin</code>, not from the flag list being empty.</p>
+<iframe sandbox="allow-scripts" width="420" height="140" title="opaque container"
+        srcdoc="<!DOCTYPE html><meta charset=utf-8><iframe src='child-csp.html' width='400' height='120'></iframe>"></iframe>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="t d">
+  <title id="t">LucinaNet</title>
+  <desc id="d">The LucinaNet mark for a light background: a ray of light bent inside a deep violet glass tile, passing a point of light.</desc>
+  <!-- Light-background variant: same geometry as lucinanet.svg, tile deepened to ACCENT_FILL #4a5bb5 so the block
+       separates from the paper ground (5.6:1 against GROUND #f6f6f3, where ACCENT #7f8fe0 is only 2.8:1); the ray
+       and the point of light stay PAPER #f2f2f7 (5.5:1 inside the tile). -->
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="#4a5bb5"/>
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="none" stroke="#ffffff" stroke-opacity="0.275" stroke-width="2"/>
+  <circle cx="46" cy="17" r="9.35" fill="#f2f2f7"/>
+  <g fill="none" stroke="#f2f2f7" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 19 L33 29 L51 47"/>
+    <path d="M13 36 L26 42.5" stroke-opacity="0.55"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+{
+  "test262_repo_path": "unused",
+  "index_path": "unused_index.json",
+  "suites": [
+    {
+      "name": "integration",
+      "path": "js",
+      "ignored_file": "ignored.json"
+    }
+  ]
+}

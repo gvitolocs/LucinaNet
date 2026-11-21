@@ -1,0 +1,10 @@
+[package]
+name = "heatpause"
+version = "0.1.0"
+edition = "2021"
+description = "Freeze a systemd user unit while Tctl is hot (the build host background-work rule)"
+license = "MIT"
+
+[workspace]
+
+[dependencies]

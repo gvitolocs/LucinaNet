@@ -1,0 +1,52 @@
+LucinaOS is under the MIT licence below, except for the code listed after it, which keeps its own licence.
+
+MIT License
+
+Copyright (c) 2026 LucinaOS contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
+Code that is NOT under the MIT licence above
+
+The MIT licence covers only the code written for LucinaOS. Anything taken from another project stays under that project's
+licence, and nothing here relicenses it:
+
+- A file with its own licence or SPDX notice is under that licence. That notice decides, not this file.
+- kernel/patches/ and other changes to Asterinas are under the Mozilla Public License 2.0, as Asterinas is.
+- third_party/ holds other projects, each under the licence in its own folder or files.
+- Code ported from Linux and other GPL projects stays under the GPL with its notices. Today that is files in
+  crates/lucina-adreno, crates/lucina-venus, crates/lucina-qrtr, crates/lucina-qmi, crates/lucina-cpubw (GPL-2.0-only),
+  crates/lucina-errseq (GPL-2.0-only, from lib/errseq.c of Linux), crates/lucina-apple-aic (GPL-2.0-or-later, from irq-apple-aic.c
+  of Asahi Linux), crates/lucina-apple-uart (GPL-2.0-only, from samsung_tty.c of Linux),
+  crates/lucina-apple-aic-glue (GPL-2.0-only, from irq-apple-aic.c and arm_arch_timer.c of Linux), crates/lucina-apple-boot
+  (GPL-2.0-only, from arm64 smp_spin_table.c and the simple-framebuffer binding of Linux; follows m1n1 behaviour, nothing copied), fortuna/sim and office/engine (AGPL).
+  A program built from such a file is itself bound by that licence.
+- Crates under the Mozilla Public License 2.0, as the Asterinas code they extend or the code they were written beside:
+  crates/lucina-audio-ledger, crates/lucina-audio-wake, crates/lucina-charge, crates/lucina-cpufreq, crates/lucina-crash,
+  crates/lucina-gesture, crates/lucina-i2c-hid, crates/lucina-idle, crates/lucina-irqgate, crates/lucina-kexec, crates/lucina-ksyms,
+  crates/lucina-ksyms-build, crates/lucina-nav, crates/lucina-power, crates/lucina-rcu, crates/lucina-ring, crates/lucina-shell,
+  crates/lucina-sleep, crates/lucina-spmi, crates/lucina-standby, crates/lucina-structmap, crates/lucina-taskcpu and
+  crates/lucina-wifi-wake.
+- crates/lucina-qcom-services is under the BSD 3-Clause licence.
+- crates/lucina-app-desk links lucinadesk-core (gvitolocs/lucinadesk-core), which is under the AGPL-3.0-only. The desk app as built is
+  bound by the AGPL.
+- Fonts and other assets are under the licence files next to them.
+
+docs/research/licenses.md and docs/research/integration-decisions.md record where each source came from and its licence.

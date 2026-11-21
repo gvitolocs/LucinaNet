@@ -1,0 +1,118 @@
+<!doctype html><meta charset="utf-8"><title>mse-two-buffers</title>
+<body style="margin:0;background:#222">
+<video id="m" style="width:640px;height:360px"></video>
+<script>
+// Two SourceBuffers over fragmented WebM, as YouTube appends them: a VP9 video track and an Opus sound track, each fed an
+// initialization segment then its clusters a few times over. Then play and watch the clock; the test is whether currentTime
+// reaches 25 s of a 30 s clip. ?variant picks the playback pattern:
+//   plain  : append both, play, reach 25 s
+//   pause  : play, pause() at 1 s, play() again  (F-b: a resume must reach the mixer's playing flag)
+//   seek   : play, seek to 3 s at 2 s            (a seek lands on a random access point and resumes)
+//   init2  : append a second init segment mid-stream (P1/R4: the ids remap while the producer is parked)
+//   play2  : play, then call play() again at 2 s while already playing — not in the default set, it is the YouTube face's
+//            reproduction: the element's own update_media_state pauses a player it finds playing, and nothing answers it.
+// Success prints exactly "MSE-TEST ok"; any other outcome prints "MSE-TEST FAIL <why>".
+const log = (s) => console.log("mse-two-buffers: " + s);
+const variant = (location.search.match(/variant=([a-z0-9]+)/) || [])[1] || "plain";
+const files = (name) => `../../_mse_work/${name}.webm`; // served from the scratch root the .sh points the server at
+
+// Split a WebM into its initialization bytes (everything up to the first Cluster) and one slice per Cluster. Fragmented WebM
+// writes Clusters with an unknown size (they run to the next top-level element), so the split is on the Cluster element ID, not
+// on a size: the 4-byte ID 1F 43 B6 75 is only ever a top-level Cluster, never a nested element.
+const CLUSTER = [0x1f, 0x43, 0xb6, 0x75];
+function splitWebm(buf) {
+    const u = new Uint8Array(buf); const starts = [];
+    for (let i = 0; i + 4 <= u.length; i++) {
+        if (u[i] === CLUSTER[0] && u[i + 1] === CLUSTER[1] && u[i + 2] === CLUSTER[2] && u[i + 3] === CLUSTER[3]) {
+            // A real Cluster ID is preceded by a whole element (its own header bytes sit just before), so the offset is an
+            // element boundary. Record every such offset; a false one inside frame data is rare and harmless for the test.
+            starts.push(i);
+        }
+    }
+    if (!starts.length) throw new Error("no clusters found in the webm");
+    const init = buf.slice(0, starts[0]);
+    const clusters = starts.map((s, i) => buf.slice(s, i + 1 < starts.length ? starts[i + 1] : buf.byteLength));
+    return { init, clusters };
+}
+
+function appendSequence(sb, pieces) {
+    return new Promise((resolve, reject) => {
+        let i = 0;
+        const step = () => {
+            if (i >= pieces.length) { sb.removeEventListener("updateend", step); return resolve(); }
+            try { sb.appendBuffer(pieces[i++]); } catch (e) { reject(e); }
+        };
+        sb.addEventListener("updateend", step);
+        sb.addEventListener("error", () => reject(new Error("SourceBuffer error")));
+        step();
+    });
+}
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const ended = (el) => new Promise((r) => (el.ended ? r() : el.addEventListener("ended", r, { once: true })));
+
+function currentTimeOf() { return document.getElementById("m").currentTime; }
+
+async function run() {
+    if (!window.MediaSource) throw new Error("no MediaSource");
+    const el = document.getElementById("m");
+    el.volume = 1; // not muted: exercise the audible clock path as a real play does (the run is silent via SINK=none)
+    for (const t of ['video/webm; codecs="vp9"', 'audio/webm; codecs="opus"']) log("isTypeSupported " + t + " = " + MediaSource.isTypeSupported(t));
+    const ms = new MediaSource();
+    el.src = URL.createObjectURL(ms);
+    const [vbuf, abuf] = await Promise.all([fetch(files("video")).then((r) => r.arrayBuffer()), fetch(files("audio")).then((r) => r.arrayBuffer())]);
+    const v = splitWebm(vbuf), a = splitWebm(abuf);
+    log(`video init+${v.clusters.length} clusters, audio init+${a.clusters.length} clusters`);
+    await new Promise((r) => (ms.readyState === "open" ? r() : ms.addEventListener("sourceopen", r, { once: true })));
+    const vsb = ms.addSourceBuffer('video/webm; codecs="vp9"');
+    const asb = ms.addSourceBuffer('audio/webm; codecs="opus"');
+    // A second init segment for the video track, for the init2 variant: the same bytes re-appended mid-stream remaps the ids.
+    await appendSequence(vsb, [v.init]);
+    await appendSequence(asb, [a.init]);
+    const n = Math.min(v.clusters.length, a.clusters.length);
+    const half = Math.max(1, Math.floor(n / 2));
+    for (let i = 0; i < n; i++) {
+        await Promise.all([appendSequence(vsb, [v.clusters[i]]), appendSequence(asb, [a.clusters[i]])]);
+        if (variant === "init2" && i === half - 1) {
+            log("appending a second video init segment mid-stream");
+            await appendSequence(vsb, [v.init]);
+        }
+    }
+    ms.endOfStream();
+    log(`appended, duration=${ms.duration} buffered=${el.buffered.length ? el.buffered.end(el.buffered.length - 1).toFixed(1) : "?"}s`);
+    // Start the playback pattern.
+    await el.play();
+    if (variant === "pause") {
+        if (currentTimeOf() < 1) await wait(1200);
+        el.pause(); log("paused at " + currentTimeOf().toFixed(2) + "s");
+        await wait(400);
+        await el.play(); log("played again at " + currentTimeOf().toFixed(2) + "s");
+    } else if (variant === "seek") {
+        await wait(2000);
+        el.currentTime = 3.0; log("seeked to 3s from " + currentTimeOf().toFixed(2) + "s");
+        el.play().catch(() => {});
+    } else if (variant === "play2") {
+        // A second `play()` on an element that is already playing: the page paused nothing, so it will not play() again to
+        // answer; the element's own update_media_state finds the player playing and pauses it, and the clock stops there.
+        await wait(2000);
+        log("play() again at " + currentTimeOf().toFixed(2) + "s");
+        await el.play();
+    }
+    // Now drive the clock to the deadline; the whole point is to see whether it stops early.
+    const deadline = Date.now() + 55000;
+    let last = -1, still = 0;
+    while (Date.now() < deadline && currentTimeOf() < 25.0 && !el.ended) {
+        await wait(250);
+        const c = currentTimeOf();
+        if (Math.abs(c - last) < 0.05) still++; else still = 0;
+        last = c;
+        if (still >= 40) { log("clock frozen at " + c.toFixed(2) + "s for 10s (readyState=" + el.readyState + " paused=" + el.paused + ")"); throw new Error("clock froze at " + c.toFixed(2)); }
+    }
+    const c = currentTimeOf();
+    log("final currentTime=" + c.toFixed(2) + " ended=" + el.ended);
+    if (c >= 25.0 || el.ended) console.log("MSE-TEST ok");
+    else throw new Error("only reached " + c.toFixed(2) + "s");
+}
+
+run().catch((e) => { log("FAIL " + e); console.log("MSE-TEST FAIL " + e.message); });
+</script>

@@ -1,0 +1,179 @@
+# Android probe for LucinaNet. THERE IS NO ANDROID BUILD TODAY (README, "Planned"):
+# touch input, an audio output path, the Android font list and packaging are missing.
+# The build steps are allowed to fail; the job summary lists every blocker.
+#
+# Features chosen for `cargo check`: none (the crate default). The crate offers only
+# `desktop` (winit/softbuffer, X11-wired, wrong for Android) and `media` (the media backend,
+# whose sys.rs calls POSIX pipe/fcntl and has no Android audio sink). Plain default is the
+# smallest build, so the first errors are the engine and platform blockers, not feature noise.
+# Run again with `media` once the plain check passes.
+name: android-probe
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "43 4 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - "crates/**"
+      - "Cargo.lock"
+
+permissions: {}
+
+env:
+  CARGO_TERM_COLOR: never
+  TARGET: aarch64-linux-android
+  ANDROID_API: "24"
+
+jobs:
+  check:
+    name: cargo check (probe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    outputs:
+      check_ok: ${{ steps.check.outcome == 'success' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain (rust-toolchain.toml) and the target
+        run: |
+          rustup toolchain install --profile minimal --no-self-update
+          rustup target add "$TARGET"
+          rustc --version
+
+      - name: Point the C toolchain at the runner NDK (preinstalled, not downloaded)
+        run: |
+          ndk="${ANDROID_NDK_LATEST_HOME:-}"
+          if [ -z "$ndk" ] || [ ! -d "$ndk" ]; then
+            echo "No preinstalled NDK (ANDROID_NDK_LATEST_HOME=${ndk:-unset}; ANDROID_HOME=${ANDROID_HOME:-unset})." >&2
+            ls "${ANDROID_HOME:-/nonexistent}/ndk" 2>&1 || true
+            exit 1
+          fi
+          bin="$ndk/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          {
+            echo "ANDROID_NDK_ROOT=$ndk"
+            echo "CC_aarch64_linux_android=$bin/aarch64-linux-android${ANDROID_API}-clang"
+            echo "CXX_aarch64_linux_android=$bin/aarch64-linux-android${ANDROID_API}-clang++"
+            echo "AR_aarch64_linux_android=$bin/llvm-ar"
+            echo "CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$bin/aarch64-linux-android${ANDROID_API}-clang"
+          } >> "$GITHUB_ENV"
+          echo "NDK: $ndk"
+
+      - name: cargo check
+        id: check
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          cargo check --locked -p lucinanet-servo --target "$TARGET" \
+            --message-format short 2>&1 | tee check.log
+
+      - name: Blocker summary
+        if: always()
+        env:
+          STEP_OUTCOME: ${{ steps.check.outcome }}
+        run: |
+          {
+            echo "## Android probe: cargo check ($TARGET, default features)"
+            echo
+            echo "Step outcome: **${STEP_OUTCOME}**. There is no Android build today; this is a probe."
+            echo
+            if [ ! -f check.log ]; then echo "No log was written (the step did not start)."; exit 0; fi
+            grep -E "(^|: )error(\[E[0-9]+\])?:" check.log > errors.txt || true
+            total=$(wc -l < errors.txt | tr -d " ")
+            echo "Error lines (including cargo could-not-compile lines): **${total}**"
+            echo
+            echo "### First 30 error lines, grouped by crate"
+            echo
+            awk -F: '
+              function crate(p,   a, n, i) {
+                if (match(p, /crates\/[^\/]+\//)) return substr(p, RSTART+7, RLENGTH-8)
+                n = split(p, a, "/")
+                for (i = 1; i <= n; i++) if (a[i] ~ /^[A-Za-z0-9_.+-]+-[0-9]+\.[0-9]+/) return a[i]
+                if (match(p, /^(patches|blitz|parity|raster|swgl)\/[^\/]+/)) return substr(p, RSTART, RLENGTH)
+                return "(no path)"
+              }
+              /could not compile `/ { next }
+              n < 30 {
+                c = "(no path)"
+                if ($0 ~ /^[^ ]+\.rs:[0-9]+/) c = crate($1)
+                grp[c] = grp[c] "\n- `" $0 "`"
+                if (!(c in seen)) { seen[c] = 1; order[++k] = c }
+                n++
+              }
+              END { for (i = 1; i <= k; i++) printf "#### %s%s\n\n", order[i], grp[order[i]]; if (k == 0) print "(none)" }
+            ' errors.txt
+            echo
+            echo "### Blockers: blocker -> crate -> first error line"
+            echo
+            echo "| blocker | crate | first error line |"
+            echo "| --- | --- | --- |"
+            grep -oE "could not compile \`[^\`]+\`" check.log | sed -E "s/.*\`([^\`]+)\`/\1/" | sort -u > failed.txt || true
+            while read -r crate; do
+              [ -n "$crate" ] || continue
+              first=$(grep -E "(^|/)${crate}[^ ]*\.rs:[0-9]+.*error" check.log | head -n 1 | tr "|" "/" | cut -c1-240)
+              [ -n "$first" ] || first=$(grep -E "error.*${crate}" check.log | head -n 1 | tr "|" "/" | cut -c1-240)
+              echo "| compile failure | ${crate} | \`${first:-see log}\` |"
+            done < failed.txt
+            echo
+            echo "Known blockers from the platform table (STEP 0): desktop.rs has mouse and keyboard only, no touch; no AAudio/OpenSL sink; profile path /data/lucina/net is a Juno path, not the app sandbox; font dirs are Linux paths; no packaging."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the full log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: android-check-log
+          path: check.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+  apk:
+    name: APK packaging (documented, runs only when the check passed)
+    needs: check
+    if: needs.check.outputs.check_ok == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      # Packaging tool: cargo-apk (the winit/android-activity route, no Gradle project to maintain).
+      # TODO(apk): this needs, in this order, none of which exists today:
+      #   1. a cdylib target exporting android_main (android-activity entry) in a crate, not the lucinanet-servo bin;
+      #   2. [package.metadata.android] in that crate (package id, label, min/target sdk, permissions, a launcher activity);
+      #   3. touch input, an AAudio sink, an Android font list and an app-sandbox profile path (see the README, Planned);
+      #   4. a throwaway debug key generated in this job and deleted after (never a stored key; no secret).
+      - name: Install the pinned toolchain and the target
+        if: success()
+        run: |
+          rustup toolchain install --profile minimal --no-self-update
+          rustup target add "$TARGET"
+
+      - name: Build the APK with cargo-apk (expected to fail until the TODO(apk) items exist)
+        id: apk
+        if: success()
+        continue-on-error: true
+        run: |
+          cargo install cargo-apk --locked
+          cargo apk build --locked --release -p lucinanet-servo --target "$TARGET"
+
+      - name: Summary
+        if: always()
+        env:
+          APK_OUTCOME: ${{ steps.apk.outcome }}
+        run: |
+          {
+            echo "## Android probe: APK packaging"
+            echo
+            echo "cargo-apk: **${APK_OUTCOME}**. No APK is attached to any release; no smoke test exists for Android."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,9 @@
+[package]
+name = "lucina-ftcompat"
+version = "0.1.0"
+description = "FreeType 2.13.2 size, metric, advance and synthetic-bold arithmetic in pure Rust, for LucinaNet"
+edition.workspace = true
+publish.workspace = true
+license = "MPL-2.0 AND FTL"
+
+[dependencies]

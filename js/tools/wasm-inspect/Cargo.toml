@@ -1,0 +1,26 @@
+[package]
+name = "wasm-inspect"
+version = "0.1.0"
+edition = "2024"
+license = "MPL-2.0"
+publish = false
+description = "Read a .wasm module's sections, imports, exports and the WebAssembly features its code actually needs, without running it"
+
+[workspace]
+
+[dependencies]
+# Pinned to the parser wasmi 2.0.0 builds on (wasmparser 0.228.0), so the verdict
+# comes from the same parser as the engine that would have to accept the module.
+wasmparser = { version = "=0.228.0", default-features = false, features = ["std", "simd"] }
+serde_json = "1"
+
+[dev-dependencies]
+# Only used to build tiny fixture modules in the tests; `wasmparser` stays optional
+# so no second copy of the parser enters the build.
+wasm-encoder = { version = "0.245.1", default-features = false, features = ["std"] }
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+strip = true
+panic = "abort"

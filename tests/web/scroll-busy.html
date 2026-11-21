@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>scroll while a script keeps the main thread busy</title>
+<style>
+  body { margin: 0; font: 16px/1.5 sans-serif; background: #fff; color: #222; }
+  section { padding: 16px 24px; border-bottom: 1px solid #ccc; }
+  section:nth-child(odd) { background: linear-gradient(90deg, #eef, #fee); }
+  h2 { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<script>
+// No network, no media. Long scrollable content, then (unless the address ends in #idle) a script that blocks
+// the main thread in a busy loop for 500 ms, once a second, from load on. `#idle` is the control: the same page
+// with nothing blocking. tests/web/scroll-busy.sh scrolls both and compares the frame logs.
+(function () {
+  var html = [];
+  for (var i = 1; i <= 400; i++) {
+    html.push('<section><h2>Section ' + i + '</h2><p>Plain filler text for the section, written so that the page has\n' +
+      'a few lines to lay out and a gradient to paint. Nothing here is fetched or played.</p></section>');
+  }
+  document.body.innerHTML = html.join('');
+  if (location.hash === '#idle') return;
+  function block() {
+    var until = Date.now() + 500;
+    while (Date.now() < until) { /* busy */ }
+    setTimeout(block, 500);
+  }
+  setTimeout(block, 500);
+})();
+</script>
+</body>
+</html>

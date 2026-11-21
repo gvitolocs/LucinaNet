@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>OOM in a microtask</title>
+<body>
+<p>Exhausts a capped JS heap inside a promise reaction chain, so the context is poisoned during a
+microtask checkpoint while the task's realm is still entered.
+<script>
+var keep = [];
+function grow() {
+  for (var i = 0; i < 20000; i++) {
+    keep.push({ a: "x".repeat(256), b: [i, i + 1, i + 2], c: function () { return i; } });
+  }
+  return Promise.resolve().then(grow);
+}
+Promise.resolve().then(grow);
+</script>
+</body>

@@ -1,0 +1,15 @@
+[package]
+name = "lucinanet_engine_shim"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+publish = false
+description = "LucinaNet JavaScript: the #[engine_shim] attribute that wraps every engine extern \"C\" entry point of mozjs_sys (docs/edge-wrap.md)"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full"] }

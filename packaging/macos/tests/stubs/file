@@ -1,0 +1,16 @@
+#!/bin/bash
+# Stub of macOS `file` for the packaging tests, which run on Linux. It reads the Mach-O magic and cputype the same way
+# the real one does, so a fixture binary that is not arm64 is rejected for the right reason. Anything it does not know
+# goes to the host's file(1), which is how an ELF or a shell script reaches the packager's failure message.
+[ "${1-}" = "-b" ] && shift
+f=${1-}
+[ -f "$f" ] || { /usr/bin/file -b "$f"; exit $?; }
+m=$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')
+case $m in
+  cffaedbe0c000001) echo "Mach-O 64-bit executable arm64";;
+  cffaedbe04000001) echo "Mach-O 64-bit executable x86_64";;
+  cffaedbe1200000c) echo "Mach-O 64-bit executable arm64e";;
+  cafebabe*) echo "Mach-O universal binary with 2 architectures: [x86_64] [arm64]";;
+  89504e47*) echo "PNG image data";;
+  *) /usr/bin/file -b "$f";;
+esac

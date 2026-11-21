@@ -1,0 +1,27 @@
+# The invariant monitor over a LUCINANET_MEDIA_TRACE log (the stderr of a `--render` run). Its own workspace, like
+# tools/sweep-score: it links no engine, reads a text file, and needs nothing outside the standard library, so `cargo test
+# --offline` resolves with no crates at all. / trace-format.
+[workspace]
+
+[package]
+name = "media-trace-check"
+version = "0.1.0"
+description = "Checks the invariants of the media backend (lucinanet-media) over a LUCINANET_MEDIA_TRACE log"
+edition = "2021"
+publish = false
+license = "MPL-2.0"
+
+[lib]
+name = "media_trace_check"
+path = "src/lib.rs"
+
+[[bin]]
+name = "media-trace-check"
+path = "src/main.rs"
+
+[dependencies]
+
+[profile.release]
+debug = false
+lto = "thin"
+codegen-units = 1

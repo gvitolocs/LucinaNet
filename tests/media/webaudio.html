@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>webaudio</title>
+<script>
+// An oscillator for 1 s, and decodeAudioData of the MP3: both must work and the context's clock must run.
+const log = (s) => console.log("media-test: " + s);
+const ctx = new AudioContext();
+const osc = ctx.createOscillator();
+osc.frequency.value = 440;
+osc.connect(ctx.destination);
+osc.start();
+osc.stop(ctx.currentTime + 1);
+const t0 = ctx.currentTime;
+fetch("../../crates/lucinanet-media/tests/media/tone.mp3").then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b)).then(buf => {
+  log("decoded channels=" + buf.numberOfChannels + " rate=" + buf.sampleRate + " duration=" + buf.duration.toFixed(3));
+  setTimeout(() => {
+    const ran = ctx.currentTime - t0;
+    if (Math.abs(buf.duration - 3.0) < 0.1 && ran > 1.5) log("PASS webaudio clock_ran=" + ran.toFixed(2));
+    else log("FAIL duration=" + buf.duration + " clock_ran=" + ran);
+  }, 2000);
+}, e => log("FAIL decodeAudioData " + e));
+</script>

@@ -1,0 +1,5 @@
+# Copied from servo/.cargo/config.toml: this workspace builds Servo's crates from outside its root,
+# so its [env] does not apply by itself.
+[env]
+RUSTC_BOOTSTRAP = "crown,script,script_webcrypto,script_webgpu,script_bindings,style_tests,mozjs,mozjs_sys"
+SERVO_STYLE_THREAD_STACK_SIZE_KB = "8192"

@@ -1,0 +1,39 @@
+#!/bin/bash
+# Stub of macOS `codesign`, covering the three calls tools/release/package-macos.sh makes:
+#   --force --deep --sign ID APP   writes Contents/_CodeSignature/CodeDirectory holding ID
+#   --verify [--deep] [--strict] [--verbose=N] APP   fails unless that marker is there
+#   -dvv APP                       prints Signature=adhoc for the identity "-"
+# So the test can prove the bundle was signed and that the ad-hoc claim is checked, not assumed.
+set -u
+sign=""; verify=0; dump=0; app=""
+while [ $# -gt 0 ]; do
+  case $1 in
+    --force|--deep) shift;;
+    --sign) sign=${2-}; shift 2;;
+    --verify) verify=1; shift;;
+    --strict) shift;;
+    --verbose=*) shift;;
+    -dvv|-dv|-d) dump=1; shift;;
+    -*) shift;;
+    *) app=$1; shift;;
+  esac
+done
+[ -n "$app" ] || { echo "codesign(stub): no bundle given" >&2; exit 2; }
+cs="$app/Contents/_CodeSignature"
+if [ "$verify" = 1 ]; then
+  if [ -s "$cs/CodeDirectory" ]; then echo "codesign(stub): $app valid on disk"; exit 0; fi
+  echo "codesign(stub): $app code object is not signed at all" >&2; exit 1
+fi
+if [ "$dump" = 1 ]; then
+  [ -s "$cs/CodeDirectory" ] || { echo "codesign(stub): $app is not signed" >&2; exit 1; }
+  id=$(cat "$cs/CodeDirectory")
+  printf 'Executable=%s/Contents/MacOS/lucinanet\n' "$app"
+  printf 'Signature=%s\n' "$( [ "$id" = "-" ] && echo adhoc || echo regular )"
+  exit 0
+fi
+[ -n "$sign" ] || { echo "codesign(stub): --sign needs an identity" >&2; exit 2; }
+[ -d "$app/Contents" ] || { echo "codesign(stub): $app is not an app bundle" >&2; exit 1; }
+mkdir -p "$cs" || exit 1
+printf '%s' "$sign" > "$cs/CodeDirectory" || exit 1
+printf '%s' "signed by $sign" > "$cs/CodeResources" || exit 1
+echo "codesign(stub): signed $app with $sign"

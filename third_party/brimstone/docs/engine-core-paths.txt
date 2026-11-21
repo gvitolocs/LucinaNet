@@ -1,0 +1,19 @@
+# Engine core: a change to any of these needs a second-family review record (see docs/engine-invariants.md). The glue repository's engine/** is core too but lives in another repository.
+# One glob per line, relative to the repository root. Lines starting with # are comments.
+#
+# Generator and VM. This includes bytecode/fncache/**, the function cache that stores bytecode.
+src/js/runtime/bytecode/**
+# The collector, handles and the heap verifier.
+src/js/runtime/gc/**
+# The embedding API, host space, jobs, modules and engine cells.
+src/js/runtime/embed/**
+# Scope analysis and re-parse of lazy functions (the parser's scope code).
+src/js/parser/analyze.rs
+src/js/parser/scope_tree.rs
+src/js/parser/reparse.rs
+src/js/parser/reparse_rules.rs
+# Keeps the scope tree alive and hands out references into it (parsed_program.rs, a transmute).
+src/js/parser/parsed_program.rs
+# Runtime scopes and the heap item that carries a scope's names.
+src/js/runtime/scope.rs
+src/js/runtime/scope_names.rs

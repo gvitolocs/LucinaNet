@@ -1,0 +1,403 @@
+# LucinaNet CI. Runs on every push to main and on every pull request. It never uses a secret and never writes a cache
+# from a pull request. The one check to require in branch protection is `ci-required`: it always runs and passes only if every job
+# below succeeded, so a skipped, cancelled or missing job cannot look like a pass.
+#
+#   fmt              rustfmt of our crates as a ratchet (tools/ci/fmt-baseline.txt lists the files that were dirty before CI)
+#   clippy           clippy of our crates as a ratchet (tools/ci/clippy-baseline.txt); any file not in the baseline with a finding fails
+#   build-test       per OS (ubuntu-24.04, macos-15 = arm64): build the browser (desktop,media), cargo test of our crates, a headless
+#                    render of a local page, the media pages with the media trace checked, the OOM pages
+#   standalone       the crates outside the workspace that run without the browser: raster/core, media-trace-check, sweep-score
+#   proofs-plan      lists the proof units of verification/ (the same list scripts/verify.sh walks) as a matrix
+#   proofs           one Verus unit per runner, memory capped, Verus pinned by verification/verus.version and the zip's sha256
+#   ci-required      the aggregate; REQUIRED
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Read nothing by default; every job names what it needs.
+permissions: {}
+
+concurrency:
+  # A newer push to the same pull request cancels the older run; main and tags are never cancelled.
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: never
+  CARGO_NET_RETRY: 10
+  CC: clang
+  CXX: clang++
+  PYTHON3: python3
+  # Where the three DejaVu faces live in the published tree (assumption: the assembler keeps LucinaOS's crates/lucina-app/fonts here).
+  FONT_DIR: lucinaos/crates/lucina-app/fonts
+  # Verus: the release is read from verification/verus.version; this is the sha256 of that release's x86-linux zip, taken from the
+  # GitHub release asset digest of verus-lang/verus release/0.2026.11.02.8bf68ee on 2026-11-19. A new pin needs a new line here.
+  VERUS_VERSION_EXPECTED: 0.2026.11.02.8bf68ee
+  VERUS_ZIP_SHA256: f3a0119292df8855e4435da8130bee1873b0e6a60c306accf81a08ea687bba3c
+
+jobs:
+  fmt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Toolchain (the channel of rust-toolchain.toml)
+        run: |
+          channel=$(sed -n 's/^channel *= *"\(.*\)".*/\1/p' rust-toolchain.toml)
+          test -n "$channel"
+          rustup toolchain install "$channel" --profile minimal -c rustfmt --no-self-update
+      - name: rustfmt ratchet (our workspace members only, never third_party)
+        run: |
+          members=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[].name')
+          test -n "$members"
+          args=()
+          for m in $members; do args+=(-p "$m"); done
+          set +e
+          out=$(cargo fmt "${args[@]}" -- --check -l 2>&1)
+          set -e
+          if printf '%s\n' "$out" | grep -q '^error'; then printf '%s\n' "$out"; echo "::error::rustfmt could not finish"; exit 1; fi
+          printf '%s\n' "$out" | sed "s#^$PWD/##" | { grep '\.rs$' || true; } | LC_ALL=C sort -u > now.txt
+          base=tools/ci/fmt-baseline.txt
+          if [ -f "$base" ]; then
+            { grep -v '^#' "$base" || true; } | LC_ALL=C sort -u > base.txt
+          else
+            echo "::warning::$base is missing, so the baseline is empty and every dirty file fails"
+            : > base.txt
+          fi
+          echo "ratchet fmt: $(wc -l < now.txt) files not formatted, baseline $(wc -l < base.txt)"
+          new=$(LC_ALL=C comm -23 now.txt base.txt)
+          fixed=$(LC_ALL=C comm -13 now.txt base.txt)
+          if [ -n "$fixed" ]; then echo "::notice::clean now, take them off $base:"; printf '%s\n' "$fixed"; fi
+          if [ -n "$new" ]; then echo "::error::files not in the baseline are not rustfmt-clean:"; printf '%s\n' "$new"; exit 1; fi
+
+  clippy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: Toolchain (the channel of rust-toolchain.toml)
+        run: |
+          channel=$(sed -n 's/^channel *= *"\(.*\)".*/\1/p' rust-toolchain.toml)
+          test -n "$channel"
+          rustup toolchain install "$channel" --profile minimal -c clippy --no-self-update
+      # Restore only. The cache is written by pushes to main (the save step below), never by a pull request.
+      - name: Restore cache
+        id: cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: clippy-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: |
+            clippy-${{ runner.os }}-${{ runner.arch }}-
+      - name: clippy ratchet (our workspace members; findings in files outside the baseline fail)
+        run: |
+          set +e
+          out=$(cargo clippy --workspace --all-targets --locked --keep-going --quiet --message-format=short \
+            --features lucinanet-servo/desktop,lucinanet-servo/media -- --cap-lints warn 2>&1)
+          rc=$?
+          set -e
+          if [ "$rc" != 0 ]; then printf '%s\n' "$out" | tail -40; echo "::error::clippy could not finish (exit $rc)"; exit 1; fi
+          printf '%s\n' "$out" | { grep -E '^[^ :]+\.rs:[0-9]+:[0-9]+: warning' || true; } | cut -d: -f1 | LC_ALL=C sort -u > now.txt
+          base=tools/ci/clippy-baseline.txt
+          if [ -f "$base" ]; then
+            { grep -v '^#' "$base" || true; } | LC_ALL=C sort -u > base.txt
+          else
+            echo "::warning::$base is missing, so the baseline is empty and every file with a finding fails"
+            : > base.txt
+          fi
+          echo "ratchet clippy: $(wc -l < now.txt) files with findings, baseline $(wc -l < base.txt)"
+          new=$(LC_ALL=C comm -23 now.txt base.txt)
+          fixed=$(LC_ALL=C comm -13 now.txt base.txt)
+          if [ -n "$fixed" ]; then echo "::notice::clean now, take them off $base:"; printf '%s\n' "$fixed"; fi
+          if [ -n "$new" ]; then
+            echo "::error::files not in the baseline have clippy findings:"
+            printf '%s\n' "$new"
+            for f in $new; do printf '%s\n' "$out" | grep -F "$f:" | head -5; done
+            exit 1
+          fi
+      - name: Save cache (pushes to main only, and only when the key was not already stored)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: clippy-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+
+  build-test:
+    name: build-test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.timeout }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # macos-15 is arm64 (Apple silicon), the macOS platform the release ships. It is pinned, not macos-latest, so that the
+          # compiler and SDK do not change under a green main.
+          - os: ubuntu-24.04
+            jobs: 4
+            timeout: 120
+          - os: macos-15
+            jobs: 3
+            timeout: 180
+    env:
+      CARGO_BUILD_JOBS: ${{ matrix.jobs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Free disk space (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL
+          df -h /
+      - name: Toolchain (the channel of rust-toolchain.toml)
+        run: |
+          channel=$(sed -n 's/^channel *= *"\(.*\)".*/\1/p' rust-toolchain.toml)
+          test -n "$channel"
+          rustup toolchain install "$channel" --profile minimal --no-self-update
+      - name: Restore cache
+        id: cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: build-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: |
+            build-${{ runner.os }}-${{ runner.arch }}-
+      - name: Build the browser (probe profile, desktop and media)
+        run: cargo build --locked --profile probe -p lucinanet-servo --features desktop,media
+      - name: cargo test of our crates (the workspace members, not third_party)
+        run: cargo test --locked --profile probe --workspace --features lucinanet-servo/desktop,lucinanet-servo/media
+      - name: Headless render of a local page
+        run: |
+          bin="$PWD/target/probe/lucinanet-servo"
+          test -x "$bin"
+          out="$RUNNER_TEMP/smoke"
+          mkdir -p "$out"
+          printf '%s\n' '<!doctype html><meta charset="utf-8"><title>blank</title>' > "$out/blank.html"
+          cat > "$out/smoke.html" <<'HTML'
+          <!doctype html><meta charset="utf-8"><title>smoke</title>
+          <body style="margin:0;background:#fff;font:32px sans-serif">
+          <div style="width:300px;height:200px;background:#1a73e8;color:#fff;padding:20px">LucinaNet smoke</div>
+          <div style="width:200px;height:100px;background:#e8711a"></div>
+          <p>The quick brown fox jumps over the lazy dog 0123456789</p>
+          HTML
+          if [ -d "$FONT_DIR" ]; then export LUCINANET_FONT_DIRS="$PWD/$FONT_DIR"; else echo "::warning::$FONT_DIR is missing; the render uses system fonts"; fi
+          export LUCINANET_PROFILE_DIR=none LUCINANET_MEDIA_SINK=none
+          timeout 180 "$bin" --render "file://$out/blank.html" "$out/blank.png" 1280x800
+          timeout 180 "$bin" --render "file://$out/smoke.html" "$out/smoke.png" 1280x800
+          for f in blank smoke; do
+            test -s "$out/$f.png"
+            magic=$(head -c 8 "$out/$f.png" | od -An -tx1 | tr -d ' \n')
+            test "$magic" = 89504e470d0a1a0a || { echo "::error::$f.png is not a PNG"; exit 1; }
+          done
+          b=$(wc -c < "$out/blank.png" | tr -d ' ')
+          s=$(wc -c < "$out/smoke.png" | tr -d ' ')
+          echo "blank.png $b bytes, smoke.png $s bytes"
+          # A PNG of one colour compresses to almost nothing: the page with boxes and text must be clearly larger than the blank one.
+          if cmp -s "$out/blank.png" "$out/smoke.png" || [ "$s" -lt 4000 ] || [ "$s" -lt $((b + 1000)) ]; then
+            echo "::error::the render of the smoke page is empty or one colour"
+            exit 1
+          fi
+      - name: Media pages, with the media trace checked (no GPU, no sound output)
+        run: |
+          bin="$PWD/target/probe/lucinanet-servo"
+          cargo build --release --locked --manifest-path tools/media-trace-check/Cargo.toml
+          checker="$PWD/tools/media-trace-check/target/release/media-trace-check"
+          out="$RUNNER_TEMP/media"
+          mkdir -p "$out"
+          fail=0
+          for p in video-mp4 video-webm audio-mp3; do
+            set +e
+            LUCINANET_CONSOLE=1 LUCINANET_MEDIA_TRACE=1 LUCINANET_RENDER_HOLD=12 LUCINANET_PROFILE_DIR=none LUCINANET_MEDIA_SINK=none \
+              timeout 180 "$bin" --render "file://$PWD/tests/media/$p.html" "$out/$p.png" > "$out/$p.log" 2>&1
+            rc=$?
+            set -e
+            if [ "$rc" != 0 ]; then echo "$p: exit $rc"; tail -20 "$out/$p.log"; fail=1; continue; fi
+            if ! grep -q 'media-test: PASS' "$out/$p.log"; then echo "$p: no PASS line"; tail -20 "$out/$p.log"; fail=1; continue; fi
+            if ! "$checker" "$out/$p.log"; then echo "$p: the media trace broke an invariant"; fail=1; continue; fi
+            echo "$p: PASS"
+          done
+          exit "$fail"
+      - name: OOM pages (edge-wrap), a capped JS heap must end in a poisoned context and exit 0
+        run: |
+          bin="$PWD/target/probe/lucinanet-servo"
+          out="$RUNNER_TEMP/edge-wrap"
+          mkdir -p "$out"
+          pages=$(ls tests/edge-wrap/*.html 2>/dev/null || true)
+          if [ -z "$pages" ]; then echo "::error::tests/edge-wrap has no pages, so the OOM gate would pass on nothing"; exit 1; fi
+          fail=0
+          for page in $pages; do
+            name=$(basename "$page" .html)
+            set +e
+            LUCINANET_JS_MAX_HEAP_MB=64 LUCINANET_PROFILE_DIR=none LUCINANET_MEDIA_SINK=none \
+              timeout 180 "$bin" --render "file://$PWD/$page" "$out/$name.png" > "$out/$name.log" 2>&1
+            rc=$?
+            set -e
+            if [ "$rc" != 0 ]; then echo "$name: exit $rc (a crash is 139)"; tail -20 "$out/$name.log"; fail=1; continue; fi
+            if ! grep -q 'context poisoned: OutOfMemory' "$out/$name.log"; then echo "$name: no OutOfMemory record"; tail -20 "$out/$name.log"; fail=1; continue; fi
+            echo "$name: PASS"
+          done
+          exit "$fail"
+      - name: Save cache (pushes to main only, and only when the key was not already stored)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: build-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+
+  standalone:
+    # Crates with their own workspace and lock: no browser needed.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Toolchain (the channel of rust-toolchain.toml)
+        run: |
+          channel=$(sed -n 's/^channel *= *"\(.*\)".*/\1/p' rust-toolchain.toml)
+          test -n "$channel"
+          rustup toolchain install "$channel" --profile minimal --no-self-update
+      - name: media-trace-check tests
+        run: cargo test --locked --manifest-path tools/media-trace-check/Cargo.toml
+      - name: sweep-score tests
+        run: cargo test --locked --manifest-path tools/sweep-score/Cargo.toml
+      - name: Rasterizer tests (raster/core, with its C++ oracle)
+        run: cargo test --locked --manifest-path raster/core/Cargo.toml
+
+  proofs-plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: plan
+        name: One unit per proof file, plus the mutants script
+        run: |
+          # The same list scripts/verify.sh walks: the top-level proofs and the models in their own folders.
+          units=$(printf '%s\n' verification/*.rs verification/*/model.rs | { grep -v '[*]' || true; } | LC_ALL=C sort)
+          if [ -z "$units" ]; then echo "::error::verification/ holds no proof"; exit 1; fi
+          test -f verification/mutants.sh
+          json=$({ printf '%s\n' "$units" | jq -R '{name: ., kind: "proof", target: .}'; \
+                   jq -n '{name: "verification/mutants.sh", kind: "mutants", target: "verification/mutants.sh"}'; } | jq -sc '{include: .}')
+          echo "$json" | jq .
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"
+
+  proofs:
+    name: proof (${{ matrix.name }})
+    needs: proofs-plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.proofs-plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Toolchain (Verus runs on the repository's toolchain)
+        run: |
+          channel=$(sed -n 's/^channel *= *"\(.*\)".*/\1/p' rust-toolchain.toml)
+          test -n "$channel"
+          rustup toolchain install "$channel" --profile minimal --no-self-update
+      - name: Verus at the pinned release, zip checked against the recorded sha256 before it is unpacked
+        run: |
+          version=$(tr -d ' \n' < verification/verus.version)
+          if [ "$version" != "$VERUS_VERSION_EXPECTED" ]; then
+            echo "::error::verification/verus.version is $version but this workflow records the sha256 of $VERUS_VERSION_EXPECTED; update both"
+            exit 1
+          fi
+          mkdir -p "$HOME/verus"
+          zip="$HOME/verus/verus-$version.zip"
+          curl -fsSL --retry 5 -o "$zip" "https://github.com/verus-lang/verus/releases/download/release%2F$version/verus-$version-x86-linux.zip"
+          echo "$VERUS_ZIP_SHA256  $zip" | sha256sum -c -
+          unzip -q "$zip" -d "$HOME/verus"
+          test -x "$HOME/verus/verus-x86-linux/verus"
+          echo "VERUS=$HOME/verus/verus-x86-linux/verus" >> "$GITHUB_ENV"
+      - name: Run the unit (memory capped at 12 GiB)
+        env:
+          UNIT: ${{ matrix.target }}
+          KIND: ${{ matrix.kind }}
+        run: |
+          # Where the Servo fork's accessibility rules are read from: third_party/servo in this tree.
+          export LUCINANET_SERVO="$PWD/third_party/servo" SERVO="$PWD/third_party/servo"
+          if [ "$KIND" = mutants ]; then
+            cmd=(bash verification/mutants.sh)
+          else
+            export VERIFY_ONLY="$UNIT"
+            cmd=(bash scripts/verify.sh)
+          fi
+          capped=()
+          if sudo -n systemd-run --scope --quiet -p MemoryMax=12G -p MemorySwapMax=0 true 2>/dev/null; then
+            # The scope runs as root, so the unit drops back to this user and takes its environment along.
+            capped=(sudo -n systemd-run --scope --quiet -p MemoryMax=12G -p MemorySwapMax=0 sudo -n -u "$USER" -H env "PATH=$PATH" "VERUS=$VERUS" \
+              "LUCINANET_SERVO=$LUCINANET_SERVO" "SERVO=$SERVO" "VERIFY_ONLY=${VERIFY_ONLY:-}")
+          else
+            echo "::warning::no systemd scope available: this unit runs without the 12 GiB cap (the runner has 16 GB; an out-of-memory kill fails the job)"
+          fi
+          set +e
+          timeout 4800 "${capped[@]}" "${cmd[@]}" 2>&1 | tee unit.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          test "$rc" = 0 || { echo "::error::the unit failed (exit $rc)"; exit 1; }
+          if [ "$KIND" = proof ]; then grep -q '^ok ' unit.log || { echo "::error::no 'ok' line: the unit did not verify"; exit 1; }; fi
+
+  ci-required:
+    # REQUIRED. Always runs; passes only when every job below succeeded.
+    needs: [fmt, clippy, build-test, standalone, proofs-plan, proofs]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every job finished with success
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key)=\(.value.result)"'
+          if ! echo "$NEEDS" | jq -e 'length == 6 and (to_entries | all(.value.result == "success"))' > /dev/null; then
+            echo "::error::a job did not succeed (failed, skipped or cancelled)"
+            exit 1
+          fi

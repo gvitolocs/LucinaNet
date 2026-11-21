@@ -1,0 +1,134 @@
+10 runs read, 8 matched to a load line by the clock, 1 whose block disagreed with the directory
+## 1. frames returned, and the frame time, one row per run
+
+| page | s | raster | pace | run | frames | steps | merged | iv p50 | iv p95 | iv max | lat p50 | paint p50 | paint p95 | paint max | copy p50 | copy p95 | present | area % | docs | load | wall s | set |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| long | 1 | rust | fast | r1 | 60 | 60 | 0 | 45.2 | 111.7 | 142.4 | 44.4 | 9.6 | 36.3 | 78.5 | 0.7 | 3.0 | 0.00 | 11.6 | 1.00 | 68.63 | 7 | m3 |
+| long | 1 | rust | fast | r1 | 60 | 60 | 0 | 40.2 | 85.1 | 158.2 | 40.1 | 7.9 | 43.5 | 71.6 | 0.7 | 3.0 | 0.00 | 11.6 | 1.00 | 66.91 | 7 | m4 |
+| long | 2 | swgl | vsync | r1 | 6 | 60 | 54 | 65.9 | 224.5 | 263.6 | 6.9 | 48.7 | 208.7 | 258.7 | 3.8 | 36.2 | 0.00 | 74.4 | - | 94.53 | 6 | m1 |
+| long | 2 | swgl | vsync | r2 | 21 | 60 | 42 | 47.7 | 121.6 | 134.3 | 3.7 | 22.8 | 50.4 | 74.8 | 3.6 | 24.3 | 0.00 | 33.4 | - | 91.65 | 6 | m1 |
+| wiki | 2 | rust | vsync | r1 | 0 | 60 | 60 | - | - | - | - | - | - | - | - | - | - | - | - | 66.86 | 15 | m1 |
+| wiki | 2 | rust | vsync | r2 | 0 | 60 | 60 | - | - | - | - | - | - | - | - | - | - | - | - | - | - | m1 |
+| wiki | 2 | swgl | fast | r1 | 1 | 2 | 1 | - | - | - | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.00 | - | - | 81.76 | 13 | m3 |
+| wiki | 2 | swgl | vsync | r1 | 2 | 60 | 58 | 538.2 | 538.2 | 538.2 | 7.1 | 114.7 | 129.1 | 130.7 | 46.0 | 83.9 | 0.00 | 16.3 | - | 87.0 | 7 | m1 |
+| yt | 1 | rust | vsync | r2 | 22 | 616 | 594 | 173.7 | 1540.9 | 1840.4 | 7.7 | 19.2 | 149.6 | 259.4 | 0.8 | 5.4 | 0.00 | 33.1 | 1.00 | 61.96 | 32 | m4 |
+| yt | 2 | swgl | vsync | r2 | 64 | 810 | 750 | 124.9 | 741.4 | 1266.0 | 6.3 | 15.6 | 69.4 | 468.0 | 5.1 | 13.5 | 0.00 | 27.5 | 1.00 | - | - | m4 |
+
+## 2. the spread over the runs of one configuration (median of the per-run medians)
+
+| page | s | raster | pace | runs | sets | frames per run | interval p50 | interval p95 | paint p50 | copy p50 | tiles p50 | tile area % | iv/paint |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| long | 1 | rust | fast | 2 | m3,m4 | m3:60,m4:60 | 42.7 (40.2..45.2) | 98.4 (85.1..111.7) | 8.8 (7.9..9.6) | 0.7 (0.7..0.7) | 0.0 (0.0..0.0) | 11.6 (11.6..11.6) | 4.87 |
+| long | 2 | swgl | vsync | 2 | m1 | m1:6,m1:21 | 56.8 (47.7..65.9) | 173.0 (121.6..224.5) | 35.8 (22.8..48.7) | 3.7 (3.6..3.8) | 22.3 (18.9..25.8) | 53.9 (33.4..74.4) | 1.59 |
+| wiki | 2 | rust | vsync | 2 | m1 | none of 3+ frames | - | - | - | - | - | - | - |
+| wiki | 2 | swgl | fast | 1 | m3 | none of 3+ frames | - | - | - | - | - | - | - |
+| wiki | 2 | swgl | vsync | 1 | m1 | none of 3+ frames | - | - | - | - | - | - | - |
+| yt | 1 | rust | vsync | 1 | m4 | m4:22 | 173.7 (173.7..173.7) | 1540.9 (1540.9..1540.9) | 19.2 (19.2..19.2) | 0.8 (0.8..0.8) | 2.7 (2.7..2.7) | 33.1 (33.1..33.1) | 9.04 |
+| yt | 2 | swgl | vsync | 1 | m4 | m4:64 | 124.9 (124.9..124.9) | 741.4 (741.4..741.4) | 15.6 (15.6..15.6) | 5.1 (5.1..5.1) | 0.1 (0.1..0.1) | 27.5 (27.5..27.5) | 8.03 |
+
+## 3. where the frame's milliseconds go: the measured containers, then the named parts inside them
+
+Every number below is a median of per-run medians over the runs of the rewritten driver that
+returned twenty frames or more - the pre-rewrite rows are in sections 1, 2 and 4, where the count
+of frames each run got is the point. Prose on the findings page quotes these cells and nothing else.
+Medians do not add, so a named part can exceed the container it is inside (the row reading 117 % of
+`wr render` says the two medians came from different frames of the same cell) and the remainder can
+come out negative. Read the shares, not the subtraction.
+
+- long s1 rust fast
+    frame 42.7 ms = paint 8.8 (21%) + copy 0.7 (2%) + present 0.0 + the rest of the loop 33.2 (78%)
+    paint 8.8 ms = wr render 8.2 (94% of paint) + wr update 0.0 + the part of paint WebRender does not name 0.5
+    wr render 8.2 ms named parts: wr frame build 7.9 ms (96%) | inside render and unnamed 0.3 (4% of render)
+    layout lines of the frame: nothing | frame minus (paint+copy+present) is 33.2, so layout sits inside paint or too small to place
+- yt s1 rust vsync
+    frame 173.7 ms = paint 19.2 (11%) + copy 0.8 (0%) + present 0.0 + the rest of the loop 153.8 (89%)
+    paint 19.2 ms = wr render 17.5 (91% of paint) + wr update 0.0 + the part of paint WebRender does not name 1.7
+    wr render 17.5 ms named parts: raster: tiles 2.7 ms (15%), wr frame build 1.6 ms (9%), colour pass 0.2 ms (1%), cache: alpha 0.1 ms (1%) | inside render and unnamed 13.0 (74% of render)
+    layout lines of the frame: layout: display list 33.2 ms, layout: restyle+trees 9.5 ms | frame minus (paint+copy+present) is 153.8, so layout sits outside the timed paint()
+- yt s2 swgl vsync
+    frame 124.9 ms = paint 15.6 (12%) + copy 5.1 (4%) + present 0.0 + the rest of the loop 104.2 (83%)
+    paint 15.6 ms = wr render 14.5 (93% of paint) + wr update 0.0 + the part of paint WebRender does not name 1.1
+    wr render 14.5 ms named parts: wr frame build 2.2 ms (15%), colour pass 0.2 ms (1%), raster: tiles 0.1 ms (1%) | inside render and unnamed 12.0 (83% of render)
+    layout lines of the frame: layout: display list 41.1 ms, layout: restyle+trees 6.1 ms | frame minus (paint+copy+present) is 104.2, so layout sits outside the timed paint()
+
+## 4. layout, the `full_paint` flag, and the frame that had nothing to draw
+
+The flag column is here to be struck out: webrender's `RendererStats::merge` assigns `full_paint = true`
+unconditionally (src/renderer/mod.rs:4731 of the pinned rev), so it says a frame was rendered and nothing
+about how much of the window it covered. A claim resting on it - every frame repaints the whole window -
+is not supported by this diagnostic. Section 6 is where that question can actually be answered.
+
+| page | s | raster | pace | runs | frames | frames with layout | frames that built a list | `full_paint` true (always) | 0-1-draw frames | their wr render p50 | async scroll line |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| long | 1 | rust | fast | 2 | 120 | 0 | 0 | 120 | 76 | 4.5 | 60 frames followed a step and none reported a reflow at all: the compositor moved the scroll tree alone |
+| long | 2 | swgl | vsync | 2 | 27 | - | - | 26 | 3 | 14.0 | 6 frames followed a step and none reported a reflow at all: the compositor moved the scroll tree alone |
+| wiki | 2 | rust | vsync | 2 | 0 | - | - | 0 | 0 | - | no frame was presented while the steps went out, so the run says nothing about the scroll |
+| wiki | 2 | swgl | fast | 1 | 1 | 0 | 0 | 0 | 0 | - | 1 frames followed a step and none reported a reflow at all: the compositor moved the scroll tree alone |
+| wiki | 2 | swgl | vsync | 1 | 2 | 2 | 1 | 2 | 1 | 98.0 | 1 of the 2 frames that followed a step rebuilt a display list: the scroll went through layout |
+| yt | 1 | rust | vsync | 1 | 22 | 21 | 19 | 21 | 4 | 7.0 | 19 of the 22 frames that followed a step rebuilt a display list: the scroll went through layout |
+| yt | 2 | swgl | vsync | 1 | 64 | 56 | 54 | 61 | 14 | 13.5 | 54 of the 60 frames that followed a step rebuilt a display list: the scroll went through layout |
+
+## 5. the frames of a run in the order they came: does a scroll get cheaper once the cache is warm?
+
+Pooled per-frame values, every run of the configuration together, by the position of the frame in its
+run. `area` is the tiles a frame re-rastered as a share of the window. A scroll of 120 CSS px in a 1090 CSS
+px window uncovers 11 % of it at one step per frame; the paced runs merge two to four steps into a frame, so
+the share a frame re-rasters in passing is larger than 11 % and section 6 is what separates that from waste.
+
+| page | s | raster | pace | frames | area % | tiles | paint | interval | kpx |
+|---|---|---|---|---|---|---|---|---|---|
+| long | 1 | rust | fast | 2 | 0.0 (0.0..0.0) | 0.0 | 5.5 | - | 0 |
+| long | 1 | rust | fast | 2 | 0.0 (0.0..0.0) | 0.0 | 2.2 | 22.0 | 0 |
+| long | 1 | rust | fast | 2 | 2.2 (2.2..2.2) | 1.0 | 15.7 | 53.5 | 41 |
+| long | 1 | rust | fast | 6 | 0.0 (0.0..47.8) | 0.0 | 7.9 | 37.5 | 0 |
+| long | 1 | rust | fast | 12 | 0.0 (0.0..50.0) | 0.0 | 5.3 | 39.3 | 0 |
+| long | 1 | rust | fast | 24 | 1.3 (0.0..46.9) | 0.5 | 11.1 | 55.7 | 24 |
+| long | 1 | rust | fast | 48 | 0.0 (0.0..55.6) | 0.0 | 10.8 | 40.6 | 0 |
+| long | 1 | rust | fast | 24 | 0.0 (0.0..50.0) | 0.0 | 7.3 | 50.4 | 0 |
+| yt | 1 | rust | vsync | 1 | 0.0 | 0.0 | 8.2 | - | 0 |
+| yt | 1 | rust | vsync | 1 | 131.9 | 6.0 | 259.4 | 1540.9 | 2502 |
+| yt | 1 | rust | vsync | 1 | 100.8 | 6.0 | 96.5 | 768.0 | 1911 |
+| yt | 1 | rust | vsync | 3 | 79.0 (70.7..98.3) | 4.0 | 61.4 | 262.3 | 1498 |
+| yt | 1 | rust | vsync | 6 | 4.3 (0.0..194.7) | 1.0 | 10.3 | 175.0 | 82 |
+| yt | 1 | rust | vsync | 10 | 4.3 (0.0..4.3) | 1.0 | 12.2 | 142.9 | 82 |
+| yt | 2 | swgl | vsync | 1 | 117.4 | 20.0 | 48.4 | - | 8908 |
+| yt | 2 | swgl | vsync | 1 | 95.4 | 17.0 | 28.6 | 36.6 | 7241 |
+| yt | 2 | swgl | vsync | 1 | 112.0 | 20.0 | 194.7 | 428.6 | 8499 |
+| yt | 2 | swgl | vsync | 3 | 117.4 (0.0..128.0) | 20.0 | 59.4 | 69.9 | 8908 |
+| yt | 2 | swgl | vsync | 6 | 16.5 (0.0..217.6) | 4.0 | 30.7 | 71.3 | 1254 |
+| yt | 2 | swgl | vsync | 12 | 1.8 (0.0..6.5) | 1.0 | 10.9 | 99.0 | 135 |
+| yt | 2 | swgl | vsync | 24 | 1.8 (0.0..103.6) | 1.0 | 16.3 | 124.5 | 135 |
+| yt | 2 | swgl | vsync | 16 | 0.9 (0.0..102.4) | 1.0 | 15.4 | 175.5 | 67 |
+
+## 6. what a frame re-rastered, against what the scroll uncovered
+
+`need` is the strip the frame's steps brought on screen - steps since the last frame, times the 120 CSS px
+of a step, times the scale, clipped to the window - as a share of the window. `tile` is what WebRender said
+it re-rastered into its picture cache (`wr-phases tiles .. kpx`, the dirty rect of every tile target, from
+the patch in patches/webrender/0003). `ratio` is tile over need, so 1.0 is a renderer that draws exactly
+what moved and 3.0 one that redraws two windows' worth of unchanged tiles for each one it needed.
+
+`scroll` counts the frames a step moved; `idle` the ones whose step index did not advance. A run keeps
+recording until 300 ms after the last frame, so a page that has reached the bottom, or that repaints itself
+(yt's video, wiki's late loads), runs to its time budget with hundreds of idle frames. On the two static
+pages an idle frame has nothing new to show, so whatever it re-rasters is the waste spec 05 asks about; on
+yt it is the next video frame, so idle means something else there - and so, for that matter, does a
+scroll frame, since the video repaints whether or not the page moved: the 12x in yt's unpaced row is the
+picture moving, not a cache being thrown away.
+
+`need` is a model and not a measurement: it assumes every answered step moves the page. That holds
+to the end on the synthetic one (section 5's last bucket of it still re-rasters a quarter of a window),
+but a real page can swallow a step into an inner scroller or a carousel, so wiki's 0.00 ratio is the
+model overstating the need and not a renderer that draws nothing. Read the ratio on the long page; the
+`idle` columns carry no assumption at all, since the step index did not move whatever the page did.
+
+| page | s | raster | pace | frames | scroll | idle | steps/f | need % | tile % | ratio | idle tile % | idle paint |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| long | 1 | rust | fast | 120 | 118 | 2 | 1.0 | 11.0 (11.0..11.0) | 0.0 (0.0..55.6) | 0.00 (0.00..5.05) | 0.0 (0.0..0.0) | 5.5 |
+| yt | 1 | rust | vsync | 22 | 22 | 0 | 10.5 | 100.0 (11.0..100.0) | 4.3 (0.0..194.7) | 0.05 (0.00..1.95) | - | - |
+| yt | 2 | swgl | vsync | 64 | 60 | 4 | 7.0 | 77.1 (11.0..100.0) | 1.8 (0.0..217.6) | 0.03 (0.00..7.41) | 0.9 (0.9..0.9) | 12.1 |
+
+Over the 200 frames pooled above that a step moved the page: the strip uncovered is a median 11.0 of a window,
+the area re-rastered a median 0.9 of one, a ratio of 0.01; 94 of them re-rastered nothing at all and still
+painted a median 6.8 ms. The other 6 frames had no step in them at all - the page had reached the bottom,
+or keeps animating by itself - and re-rastered a median 0.9 of a window while painting 11.2 ms.

@@ -1,0 +1,21 @@
+#!/bin/bash
+# Stub of macOS `iconutil -c icns DIR -o OUT`. It checks the two tiles Apple's own rules always expect, then writes a
+# file with the icns magic followed by the sorted list of iconset entries it consumed. The test reads that list back,
+# so a packager that built a half-filled iconset is caught instead of quietly shipping a small icon.
+set -u
+[ "${1-}" = "-c" ] && [ "${2-}" = "icns" ] || { echo "iconutil(stub): only -c icns is supported" >&2; exit 1; }
+dir=${3-}
+[ "${4-}" = "-o" ] || { echo "iconutil(stub): expected -o" >&2; exit 1; }
+out=${5-}
+[ -d "$dir" ] || { echo "iconutil(stub): no such iconset $dir" >&2; exit 1; }
+for req in icon_16x16.png icon_512x512.png; do
+  [ -s "$dir/$req" ] || { echo "iconutil(stub): $dir/$req missing or empty" >&2; exit 1; }
+done
+n=$(cd "$dir" && ls | grep -c '^icon_.*\.png$')
+[ "$n" -ge 1 ] || { echo "iconutil(stub): $dir holds no icon_*.png" >&2; exit 1; }
+{
+  printf 'icns'
+  printf '\0\0\0\0'
+  ( cd "$dir" && ls | LC_ALL=C sort | sed 's/^/iconset /' )
+} > "$out" || exit 1
+echo "iconutil(stub): wrote $out from $n tiles"

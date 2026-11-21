@@ -1,0 +1,62 @@
+LucinaNet
+Copyright 2026 LucinaNet contributors.
+
+LucinaNet's own code is licensed under the Mozilla Public License, v. 2.0 (LICENSE). This file names what the
+repository carries from other projects, the commit it comes from, what we changed and the licence it stays under.
+third_party/UPSTREAMS.toml lists the same upstreams in a form a script can read. Third-party crates that Cargo
+fetches from crates.io are not copied here; they keep their own licences (see Cargo.lock).
+
+Upstream code in this repository
+--------------------------------
+Servo (third_party/servo), https://github.com/servo/servo, MPL-2.0.
+  Based on 2b94d76a6971d2c41b6447b1b6d8251412d6ac72 plus 145 commits of ours (LucinaEngine). We changed: the JavaScript
+  host API (Rust, over LucinaJS), the font, storage and network-policy components, the media element, the software
+  render paths. Servo's web-platform-tests and performance pages are not copied. LICENSE_WHATWG_SPECS (BSD-3-Clause)
+  covers specification text and stays with the fork.
+WebRender and its glyph rasterizer (third_party/webrender, third_party/wr-glyph-rasterizer), MPL-2.0.
+  Based on the crates webrender 0.70.1 and wr_glyph_rasterizer 0.70.1. The glyph rasterizer uses skrifa and zeno
+  instead of FreeType; src/platform/unix/font.rs is derived from FreeType (third_party/wr-glyph-rasterizer/FTL.TXT).
+swgl (swgl), MPL-2.0. Based on the crate swgl 0.70.0. swgl/res/Proggy.ttf is ProggyClean by Tristan Grimmer, MIT.
+Stylo (third_party/stylo), https://github.com/servo/stylo at 890aa121c6aa930c1a3c52f307fd4ba5d9410068, MPL-2.0
+  (servo_arc and malloc_size_of: MIT OR Apache-2.0). Unchanged.
+Brimstone (third_party/brimstone), https://github.com/Hans-Halverson/brimstone, MIT, Copyright (c) 2025 Hans Halverson.
+  Based on 64d66980ce03f3c9c0a38a16d09e7fa056a1171d plus our commits (LucinaJS). The baked Intl data under
+  third_party/brimstone/src/brimstone_intl_data is CLDR and Unicode data under the Unicode License v3, whose text is in
+  third_party/brimstone/src/brimstone_intl_data/LICENSE.
+LucinaJS glue (js), MPL-2.0, with the mozjs and mozjs-sys names and API of https://github.com/servo/mozjs 0.26.13.
+  Rust only; no SpiderMonkey source is in this repository.
+rav1d (third_party/rav1d), https://github.com/memorysafety/rav1d at 2e7216c20ac2a75de204d6c8d7268b75a45959b4, BSD-2-Clause
+  (COPYING: VideoLAN and the Internet Security Research Group; Copyright of the dav1d authors). Unchanged.
+indexmap-allocator-api (third_party/indexmap-allocator-api), https://github.com/Hans-Halverson/indexmap-allocator-api,
+  Apache-2.0 OR MIT. Unchanged.
+Blitz (third_party/blitz, blitz), https://github.com/DioxusLabs/blitz at d0f48bd17224130c3697b9c6a2de9c090cfdebc7 plus 2
+  commits, MIT OR Apache-2.0 (LICENSE-MIT, LICENSE-APACHE). Kept as a rendering comparison; the browser build does not use it.
+LucinaOS crates (lucinaos), https://github.com/gvitolocs/lucina at 5bd41b051d594a1b77b99b015c0c92ecf126aebb, MIT except the
+  code listed in lucinaos/LICENSE. The eyra stack under lucinaos/third_party/eyra-stack is Apache-2.0 WITH LLVM-exception OR
+  Apache-2.0 OR MIT (its own LICENSE files).
+
+Notices that must travel
+------------------------
+FreeType. fonts/crates/lucina-ftcompat is derived from FreeType 2.13.2: src/embolden.rs is a translation of the logic of
+  FT_Outline_Embolden (ftoutln.c, with helpers from ftcalc.c) and the rest of src/lib.rs reproduces FreeType's fixed-point,
+  size and metric arithmetic. The wr-glyph-rasterizer unix font.rs is derived in part from FreeType.
+  Portions of this software are copyright (c) 1996-2023 The FreeType Project (www.freetype.org). All rights reserved.
+  The FreeType License is in fonts/LICENSES/FTL.TXT and third_party/wr-glyph-rasterizer/FTL.TXT.
+OTS. fonts/crates/lucina-fontsan reproduces the accept and reject decisions, table whitelist, limits and error strings of
+  the OpenType Sanitizer (Chromium's OTS, https://github.com/khaledhosny/ots, as shipped in the fontsan crate 0.7.0).
+  Copyright (c) 2009-2017 The OTS Authors. All rights reserved. BSD-3-Clause, text in fonts/LICENSES/BSD-3-Clause-OTS.txt.
+Chromium and Firefox. crates/lucinanet-omnibox, lucinanet-shortcuts, lucinanet-zoom and lucinanet-permissions hold constants
+  and formulas taken from Chromium's published source (BSD-3-Clause); the code is written anew. crates/lucinanet-shortcuts
+  also carries a table taken from Firefox's MPL-2.0 source. Each crate's NOTICE file says what was taken.
+DejaVu fonts. lucinaos/crates/lucina-app/fonts and lucinaos/crates/lucina-glass/fonts hold DejaVu Sans, DejaVu Sans Bold
+  and DejaVu Sans Mono, Copyright (c) 2003 Bitstream, Inc. and DejaVu changes in the public domain (the Bitstream Vera licence
+  in the LICENSE file beside the fonts). A Linux archive of LucinaNet carries the three faces with that licence file.
+  Servo's test fonts under third_party/servo/components/fonts/tests/support keep their own LICENSE files.
+Lato. lucinaos/crates/lucina-glass/fonts holds Lato, SIL Open Font License 1.1 (LICENSE-Lato-OFL.txt beside the fonts).
+Unicode data. The Intl data baked into LucinaJS is under the Unicode License v3 (see above).
+Mozilla. The MPL-2.0 files of Servo, WebRender, Stylo and the SpiderMonkey host API names keep their Mozilla headers.
+
+Decoders (crates.io dependencies, not copied here; each keeps the licence its crate states)
+  rusty_h264-decoder, rusty_h264-accel, rusty_h264-common: BSD-2-Clause (rusty_h264-accel carries LICENSE.openh264).
+  filmcraft-vp9, filmcraft-bitstream: MIT OR Apache-2.0. opus1: BSD-3-Clause. symphonia: MPL-2.0.
+  Other crates: graviola (rustls crypto provider) Apache-2.0 OR ISC OR MIT-0; tikv-jemalloc-sys MIT OR Apache-2.0.

@@ -1,0 +1,12 @@
+# Generated: lucina-ci spec --write-counts. Per proof unit: frozen statements and statement+proof tokens (docs/ci/PROOF-ROLES.md).
+# `spec --check` refuses a decrease of either number against the base commit unless an amendment or the merge allow covers it.
+# unit<TAB>statement_count<TAB>token_count
+shipped/bytecode/disk_rules	20	5272
+shipped/bytecode/partition	7	327
+shipped/bytecode/patch_rules	3	377
+shipped/bytecode/prov_rules	22	2356
+shipped/bytecode/wire	41	5053
+shipped/js/reparse_rules	10	1191
+shipped/runtime/accounting	15	1493
+shipped/runtime/call_position	2	178
+shipped/runtime/sizing	51	4240

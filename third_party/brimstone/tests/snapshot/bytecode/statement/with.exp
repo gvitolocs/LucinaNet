@@ -1,0 +1,156 @@
+[BytecodeFunction: <global>] {
+  Parameters: 0, Registers: 1
+     0: NewClosure r0, c0
+     3: StoreGlobal r0, c1, k0
+     7: NewClosure r0, c2
+    10: StoreGlobal r0, c3, k1
+    14: NewClosure r0, c4
+    17: StoreGlobal r0, c5, k2
+    21: NewClosure r0, c6
+    24: StoreGlobal r0, c7, k3
+    28: NewClosure r0, c8
+    31: StoreGlobal r0, c9, k4
+    35: LoadUndefined r0
+    37: Ret r0
+  Constant Table:
+    0: [BytecodeFunction: basic]
+    1: [String: basic]
+    2: [BytecodeFunction: withVars]
+    3: [String: withVars]
+    4: [BytecodeFunction: withVarShadowsVar]
+    5: [String: withVarShadowsVar]
+    6: [BytecodeFunction: withVarShadowsArg]
+    7: [String: withVarShadowsArg]
+    8: [BytecodeFunction: withVarShadowsArguments]
+    9: [String: withVarShadowsArguments]
+}
+
+[BytecodeFunction: basic] {
+  Parameters: 1, Registers: 1
+     0: PushFunctionScope c0
+     2: StoreToScope <this>, 1, 0
+     6: StoreToScope r0, 3, 0
+    10: StoreToScope a0, 0, 0
+    14: NewMappedArguments r0
+    16: StoreToScope r0, 2, 0
+    20: LoadImmediate r0, 1
+    23: LoadFromScope r0, 0, 0
+    27: PushWithScope r0, c1
+    30: LoadImmediate r0, 2
+    33: PopScope 
+    34: LoadImmediate r0, 3
+    37: LoadUndefined r0
+    39: Ret r0
+  Constant Table:
+    0: [ScopeNames]
+    1: [ScopeNames]
+}
+
+[BytecodeFunction: withVars] {
+  Parameters: 1, Registers: 2
+     0: PushFunctionScope c0
+     2: StoreToScope <this>, 1, 0
+     6: StoreToScope r0, 4, 0
+    10: StoreToScope a0, 0, 0
+    14: NewMappedArguments r0
+    16: StoreToScope r0, 3, 0
+    20: LoadFromScope r0, 0, 0
+    24: PushWithScope r0, c1
+    27: LoadImmediate r0, 1
+    30: StoreDynamic r0, c2
+    33: LoadDynamic r0, c2
+    36: AddImm r0, r0, 2
+    40: MakeDynamicRef r1, c2
+    43: LoadImmediate r0, 3
+    46: StoreToDynamicRef r0, r1, c2
+    50: PopScope 
+    51: LoadDynamic r0, c2
+    54: AddImm r0, r0, 4
+    58: MakeDynamicRef r1, c2
+    61: LoadImmediate r0, 5
+    64: StoreToDynamicRef r0, r1, c2
+    68: LoadUndefined r0
+    70: Ret r0
+  Constant Table:
+    0: [ScopeNames]
+    1: [ScopeNames]
+    2: [String: y]
+}
+
+[BytecodeFunction: withVarShadowsVar] {
+  Parameters: 1, Registers: 2
+     0: PushFunctionScope c0
+     2: StoreToScope <this>, 1, 0
+     6: StoreToScope r0, 4, 0
+    10: StoreToScope a0, 0, 0
+    14: NewMappedArguments r0
+    16: StoreToScope r0, 3, 0
+    20: LoadImmediate r0, 0
+    23: StoreDynamic r0, c1
+    26: LoadFromScope r0, 0, 0
+    30: PushWithScope r0, c2
+    33: LoadImmediate r0, 1
+    36: StoreDynamic r0, c1
+    39: MakeDynamicRef r1, c1
+    42: LoadImmediate r0, 2
+    45: StoreToDynamicRef r0, r1, c1
+    49: PopScope 
+    50: MakeDynamicRef r1, c1
+    53: LoadImmediate r0, 3
+    56: StoreToDynamicRef r0, r1, c1
+    60: LoadUndefined r0
+    62: Ret r0
+  Constant Table:
+    0: [ScopeNames]
+    1: [String: y]
+    2: [ScopeNames]
+}
+
+[BytecodeFunction: withVarShadowsArg] {
+  Parameters: 2, Registers: 2
+     0: PushFunctionScope c0
+     2: StoreToScope <this>, 2, 0
+     6: StoreToScope r0, 4, 0
+    10: StoreToScope a0, 0, 0
+    14: StoreToScope a1, 1, 0
+    18: NewMappedArguments r0
+    20: StoreToScope r0, 3, 0
+    24: LoadFromScope r0, 0, 0
+    28: PushWithScope r0, c1
+    31: LoadImmediate r0, 1
+    34: StoreDynamic r0, c2
+    37: PopScope 
+    38: MakeDynamicRef r1, c2
+    41: LoadImmediate r0, 2
+    44: StoreToDynamicRef r0, r1, c2
+    48: LoadUndefined r0
+    50: Ret r0
+  Constant Table:
+    0: [ScopeNames]
+    1: [ScopeNames]
+    2: [String: p]
+}
+
+[BytecodeFunction: withVarShadowsArguments] {
+  Parameters: 1, Registers: 2
+     0: PushFunctionScope c0
+     2: StoreToScope <this>, 1, 0
+     6: StoreToScope r0, 3, 0
+    10: StoreToScope a0, 0, 0
+    14: NewMappedArguments r0
+    16: StoreDynamic r0, c1
+    19: LoadFromScope r0, 0, 0
+    23: PushWithScope r0, c2
+    26: LoadImmediate r0, 1
+    29: StoreDynamic r0, c1
+    32: PopScope 
+    33: MakeDynamicRef r1, c1
+    36: LoadImmediate r0, 2
+    39: StoreToDynamicRef r0, r1, c1
+    43: LoadUndefined r0
+    45: Ret r0
+  Constant Table:
+    0: [ScopeNames]
+    1: [String: arguments]
+    2: [ScopeNames]
+}

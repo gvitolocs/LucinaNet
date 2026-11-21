@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = ["crates/lucina-ftcompat", "crates/lucina-fontface", "crates/lucina-fontsan"]
+
+[workspace.package]
+edition = "2021"
+publish = false
+license = "MPL-2.0"

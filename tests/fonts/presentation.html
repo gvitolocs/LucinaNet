@@ -1,0 +1,18 @@
+<!doctype html>
+<meta charset=utf-8>
+<title>emoji presentation preference</title>
+<style>
+  body { margin: 10px; color: #000; background: #fff }
+  div { font-size: 44px; line-height: 1.5; white-space: pre }
+</style>
+<!-- The same four characters under two families. "DejaVu Sans" is installed here and holds an outline U+2699;
+     "Lato" is not installed anywhere, so its run reaches the fallback chain, where the emoji presentation
+     preference refuses a face with no colour bitmap. See docs/fonts.md. -->
+<div style="font-family:'DejaVu Sans'">installed family, gear alone: ⚙ end</div>
+<div style="font-family:'DejaVu Sans'">installed family, gear + U+FE0F: ⚙️ end</div>
+<div style="font-family:'DejaVu Sans'">installed family, crab: 🦀 end</div>
+<div style="font-family:'DejaVu Sans'">installed family, CJK: 日本語 end</div>
+<div style="font-family:Lato">missing family, gear alone: ⚙ end</div>
+<div style="font-family:Lato">missing family, gear + U+FE0F: ⚙️ end</div>
+<div style="font-family:Lato">missing family, crab: 🦀 end</div>
+<div style="font-family:Lato">missing family, CJK: 日本語 end</div>

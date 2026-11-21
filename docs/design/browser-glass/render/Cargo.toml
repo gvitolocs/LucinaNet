@@ -1,0 +1,17 @@
+[package]
+name = "browser-glass-render"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Renders the LucinaNet browser chrome mockups (docs/design/browser-glass.md) with the lucina-glass kit"
+
+# Its own workspace: this is a design tool, not part of the browser's build.
+[workspace]
+
+[dependencies]
+# The glass kit of LucinaOS (the build host path; build with CARGO_TARGET_DIR of an existing LucinaOS target).
+lucina-glass = { path = "../../../../lucinaos/crates/lucina-glass" }
+
+
+[profile.dev]
+opt-level = 3

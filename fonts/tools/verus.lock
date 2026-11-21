@@ -1,0 +1,11 @@
+# Verus pin for the proofs in verification/. tools/install-verus.sh checks the zip against zip_x86_linux_sha256
+# before unpacking, and the launcher and rust_verify against the two binary hashes after.
+
+[verus]
+url = "https://github.com/verus-lang/verus"
+release = "0.2026.11.02.8bf68ee"
+binary_sha256 = "1208c995c8e5244577693eba311d34bc2050c4acf984e10c4c7baf2003abff14"
+verifier_sha256 = "30d4325219c3d84b8d7512087a9068939687f740409d2bcf25cdc3174adb19c6"
+rust_toolchain = "1.99.1"
+zip_x86_linux_sha256 = "f3a0119292df8855e4435da8130bee1873b0e6a60c306accf81a08ea687bba3c"
+license = "MIT"

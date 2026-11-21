@@ -1,0 +1,17 @@
+[t+   0.027] lucinanet: rasterizer rust
+[t+   0.043] lucinanet: error log in memory only, session 1795011911 (no profile directory)
+[t+   0.043] lucinanet: HTTP disk cache in memory only (no profile directory)
+[t+   0.185] lucinanet: engine up in 158 ms, rss 40652 KiB
+[t+   0.362] lucinanet: history depth 3 over 1 tabs (was None)
+[t+   0.429] mse-two-buffers: isTypeSupported video/webm; codecs="vp9" = true
+[t+   0.430] mse-two-buffers: isTypeSupported audio/webm; codecs="opus" = true
+[t+   0.448] [2026-11-18T14:25:11Z ERROR symphonia_core::formats::probe] probe reached EOF at 0 bytes
+[t+   0.555] mse-two-buffers: video init+5 clusters, audio init+4 clusters
+[t+   0.577] mse-two-buffers: appended, duration=30.021 buffered=25.1s
+[t+   2.592] mse-two-buffers: play() again at 2.00s
+[t+   4.112] render: settled 3547 ms after load (32 frames, quiet 1500 ms, at most 12000 ms)
+[t+   4.112] render: complete true in 4088 ms, rss 137076 KiB
+[t+  12.903] mse-two-buffers: clock frozen at 2.00s for 10s (readyState=4 paused=false)
+[t+  12.904] mse-two-buffers: FAIL Error: clock froze at 2.00
+[t+  12.904] MSE-TEST FAIL clock froze at 2.00
+[t+  54.219] render: held 50 s

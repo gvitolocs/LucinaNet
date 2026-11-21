@@ -1,0 +1,348 @@
+{
+  // Tests that are known to fail but should count against test262 progress.
+  "known_failures": {
+    "tests": [
+      ////////////////////////////////////////
+      //
+      // Bugs (We intend to fix these)
+      //
+      ////////////////////////////////////////
+
+      // Introduced SpiderMonkey tests that still fail today, measured per file with every ignore
+      // list empty: release passes 1, 3 and 4 plus debug pass 2 (an earlier change, 2026-11-17).
+      // The former "staging/sm/*" glob covered these 80 files plus 1329 that now pass, and a file
+      // was dropped only when all four of its runs passed. Grouped by the failing run's message.
+
+      // Fail the assertion machinery (Test262Error)
+      "staging/sm/Atomics/detached-buffers.js",
+      "staging/sm/class/strictExecution.js",
+      "staging/sm/Date/non-iso.js",
+      "staging/sm/Error/constructor-proto.js",
+      "staging/sm/Error/prototype.js",
+      "staging/sm/Error/prototype-properties.js",
+      "staging/sm/eval/exhaustive-fun-normalcaller-direct-normalcode.js",
+      "staging/sm/expressions/nested-delete-name-in-evalcode.js",
+      "staging/sm/expressions/optional-chain.js",
+      "staging/sm/expressions/short-circuit-compound-assignment-property-key-evaluation.js",
+      "staging/sm/Function/10.2.1.1.6.js",
+      "staging/sm/Function/function-toString-builtin.js",
+      "staging/sm/JSON/parse-with-source.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b-arguments.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b-same-name.js",
+      "staging/sm/lexical-environment/unscopables-delete.js",
+      "staging/sm/lexical-environment/unscopables-proto.js",
+      "staging/sm/misc/future-reserved-words.js",
+      "staging/sm/Number/toExponential-values.js",
+      "staging/sm/RegExp/compile-lastIndex.js",
+      "staging/sm/RegExp/prototype.js",
+      "staging/sm/regress/regress-554955-5.js",
+      "staging/sm/regress/regress-602621.js",
+      "staging/sm/Set/symmetric-difference.js",
+      "staging/sm/Set/union.js",
+      "staging/sm/statements/regress-642975.js",
+      "staging/sm/strict/strict-function-statements.js",
+      "staging/sm/String/internalUsage.js",
+      "staging/sm/TypedArray/set-detached.js",
+
+      // Throw an unexpected TypeError
+      "staging/sm/Atomics/cross-compartment.js",
+      "staging/sm/class/superPropOrdering.js",
+      "staging/sm/Date/setTime-argument-shortcircuiting.js",
+      "staging/sm/extensions/arguments-property-access-in-function.js",
+      "staging/sm/extensions/censor-strict-caller.js",
+      "staging/sm/extensions/function-caller-skips-eval-frames.js",
+      "staging/sm/extensions/function-properties.js",
+      "staging/sm/Function/function-caller-restrictions.js",
+      "staging/sm/Function/function-toString-builtin-name.js",
+      "staging/sm/Iterator/prototype/lazy-methods-return-closes-iterator.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b-with.js",
+      "staging/sm/misc/explicit-undefined-optional-argument.js",
+      "staging/sm/RegExp/constructor-ordering.js",
+      "staging/sm/RegExp/flags-param-handling.js",
+      "staging/sm/RegExp/match-local-tolength-recompilation.js",
+      "staging/sm/RegExp/replace-compile-elembase.js",
+      "staging/sm/RegExp/replace-compile.js",
+      "staging/sm/RegExp/replace-local-tolength-recompilation.js",
+      "staging/sm/regress/regress-577648-1.js",
+      "staging/sm/regress/regress-577648-2.js",
+      "staging/sm/regress/regress-584355.js",
+      "staging/sm/regress/regress-586482-1.js",
+      "staging/sm/regress/regress-586482-2.js",
+      "staging/sm/regress/regress-586482-3.js",
+      "staging/sm/regress/regress-586482-4.js",
+      "staging/sm/regress/regress-586482-5.js",
+      "staging/sm/String/matchAll.js",
+      "staging/sm/syntax/linefeed-at-eof-in-unterminated-string-or-template.js",
+
+      // Parse/reject behaviour differs (unexpected SyntaxError)
+      "staging/sm/fields/await-identifier-module-2.js",
+      "staging/sm/Function/function-name-for.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b-if.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b-label.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b-parameter.js",
+      "staging/sm/lexical-environment/block-scoped-functions-deprecated-redecl.js",
+      "staging/sm/lexical-environment/var-in-catch-body-annex-b-eval.js",
+      "staging/sm/module/await-restricted-nested.js",
+      "staging/sm/RegExp/unicode-braced.js",
+      "staging/sm/syntax/declaration-forbidden-in-label.js",
+
+      // Throw an unexpected RangeError
+      "staging/sm/String/fromCodePoint.js",
+
+      // Fail with no distinctive engine message
+      "staging/sm/Function/constructor-binding.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b-eval.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b.js",
+      "staging/sm/lexical-environment/block-scoped-functions-annex-b-notapplicable.js",
+      "staging/sm/Math/acosh-approx.js",
+      "staging/sm/Math/atanh-approx.js",
+
+      // Panic inside the engine
+      "staging/sm/RegExp/7.8.5-01.js",
+
+      // Exceed the 60 s per-test budget in release and debug
+      "staging/sm/regress/regress-1507322-deep-weakmap.js",
+
+      // kills the harness process (huge BigInt shift allocation via num-bigint)
+      "staging/sm/BigInt/large-bit-length.js",
+
+      // debug timeout only: every release run passed (x5), the debug binary exceeds the 60 s
+      // per-test budget (it needs 93-111 s where release needs about 3 s)
+      "staging/sm/Date/dst-offset-caching-6-of-8.js",
+      "staging/sm/Date/dst-offset-caching-8-of-8.js",
+
+      // debug fail only: every release run passed (x5), the debug binary raises a RangeError; a real
+      // difference between the profiles, not yet investigated
+      "staging/sm/class/superPropChains.js",
+
+      ////////////////////////////////////////
+      //
+      // Known divergences (Do not plan on fixing)
+      //
+      ////////////////////////////////////////
+
+      // Test includes annex-B features (named backreference in a RegExp with no named capture groups)
+      "built-ins/String/prototype/split/separator-regexp.js",
+
+      // Calls to properties of the target object of a `with` statement must use the target object
+      // as the receiver.
+      "language/expressions/call/with-base-obj.js",
+
+      // The errors returned from a derived constructor's [[Construct]] if the constructor's
+      // return value is invalid or uninitialized must be in the callee's realm.
+      "built-ins/Function/internals/Construct/derived-this-uninitialized-realm.js",
+
+      // Does not evaluate ToPropertyKey in key of object destructuring before evaluating the RHS
+      "language/destructuring/binding/keyed-destructuring-property-reference-target-evaluation-order-with-bindings.js",
+
+      // Does not evaluate LHS of assignment to reference before evaluating the RHS, when RHS can modify reference
+      "language/identifier-resolution/assign-to-global-undefined.js",
+      "language/statements/variable/binding-resolution.js"
+    ],
+    "features": [
+      // Tail call optimizations are not implemented. Always skip tail-call-optimization tests as
+      // they cause stack overflow.
+      "tail-call-optimization"
+    ]
+  },
+  // Tests for unimplemented features. Counts against test262 progress.
+  "unimplemented": {
+    "features": [
+      // Stage 4 proposals which need to be implemented
+      "explicit-resource-management",
+      "joint-iteration",
+
+      // Other unimplemented features
+      "SharedArrayBuffer",
+      "Atomics",
+      "Atomics.pause"
+    ]
+  },
+  // Tests for features that are not part of the standard. These tests are always ignored, and do
+  // not count against test262 progress.
+  //
+  // This includes tests for:
+  // - Stage < 4 proposals
+  // - Annex B (Additional ECMAScript Features for Web Browsers)
+  // - Non-standard extensions to the language
+  // - Standards other than ECMA-262
+  "non_standard": {
+    "tests": [
+      // Annex B
+      "annexB/*",
+
+      // The ECMA-402 Internationalization API is not part of ECMA-262
+      "intl402/*"
+    ],
+    "features": [
+      // Non-standard extensions
+      "caller",
+
+      // Stage < 4 proposals
+      "await-dictionary",
+      "decorators",
+      "error-stack-accessor",
+      "import-defer",
+      "import-text",
+      "immutable-arraybuffer",
+      "legacy-regexp",
+      "nonextensible-applies-to-private",
+      "source-phase-imports",
+      "FinalizationRegistry.prototype.cleanupSome",
+      "Intl.DurationFormat",
+      "Intl.Locale-info",
+      "Intl.NumberFormat-v3",
+      "ShadowRealm"
+    ]
+  },
+  // Slow tests which are ignored in normal runs but can be run with the --all flag
+  "slow": {
+    "tests": [
+      // Passing but ignored
+      "language/comments/S7.4_A5.js",
+      "language/comments/S7.4_A6.js",
+      "language/expressions/dynamic-import/await-import-evaluation.js",
+      "language/literals/regexp/S7.8.5_A1.1_T2.js",
+      "language/literals/regexp/S7.8.5_A1.4_T2.js",
+      "language/literals/regexp/S7.8.5_A2.1_T2.js",
+      "language/literals/regexp/S7.8.5_A2.4_T2.js",
+      "built-ins/Array/prototype/concat/Array.prototype.concat_large-typed-array.js",
+      "built-ins/Function/prototype/toString/built-in-function-object.js",
+      "built-ins/RegExp/CharacterClassEscapes/character-class-digit-class-escape-negative-cases.js",
+      "built-ins/RegExp/CharacterClassEscapes/character-class-non-digit-class-escape-positive-cases.js",
+      "built-ins/RegExp/CharacterClassEscapes/character-class-non-word-class-escape-positive-cases.js",
+      "built-ins/RegExp/CharacterClassEscapes/character-class-non-whitespace-class-escape-positive-cases.js",
+      "built-ins/RegExp/CharacterClassEscapes/character-class-whitespace-class-escape-negative-cases.js",
+      "built-ins/RegExp/CharacterClassEscapes/character-class-word-class-escape-negative-cases.js",
+      "built-ins/RegExp/character-class-escape-non-whitespace.js",
+      "built-ins/RegExp/property-escapes/generated/*.js",
+      "built-ins/TypedArray/prototype/set/typedarray-arg-src-backed-by-resizable-buffer.js",
+      "built-ins/TypedArray/prototype/sort/stability.js",
+      "built-ins/parseFloat/S15.1.2.3_A6.js",
+      "built-ins/parseInt/S15.1.2.2_A8.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.10_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.11_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.11_T2.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.12_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.12_T2.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.12_T3.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.2_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.2_T2.js",
+      "built-ins/decodeURI/S15.1.3.1_A2.1_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A2.4_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A2.5_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.10_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.11_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.11_T2.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.12_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.12_T2.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.12_T3.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.2_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.2_T2.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A2.1_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A2.4_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A2.5_T1.js",
+      "built-ins/encodeURI/S15.1.3.3_A2.3_T1.js",
+      "built-ins/encodeURI/S15.1.3.3_A2.4_T1.js",
+      "built-ins/encodeURI/S15.1.3.3_A2.4_T2.js",
+      "built-ins/encodeURI/S15.1.3.3_A2.5_T1.js",
+      "built-ins/encodeURIComponent/S15.1.3.4_A2.3_T1.js",
+      "built-ins/encodeURIComponent/S15.1.3.4_A2.4_T1.js",
+      "built-ins/encodeURIComponent/S15.1.3.4_A2.4_T2.js",
+      "built-ins/encodeURIComponent/S15.1.3.4_A2.5_T1.js",
+
+      // Slow array tests - all passing but could be improved by special casing sparse Array objects
+      "built-ins/Array/prototype/every/15.4.4.16-7-c-ii-2.js",
+      "built-ins/Array/prototype/filter/15.4.4.20-9-c-ii-1.js",
+      "built-ins/Array/prototype/forEach/15.4.4.18-7-c-ii-1.js",
+      "built-ins/Array/prototype/indexOf/15.4.4.14-10-1.js",
+      "built-ins/Array/prototype/lastIndexOf/15.4.4.15-9-1.js",
+      "built-ins/Array/prototype/map/15.4.4.19-8-c-ii-1.js",
+      "built-ins/Array/prototype/some/15.4.4.17-7-c-ii-2.js",
+      "built-ins/TypedArray/prototype/copyWithin/coerced-values-end-detached.js",
+      "built-ins/TypedArray/prototype/copyWithin/coerced-values-end-detached-prototype.js",
+      "built-ins/TypedArray/prototype/copyWithin/coerced-values-start-detached.js"
+    ]
+  },
+  // Slow tests which are ignored in GC stress test runs. Aim to ignore all tests over 5 seconds.
+  "gc_stress_test": {
+    "tests": [
+      "language/identifiers/start-unicode-*.js", // 57 tests
+      "built-ins/Array/prototype/copyWithin/resizable-buffer.js",
+      "built-ins/Array/prototype/entries/resizable-buffer.js",
+      "built-ins/Array/prototype/fill/resizable-buffer.js",
+      "built-ins/Array/prototype/map/resizable-buffer.js",
+      "built-ins/Array/prototype/reverse/resizable-buffer.js",
+      "built-ins/Array/prototype/sort/comparefn-resizable-buffer.js",
+      "built-ins/Array/prototype/sort/resizable-buffer-default-comparator.js",
+      "built-ins/Array/prototype/sort/stability-2048-elements.js",
+      "built-ins/Function/prototype/bind/get-fn-realm-recursive.js",
+      "built-ins/Function/prototype/toString/built-in-function-object.js",
+      "built-ins/Math/sqrt/results.js",
+      "built-ins/Object/defineProperties/typedarray-backed-by-resizable-buffer.js",
+      "built-ins/Object/defineProperty/typedarray-backed-by-resizable-buffer.js",
+      "built-ins/Proxy/get-fn-realm-recursive.js",
+      "built-ins/String/prototype/repeat/repeat-string-n-times.js",
+      "built-ins/TypedArray/prototype/copyWithin/coerced-values-start.js",
+      "built-ins/TypedArray/prototype/copyWithin/coerced-values-target.js",
+      "built-ins/TypedArray/prototype/copyWithin/negative-end.js",
+      "built-ins/TypedArray/prototype/copyWithin/negative-out-of-bounds-end.js",
+      "built-ins/TypedArray/prototype/copyWithin/negative-out-of-bounds-start.js",
+      "built-ins/TypedArray/prototype/copyWithin/non-negative-out-of-bounds-target-and-start.js",
+      "built-ins/TypedArray/prototype/copyWithin/resizable-buffer.js",
+      "built-ins/TypedArray/prototype/entries/resizable-buffer.js",
+      "built-ins/TypedArray/prototype/fill/coerced-indexes.js",
+      "built-ins/TypedArray/prototype/fill/resizable-buffer.js",
+      "built-ins/TypedArray/prototype/join/custom-separator-result-from-tostring-on-each-value.js",
+      "built-ins/TypedArray/prototype/map/resizable-buffer.js",
+      "built-ins/TypedArray/prototype/reduceRight/resizable-buffer.js",
+      "built-ins/TypedArray/prototype/reverse/resizable-buffer.js",
+      "built-ins/TypedArray/prototype/set/BigInt/src-typedarray-not-big-throws.js",
+      "built-ins/TypedArray/prototype/set/array-arg-offset-tointeger.js",
+      "built-ins/TypedArray/prototype/set/array-arg-set-values.js",
+      "built-ins/TypedArray/prototype/set/src-typedarray-big-throws.js",
+      "built-ins/TypedArray/prototype/set/target-shrink-source-length-getter.js",
+      "built-ins/TypedArray/prototype/set/this-backed-by-resizable-buffer.js",
+      "built-ins/TypedArray/prototype/set/typedarray-arg-offset-tointeger.js",
+      "built-ins/TypedArray/prototype/set/typedarray-arg-src-backed-by-resizable-buffer.js",
+      "built-ins/TypedArray/prototype/slice/resizable-buffer.js",
+      "built-ins/TypedArray/prototype/slice/results-with-different-length.js",
+      "built-ins/TypedArray/prototype/sort/comparefn-resizable-buffer.js",
+      "built-ins/TypedArray/prototype/sort/resizable-buffer-default-comparator.js",
+      "built-ins/TypedArray/prototype/sort/stability.js",
+      "built-ins/TypedArray/prototype/subarray/resizable-buffer.js",
+      "built-ins/TypedArray/prototype/subarray/results-with-different-length.js",
+      "built-ins/TypedArrayConstructors/ctors-bigint/typedarray-arg/src-typedarray-not-big-throws.js",
+      "built-ins/TypedArrayConstructors/ctors/typedarray-arg/src-typedarray-big-throws.js",
+      "built-ins/TypedArrayConstructors/ctors/typedarray-arg/src-typedarray-resizable-buffer.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.13_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.13_T2.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.14_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.14_T2.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.14_T3.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.14_T4.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.15_T1.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.15_T2.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.15_T3.js",
+      "built-ins/decodeURI/S15.1.3.1_A1.15_T5.js",
+      "built-ins/decodeURI/S15.1.3.1_A2.3_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.13_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.13_T2.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.14_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.14_T2.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.14_T3.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.14_T4.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.15_T1.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.15_T2.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.15_T3.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A1.15_T4.js",
+      "built-ins/decodeURIComponent/S15.1.3.2_A2.3_T1.js",
+      "built-ins/encodeURI/S15.1.3.3_A1.3_T1.js",
+      "built-ins/encodeURI/S15.1.3.3_A2.2_T1.js",
+      "built-ins/encodeURIComponent/S15.1.3.4_A1.3_T1.js",
+      "built-ins/encodeURIComponent/S15.1.3.4_A2.2_T1.js",
+      "harness/nativeFunctionMatcher.js",
+      "language/destructuring/binding/typedarray-backed-by-resizable-buffer.js"
+    ]
+  }
+}

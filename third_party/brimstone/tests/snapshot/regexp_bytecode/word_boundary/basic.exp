@@ -1,0 +1,17 @@
+[CompiledRegExp: /a\bc/] {
+  Flags: ""
+  Match Start: Code Points("a")
+     0: CodePointLiteral(a)
+     1: AssertWordBoundary(false)
+     3: CodePointLiteral(c)
+     4: Accept
+}
+
+[CompiledRegExp: /a\Bc/] {
+  Flags: ""
+  Match Start: Code Points("a")
+     0: CodePointLiteral(a)
+     1: AssertWordBoundary(true)
+     3: CodePointLiteral(c)
+     4: Accept
+}

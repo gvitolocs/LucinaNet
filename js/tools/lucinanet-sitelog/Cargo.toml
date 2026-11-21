@@ -1,0 +1,17 @@
+[package]
+name = "lucinanet-sitelog"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+publish = false
+description = "Run-time inventory of what real sites find missing, from their logs"
+
+[workspace]
+
+[lib]
+name = "lucinanet_sitelog"
+path = "src/sitelog.rs"
+
+[[bin]]
+name = "lucinanet-sitelog"
+path = "src/main.rs"

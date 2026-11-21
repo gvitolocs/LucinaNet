@@ -1,0 +1,187 @@
+// @generated
+/// Implement `DataProvider<TimezoneNamesStandardLongV1>` on the given struct using the data
+/// hardcoded in this file. This allows the struct to be used with
+/// `icu`'s `_unstable` constructors.
+///
+/// Using this implementation will embed the following data in the binary's data segment:
+/// * 67B for the lookup data structure (7 data identifiers)
+/// * 6390B[^1] for the actual data (7 unique structs)
+///
+/// [^1]: these numbers can be smaller in practice due to linker deduplication
+///
+/// This macro requires the following crates:
+/// * `icu_datetime`
+/// * `icu_locale_fallback/compiled_data`
+/// * `icu_provider`
+/// * `icu_provider/baked`
+/// * `zerovec`
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_timezone_names_standard_long_v1 {
+    ($ provider : ty) => {
+        #[clippy::msrv = "1.88"]
+        const _: () = <$provider>::MUST_USE_MAKE_PROVIDER_MACRO;
+        #[clippy::msrv = "1.88"]
+        impl $provider {
+            #[doc(hidden)]
+            pub const TIMEZONE_NAMES_STANDARD_LONG_V1_CHECKSUM: u64 = 3766337918522167878u64;
+            const DATA_TIMEZONE_NAMES_STANDARD_LONG_V1: icu_provider::baked::zerotrie::Data<icu_datetime::provider::time_zones::TimezoneNamesStandardLongV1> = {
+                const TRIE: icu_provider::baked::zerotrie::ZeroTrieSimpleAscii<&'static [u8]> = icu_provider::baked::zerotrie::ZeroTrieSimpleAscii {
+                    store: b"\xC5dehiu\x02\r\x14\x16a\x80n\x81-\xC2AC\x02U\x82A\x83i-Latn\x84t\x85nd\x86",
+                };
+                const VALUES: &'static [<icu_datetime::provider::time_zones::TimezoneNamesStandardLongV1 as icu_provider::baked::zerotrie::DynamicDataMarker>::DataStruct] = &[
+                    icu_datetime::provider::time_zones::MetazoneGenericNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x02\x03\x04\x05\x06\x1A\x1C\x1F#$*,3458<>BCDEFGMNOSTWZ`bmqtuvz}\x7F\x82\x8D\x91\x95") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"-\0\x0C\0 \x001\0A\0R\0`\0u\0\x81\0\x93\0\xA8\0\xB5\0\xC5\0\xF3\0\xF6\0\x03\x01\x14\x01)\x01B\x01R\x01i\x01u\x01\x8A\x01\x9C\x01\xAE\x01\xBE\x01\xD2\x01\xE6\x01\xF3\x01\x02\x02\x0E\x02 \x02+\x029\x02L\x02[\x02e\x02r\x02}\x02\x8C\x02\x9D\x02\xA6\x02\xB4\x02\xC4\x02\xD3\x02Afghansk tidCentralafrikansk tid\xC3\x98stafrikansk tidSydafrikansk tidVestafrikansk tidBoliviansk tidBrunei Darussalam-tidChamorro-tidJule\xC3\xB8en-normaltidCocos\xC3\xB8erne-normaltid\xC3\x98sttimor-tidEcuadoriansk tidFranske Sydlige og Antarktiske Territorier-tidGMTGalapagos-tidGilbert\xC3\xB8erne-tidGolflandene-normaltidHawaii-Aleutian-normaltidIndisk normaltidIndiske Ocean-normaltidIndokina-tidCentralindonesisk tid\xC3\x98stindonesisk tidVestindonesisk tidKasakhstansk tid\xC3\x98stkasakhstansk tidVestkasakhstansk tidKirgisisk tidLinje\xC3\xB8erne-tidMalaysia-tidMarshall\xC3\xB8erne-tidMyanmar-tidNepalesisk tidPapua Ny Guinea-tidPhoenix\xC3\xB8en-tidPonape-tidPyongyang-tidReunion-tidSeychellisk tidSouth Georgia-tidSyowa-tidTadsjikisk tidVenezuelansk tidWake Island-tidYukon-tid") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"utc\0\0\0\0\0") }, unsafe {
+                                zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x01\0Koordineret universaltid")
+                            })
+                        },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneGenericNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x03\x04\x05\x06\x1E\x1F)3458<>BCDEFGMNOTWYZ\\mqw{}\x7F\x90\x95") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"#\0\x13\0#\0=\0M\0W\0m\0\x84\0\xA4\0\xB7\0\xC5\0\xD9\0\xEB\0\x08\x01\x1B\x01,\x01:\x01P\x01f\x01|\x01\x8B\x01\x9F\x01\xB3\x01\xC4\x01\xD1\x01\xDF\x01\xF4\x01\xFF\x01\x14\x02(\x024\x02K\x02]\x02g\x02r\x02Central Africa TimeEast Africa TimeSouth Africa Standard TimeWest Africa TimeCasey TimeChamorro Standard TimeDumont d\xE2\x80\x99Urville TimeFrench Southern & Antarctic TimeGreenwich Mean TimeGalapagos TimeGilbert Islands TimeGulf Standard TimeHawaii-Aleutian Standard TimeIndia Standard TimeIndian Ocean TimeIndochina TimeCentral Indonesia TimeEastern Indonesia TimeWestern Indonesia TimeKazakhstan TimeEast Kazakhstan TimeWest Kazakhstan TimeLine Islands TimeMalaysia TimeMarquesas TimeMarshall Islands TimeMawson TimePapua New Guinea TimePhoenix Islands TimeRothera TimeSingapore Standard TimeSouth Georgia TimeSyowa TimeVostok TimeYukon Time") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"utc\0\0\0\0\0") }, unsafe {
+                                zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x01\0Coordinated Universal Time")
+                            })
+                        },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneGenericNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x03\x04\x05\x06\x1E\x1F)3458<>BCDEFGMNOTWYZ\\mqw{}\x7F\x90\x92\x95") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"$\0\x13\0#\0=\0M\0W\0m\0\x84\0\xA6\0\xB9\0\xC7\0\xDB\0\xED\0\n\x01\x1D\x01.\x01<\x01R\x01h\x01~\x01\x8D\x01\xA1\x01\xB5\x01\xC6\x01\xD3\x01\xE1\x01\xF6\x01\x01\x02\x16\x02*\x026\x02M\x02_\x02i\x02t\x02\x88\x02Central Africa TimeEast Africa TimeSouth Africa Standard TimeWest Africa TimeCasey TimeChamorro Standard TimeDumont d\xE2\x80\x99Urville TimeFrench Southern and Antarctic TimeGreenwich Mean TimeGalapagos TimeGilbert Islands TimeGulf Standard TimeHawaii-Aleutian Standard TimeIndia Standard TimeIndian Ocean TimeIndochina TimeCentral Indonesia TimeEastern Indonesia TimeWestern Indonesia TimeKazakhstan TimeEast Kazakhstan TimeWest Kazakhstan TimeLine Islands TimeMalaysia TimeMarquesas TimeMarshall Islands TimeMawson TimePapua New Guinea TimePhoenix Islands TimeRothera TimeSingapore Standard TimeSouth Georgia TimeSyowa TimeVostok TimeWallis & Futuna TimeYukon Time") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"utc\0\0\0\0\0") }, unsafe {
+                                zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x01\0Coordinated Universal Time")
+                            })
+                        },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneGenericNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x03\x04\x05\x06\x1E\x1F)3458<>BCDEFGMNOTWYZ\\mqw{}\x7F\x90\x95") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"#\0\x13\0#\0=\0M\0W\0m\0\x84\0\xA6\0\xB9\0\xC7\0\xDB\0\xED\0\n\x01\x1D\x01.\x01<\x01R\x01h\x01~\x01\x8D\x01\xA1\x01\xB5\x01\xC6\x01\xD3\x01\xE1\x01\xF6\x01\x01\x02\x16\x02*\x026\x02M\x02_\x02i\x02t\x02Central Africa TimeEast Africa TimeSouth Africa Standard TimeWest Africa TimeCasey TimeChamorro Standard TimeDumont d\xE2\x80\x99Urville TimeFrench Southern and Antarctic TimeGreenwich Mean TimeGalapagos TimeGilbert Islands TimeGulf Standard TimeHawaii-Aleutian Standard TimeIndia Standard TimeIndian Ocean TimeIndochina TimeCentral Indonesia TimeEastern Indonesia TimeWestern Indonesia TimeKazakhstan TimeEast Kazakhstan TimeWest Kazakhstan TimeLine Islands TimeMalaysia TimeMarquesas TimeMarshall Islands TimeMawson TimePapua New Guinea TimePhoenix Islands TimeRothera TimeSingapore Standard TimeSouth Georgia TimeSyowa TimeVostok TimeYukon Time") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"utc\0\0\0\0\0") }, unsafe {
+                                zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x01\0Coordinated Universal Time")
+                            })
+                        },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneGenericNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x03\x04\x05\x06\x1E\x1F)3458<>BCDEFGMNOTWYZ\\mqtw{}\x7F\x85\x90\x95") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"%\0\x13\0#\0=\0M\0W\0m\0\x84\0\xA4\0\xB7\0\xC5\0\xD9\0\xEB\0\x08\x01\x1B\x01,\x01:\x01P\x01f\x01|\x01\x8B\x01\x9F\x01\xB3\x01\xC4\x01\xD1\x01\xDF\x01\xF4\x01\xFF\x01\x14\x02(\x024\x02@\x02W\x02i\x02s\x02}\x02\x88\x02Central Africa TimeEast Africa TimeSouth Africa Standard TimeWest Africa TimeCasey TimeChamorro Standard TimeDumont d\xE2\x80\x99Urville TimeFrench Southern & Antarctic TimeGreenwich Mean TimeGalapagos TimeGilbert Islands TimeGulf Standard TimeHawaii-Aleutian Standard TimeIndia Standard TimeIndian Ocean TimeIndochina TimeCentral Indonesia TimeEastern Indonesia TimeWestern Indonesia TimeKazakhstan TimeEast Kazakhstan TimeWest Kazakhstan TimeLine Islands TimeMalaysia TimeMarquesas TimeMarshall Islands TimeMawson TimePapua New Guinea TimePhoenix Islands TimePohnpei TimeRothera TimeSingapore Standard TimeSouth Georgia TimeSyowa TimeChuuk TimeVostok TimeYukon Time") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"utc\0\0\0\0\0") }, unsafe {
+                                zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x01\0Coordinated Universal Time")
+                            })
+                        },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneGenericNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(
+                                unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"\x02\x03\x04\x05\x06\x19\x1A\x1C\x1F#$()*,234568<=>BCDEFGMNOQSTWXYZ\\`abflmqstuvwz{|}~\x7F\x80\x82\x83\x85\x88\x8D\x90\x91\x92\x95") },
+                                unsafe { zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"E\0\x16\x000\0K\0h\0\x85\0\x93\0\xA4\0\xBD\0\xCC\0\xE6\0\xFB\0\x07\x01 \x010\x01B\x01[\x01\x89\x01\xA7\x01\xBA\x01\xC8\x01\xDF\x01\xEC\x01\xFC\x01$\x02=\x02V\x02i\x02\x86\x02\xA4\x02\xC4\x02\xD6\x02\xF2\x02\x10\x03\x1E\x032\x03O\x03`\x03q\x03\x83\x03\x9B\x03\xA8\x03\xBA\x03\xC6\x03\xD3\x03\xDE\x03\xEA\x03\x06\x04\"\x044\x04B\x04R\x04a\x04o\x04\x83\x04\x93\x04\xAB\x04\xC4\x04\xD4\x04\xE0\x04\xED\x04\xFF\x04\r\x05\x1A\x05'\x058\x05E\x05]\x05s\x05Ora dell\xE2\x80\x99AfghanistanOra dell\xE2\x80\x99Africa centraleOra dell\xE2\x80\x99Africa orientaleOra dell\xE2\x80\x99Africa meridionaleOra dell\xE2\x80\x99Africa occidentaleOra del BhutanOra della BoliviaOra del Brunei DarussalamOra di ChamorroOra dell\xE2\x80\x99Isola ChristmasOra delle Isole CocosOra di DavisOra di Dumont-d\xE2\x80\x99UrvilleOra di Timor EstOra dell\xE2\x80\x99EcuadorOra della Guiana franceseOra delle Terre australi e antartiche francesiOra del meridiano di GreenwichOra delle GalapagosOra di GambierOra delle isole GilbertOra del GolfoOra della GuyanaOra standard delle Isole Hawaii-AleutineOra standard dell\xE2\x80\x99IndiaOra dell\xE2\x80\x99Oceano IndianoOra dell\xE2\x80\x99IndocinaOra dell\xE2\x80\x99Indonesia centraleOra dell\xE2\x80\x99Indonesia orientaleOra dell\xE2\x80\x99Indonesia occidentaleOra del KazakistanOra del Kazakistan orientaleOra del Kazakistan occidentaleOra del KosraeOra del KirghizistanOra delle Sporadi equatorialiOra della MalesiaOra delle MaldiveOra delle MarchesiOra delle Isole MarshallOra di MawsonOra della BirmaniaOra di NauruOra del NepalOra di NiueOra di PalauOra della Papua Nuova GuineaOra delle Isole della FeniceOra delle PitcairnOra di PohnpeiOra di PyongyangOra di RiunioneOra di RotheraOra delle SeychellesOra di SingaporeOra delle Isole SalomoneOra della Georgia del SudOra del SurinameOra di SyowaOra di TahitiOra del TagikistanOra di TokelauOra del ChuukOra di TuvaluOra del VenezuelaOra di VostokOra dell\xE2\x80\x99Isola di WakeOra di Wallis e FutunaOra dello Yukon") },
+                            )
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(unsafe { zerovec::ZeroVec::from_bytes_unchecked(b"utc\0\0\0\0\0") }, unsafe {
+                                zerovec::vecs::VarZeroVec16::from_bytes_unchecked(b"\x01\0Tempo coordinato universale")
+                            })
+                        },
+                    },
+                    icu_datetime::provider::time_zones::MetazoneGenericNames {
+                        defaults: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(zerovec::ZeroVec::new(), zerovec::vecs::VarZeroVec16::new())
+                        },
+                        overrides: unsafe {
+                            #[allow(unused_unsafe)]
+                            zerovec::ZeroMap::from_parts_unchecked(zerovec::ZeroVec::new(), zerovec::vecs::VarZeroVec16::new())
+                        },
+                    },
+                ];
+                unsafe { icu_provider::baked::zerotrie::Data::from_trie_and_values_unchecked(TRIE, VALUES) }
+            };
+        }
+        #[clippy::msrv = "1.88"]
+        impl icu_provider::DataProvider<icu_datetime::provider::time_zones::TimezoneNamesStandardLongV1> for $provider {
+            fn load(&self, req: icu_provider::DataRequest) -> Result<icu_provider::DataResponse<icu_datetime::provider::time_zones::TimezoneNamesStandardLongV1>, icu_provider::DataError> {
+                let mut metadata = icu_provider::DataResponseMetadata::default().with_checksum(Self::TIMEZONE_NAMES_STANDARD_LONG_V1_CHECKSUM);
+                let payload = if let Some(payload) = icu_provider::baked::DataStore::get(
+                    &Self::DATA_TIMEZONE_NAMES_STANDARD_LONG_V1,
+                    req.id,
+                    req.metadata.attributes_prefix_match,
+                ) {
+                    payload
+                } else {
+                    const FALLBACKER: icu_locale_fallback::LocaleFallbackerWithConfig<'static> = icu_locale_fallback::LocaleFallbacker::new().for_config(<icu_datetime::provider::time_zones::TimezoneNamesStandardLongV1 as icu_provider::DataMarker>::INFO.fallback_config);
+                    let mut fallback_iterator = FALLBACKER.fallback_for(req.id.locale.clone());
+                    loop {
+                        if let Some(payload) = icu_provider::baked::DataStore::get(
+                            &Self::DATA_TIMEZONE_NAMES_STANDARD_LONG_V1,
+                            icu_provider::DataIdentifierBorrowed::for_marker_attributes_and_locale(req.id.marker_attributes, fallback_iterator.get()),
+                            req.metadata.attributes_prefix_match,
+                        ) {
+                            metadata.locale = Some(fallback_iterator.take());
+                            break payload;
+                        }
+                        if fallback_iterator.get().is_unknown() {
+                            return Err(icu_provider::DataErrorKind::IdentifierNotFound.with_req(
+                                <icu_datetime::provider::time_zones::TimezoneNamesStandardLongV1 as icu_provider::DataMarker>::INFO,
+                                req,
+                            ));
+                        }
+                        fallback_iterator.step();
+                    }
+                };
+                Ok(icu_provider::DataResponse { payload, metadata })
+            }
+        }
+    };
+    ($ provider : ty , ITER) => {
+        __impl_timezone_names_standard_long_v1!($provider);
+        #[clippy::msrv = "1.88"]
+        impl icu_provider::IterableDataProvider<icu_datetime::provider::time_zones::TimezoneNamesStandardLongV1> for $provider {
+            fn iter_ids(&self) -> Result<std::collections::BTreeSet<icu_provider::DataIdentifierCow<'static>>, icu_provider::DataError> {
+                Ok(icu_provider::baked::DataStore::iter(&Self::DATA_TIMEZONE_NAMES_STANDARD_LONG_V1).collect())
+            }
+        }
+    };
+    ($ provider : ty , DRY) => {};
+    ($ provider : ty , DRY , ITER) => {
+        __impl_timezone_names_standard_long_v1!($provider, ITER);
+    };
+}
+#[doc(inline)]
+pub use __impl_timezone_names_standard_long_v1 as impl_timezone_names_standard_long_v1;

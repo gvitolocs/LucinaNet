@@ -1,0 +1,166 @@
+[BytecodeFunction: <global>] {
+  Parameters: 0, Registers: 1
+     0: NewClosure r0, c0
+     3: StoreGlobal r0, c1, k0
+     7: NewClosure r0, c2
+    10: StoreGlobal r0, c3, k1
+    14: LoadUndefined r0
+    16: Ret r0
+  Constant Table:
+    0: [BytecodeFunction: cotinueToFinallyWithScopeRestore]
+    1: [String: cotinueToFinallyWithScopeRestore]
+    2: [BytecodeFunction: continueToFinallyNoScopeRestore]
+    3: [String: continueToFinallyNoScopeRestore]
+}
+
+[BytecodeFunction: cotinueToFinallyWithScopeRestore] {
+  Parameters: 0, Registers: 8
+      0: PushLexicalScope c0
+      2: LoadEmpty r2
+      4: StoreToScope r2, 0, 0
+      8: NewArray r4, 0
+     11: GetIterator r2, r3, r4
+     15: PopScope 
+  .L0:
+     16: PushLexicalScope c0
+     18: LoadEmpty r4
+     20: StoreToScope r4, 0, 0
+     24: IteratorNext r4, r5, r2, r3
+     29: JumpTrue r5, 84 (.L4)
+     32: StoreToScope r4, 0, 0
+     36: Mov r6, <scope>
+     39: PushLexicalScope c1
+     41: LoadEmpty r7
+     43: StoreToScope r7, 0, 0
+     47: LoadImmediate r7, 1
+     50: StoreToScope r7, 0, 0
+     54: LoadImmediate r7, 2
+     57: JumpToBooleanFalse r7, 7 (.L1)
+     60: PopScope 
+     61: PopScope 
+     62: Jump -46 (.L0)
+  .L1:
+     64: PushLexicalScope c2
+     66: LoadEmpty r7
+     68: StoreToScope r7, 0, 0
+     72: NewClosure r1, c3
+     75: LoadImmediate r7, 3
+     78: StoreToScope r7, 0, 0
+     82: LoadImmediate r7, 4
+     85: JumpToBooleanFalse r7, 8 (.L2)
+     88: PopScope 
+     89: PopScope 
+     90: PopScope 
+     91: Jump -75 (.L0)
+  .L2:
+     93: Mov r0, r1
+     96: PopScope 
+     97: PopScope 
+     98: Jump 12 (.L3)
+    100: LoadImmediate r4, 0
+    103: Mov <scope>, r6
+    106: IteratorClose r2
+    108: Rethrow r5
+  .L3:
+    110: PopScope 
+    111: Jump -95 (.L0)
+  .L4:
+    113: PopScope 
+    114: LoadUndefined r2
+    116: Ret r2
+  Constant Table:
+    0: [ScopeNames]
+    1: [ScopeNames]
+    2: [ScopeNames]
+    3: [BytecodeFunction: inner]
+  Exception Handlers:
+    32-98 -> 100 (r5)
+    106-108 -> 108
+}
+
+[BytecodeFunction: inner] {
+  Parameters: 0, Registers: 2
+     0: LoadFromScope r0, 0, 2
+     4: CheckTdz r0, c0
+     7: LoadFromScope r1, 0, 1
+    11: CheckTdz r1, c1
+    14: Add r0, r0, r1
+    18: LoadFromScope r1, 0, 0
+    22: CheckTdz r1, c2
+    25: Add r0, r0, r1
+    29: Ret r0
+  Constant Table:
+    0: [String: x]
+    1: [String: y]
+    2: [String: z]
+}
+
+[BytecodeFunction: continueToFinallyNoScopeRestore] {
+  Parameters: 0, Registers: 8
+     0: PushFunctionScope c0
+     2: NewArray r4, 0
+     5: GetIterator r2, r3, r4
+  .L0:
+     9: IteratorNext r4, r5, r2, r3
+    14: JumpTrue r5, 81 (.L4)
+    17: StoreToScope r4, 0, 0
+    21: Mov r6, <scope>
+    24: PushLexicalScope c1
+    26: LoadEmpty r7
+    28: StoreToScope r7, 0, 0
+    32: LoadImmediate r7, 1
+    35: StoreToScope r7, 0, 0
+    39: LoadImmediate r7, 2
+    42: JumpToBooleanFalse r7, 6 (.L1)
+    45: PopScope 
+    46: Jump -37 (.L0)
+  .L1:
+    48: PushLexicalScope c2
+    50: LoadEmpty r7
+    52: StoreToScope r7, 0, 0
+    56: NewClosure r1, c3
+    59: LoadImmediate r7, 3
+    62: StoreToScope r7, 0, 0
+    66: LoadImmediate r7, 4
+    69: JumpToBooleanFalse r7, 7 (.L2)
+    72: PopScope 
+    73: PopScope 
+    74: Jump -65 (.L0)
+  .L2:
+    76: Mov r0, r1
+    79: PopScope 
+    80: PopScope 
+    81: Jump 12 (.L3)
+    83: LoadImmediate r4, 0
+    86: Mov <scope>, r6
+    89: IteratorClose r2
+    91: Rethrow r5
+  .L3:
+    93: Jump -84 (.L0)
+  .L4:
+    95: LoadUndefined r2
+    97: Ret r2
+  Constant Table:
+    0: [ScopeNames]
+    1: [ScopeNames]
+    2: [ScopeNames]
+    3: [BytecodeFunction: inner]
+  Exception Handlers:
+    17-81 -> 83 (r5)
+    89-91 -> 91
+}
+
+[BytecodeFunction: inner] {
+  Parameters: 0, Registers: 2
+     0: LoadFromScope r0, 0, 2
+     4: LoadFromScope r1, 0, 1
+     8: CheckTdz r1, c0
+    11: Add r0, r0, r1
+    15: LoadFromScope r1, 0, 0
+    19: CheckTdz r1, c1
+    22: Add r0, r0, r1
+    26: Ret r0
+  Constant Table:
+    0: [String: y]
+    1: [String: z]
+}

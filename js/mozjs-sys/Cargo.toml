@@ -1,0 +1,43 @@
+[package]
+name = "mozjs_sys"
+# Same version as the crate it replaces: selected with [patch.crates-io], so Servo and mozjs see no change.
+version = "153.6.0-1"
+edition = "2021"
+license = "MPL-2.0"
+description = "LucinaNet JavaScript: SpiderMonkey host API compatibility implemented in Rust"
+publish = false
+
+[lib]
+name = "mozjs_sys"
+path = "src/lib.rs"
+
+[features]
+# LucinaNet verification only; not enabled in browser builds.
+lucinanet-gc-stress = ["brimstone_core/gc_stress_test"]
+# Tests of the engine edge wrap only (docs/edge-wrap.md): `engine::poison::failpoint`, a shim made to panic on purpose and
+# per-shim body counters. Never in a browser build.
+lucinanet-failpoints = []
+# Features of the real mozjs_sys, so mozjs keeps building. None of them does anything here.
+debugmozjs = []
+profilemozjs = []
+jit = []
+jitspew = []
+libz-sys = []
+libz-rs = []
+intl = []
+crown = []
+oom_with_hook = []
+
+[dependencies]
+libc = "0.2"
+log = "0.4"
+# `#[engine_shim]`, the wrap of every engine extern "C" entry point (docs/edge-wrap.md).
+lucinanet_engine_shim = { path = "engine-shim" }
+
+# Our fork of Brimstone (MIT), see docs/brimstone-backend.md. Its jemalloc is off: Servo brings its own allocator.
+brimstone_core = { path = "../../third_party/brimstone/src/js", default-features = false, features = ["annex_b", "no_jemalloc"] }
+
+
+[dev-dependencies]
+# tests/engine_shim_coverage.rs parses engine/**/*.rs to refuse an unwrapped extern "C" fn.
+syn = { version = "2", features = ["full", "visit"] }

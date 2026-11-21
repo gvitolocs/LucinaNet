@@ -1,0 +1,32 @@
+[package]
+name = "lucinanet-test262"
+version = "0.1.0"
+edition = "2021"
+license = "MPL-2.0"
+publish = false
+description = "LucinaNet ECMAScript conformance through its browser host API"
+
+[dependencies]
+mozjs = { path = "../../mozjs", default-features = false, features = ["intl", "libz-sys"] }
+mozjs_sys = { path = "../../mozjs-sys" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+
+[patch.crates-io]
+indexmap-allocator-api = { path = "../../../third_party/indexmap-allocator-api" }
+
+
+[workspace]
+
+[lib]
+name = "lucinanet_inventory"
+path = "src/inventory.rs"
+
+[[bin]]
+name = "lucinanet-test262"
+path = "src/main.rs"
+
+[[bin]]
+name = "lucinanet-inventory"
+path = "src/inventory_main.rs"

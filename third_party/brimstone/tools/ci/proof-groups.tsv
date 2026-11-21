@@ -1,0 +1,6 @@
+# Which CI job runs which proof unit (docs/ci/BRIMSTONE-INVENTORY-NOTES.md). Hand-kept: `lucina-ci inventory --write` reads this and
+# refuses a unit it cannot place here. `group<TAB>key key ...`. A key is a verification/ directory for a `mutants/<dir>` unit, and the
+# directory one level above the shipped file's own folder for a `shipped/<dir>/<stem>` unit (inventory.rs takes parts[len-3], the
+# position of `src` in LucinaOS's `crates/<crate>/src/<file>.rs`).
+brimstone	call-position fncache gc-accounting gc-sizing reparse runtime bytecode js
+unhosted	models full tla global-mutations

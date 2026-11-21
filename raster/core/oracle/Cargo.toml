@@ -1,0 +1,11 @@
+[package]
+name = "lucinanet-raster-oracle"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "MPL-2.0"
+description = "Test-only: swgl's C++ GLSL runtime behind extern \"C\" wrappers, the oracle for lucinanet-raster's bit-exactness tests"
+build = "build.rs"
+
+[build-dependencies]
+cc = "1.2"

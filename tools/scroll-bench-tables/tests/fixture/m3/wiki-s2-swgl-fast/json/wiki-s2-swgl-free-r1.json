@@ -1,0 +1,14 @@
+{
+  "meta": {"url": "https://en.wikipedia.org/wiki/Rust_(programming_language)", "steps": 60, "delta_css_px": 120.000, "scale": 2.000, "device_px": [3480, 2180], "css_px": [1740, 1090], "paced": false, "raster": "swgl", "raster_threads": "default", "nominal_ms": 16.7, "step_timeout_ms": 2000, "log": "/dev/stderr"},
+  "inputs": 2, "merged_steps": 1,
+  "summary": {"frames": 1, "display_lists": 0, "stepped_frames": 1, "window_device_px": 7586400, "tiles_redrawn_pct": 0.000, "colour_dirty_pct": 0.000, "full_paint_frames": 0, "layout_diag": true, "async_evidence": "1 frames followed a step and none reported a reflow at all: the compositor moved the scroll tree alone", "swgl_ms": -0.0, "swgl_window_ms": -0},
+  "stats": {
+    "scroll to present: ms": {"unit": "ms", "n": 1, "p50": 1.008, "p90": 1.008, "p99": 1.008, "max": 1.008, "mean": 1.008, "over_16_7": 0, "over_33_3": 0},
+    "paint: wr update+render: ms": {"unit": "ms", "n": 1, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "present: swgl flush: ms": {"unit": "ms", "n": 1, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "copy into page: ms": {"unit": "ms", "n": 1, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0}
+  },
+  "frames": [
+    {"step": 0, "interval_ms": null, "since_step_ms": 1.008, "paint_ms": 0.000, "present_ms": 0.000, "copy_ms": 0.000}
+  ]
+}

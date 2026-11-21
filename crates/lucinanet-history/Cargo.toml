@@ -1,0 +1,10 @@
+[package]
+name = "lucinanet-history"
+version = "0.1.0"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+description = "How many pages LucinaNet keeps alive for Back and Forward, from memory, pressure and age"
+
+[lib]
+path = "src/lib.rs"

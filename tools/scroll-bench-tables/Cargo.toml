@@ -1,0 +1,23 @@
+# The scroll-bench findings tables, in Rust. Its own workspace: it reads the json a run wrote and the
+# job log it ran from, links no engine, and needs nothing but the standard library and serde_json.
+[workspace]
+
+[package]
+name = "scroll-bench-tables"
+version = "0.1.0"
+description = "Turns scroll-bench run directories and matrix job logs into the findings tables"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+
+[[bin]]
+name = "scroll-bench-tables"
+path = "src/main.rs"
+
+[dependencies]
+serde_json = "1"
+
+[profile.release]
+debug = false
+lto = "thin"
+codegen-units = 1

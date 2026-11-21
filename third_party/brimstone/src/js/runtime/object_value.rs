@@ -1,0 +1,1285 @@
+use std::{mem::transmute_copy, num::NonZeroU32};
+
+use rand::Rng;
+
+use crate::{
+    impl_index_map_instance,
+    runtime::{
+        Context, HeapItemKind, Realm, SymbolValue,
+        accessor::Accessor,
+        alloc_error::AllocResult,
+        array_properties::ArrayProperties,
+        bytecode::cache::CachedPropertyLocation,
+        collections::{
+            BsIndexMapField, BsVec, BsVecField, FastHasher, VecInstance,
+            index_map::IndexMapInstance, vec::ValueVec,
+        },
+        embed::{HostObject, host as embed_host},
+        error::type_error,
+        eval_result::EvalResult,
+        gc::{Handle, HeapInfo, HeapItem, HeapPtr, HeapVisitor, IsHeapItem, WithHeapItemKind},
+        intrinsics::typed_array::DynTypedArray,
+        ordinary_object::OrdinaryObject,
+        property::{HeapProperty, Property, PropertyFlags},
+        property_descriptor::PropertyDescriptor,
+        property_key::PropertyKey,
+        proxy_object::ProxyObject,
+        shape::{DefinePropertyLocation, TransitionResult, ValidityGuard},
+        transitions::PropertyLocation,
+        type_utilities::{is_callable_object, is_constructor_object_value},
+        value::Value,
+    },
+};
+
+// Macro that wraps a struct that optionally contains fields. Makes that struct inherit from object
+// with the given additional fields.
+//
+// Safe to apply to root ObjectValue, since it avoids self-referencing conversions.
+#[macro_export]
+macro_rules! extend_object_without_conversions {
+    ($(#[$struct_meta:meta])* $vis:vis struct $name:ident $(<$($generics:tt),*>)? {
+        $($(#[$field_meta:meta])* $field_vis:vis $field_name:ident: $field_type:ty,)*
+    }) => {
+        #[repr(C)]
+        $(#[$struct_meta])*
+        $vis struct $name $(<$($generics),*>)? {
+            // All objects start with object vtable
+            shape: $crate::runtime::HeapPtr<$crate::runtime::shape::Shape>,
+
+            // Inherited object fields
+
+            // Storage of string and symbol properties, including private properties.
+            named_properties: $crate::runtime::HeapPtr<$crate::runtime::AnyHeapItem>,
+
+            // Array index properties by their property key
+            array_properties: $crate::runtime::HeapPtr<$crate::runtime::array_properties::ArrayProperties>,
+
+            // Stable hash code for this object, since object can be moved by GC. Lazily initialized.
+            hash_code: Option<std::num::NonZeroU32>,
+
+            // Child fields
+            $($(#[$field_meta])* $field_vis $field_name: $field_type,)*
+
+            // Start of the inline properties array
+            inline_properties: [$crate::runtime::Value; 0],
+        }
+
+        impl $(<$($generics),*>)? $name $(<$($generics),*>)? {
+            #[allow(dead_code)]
+            #[inline]
+            pub fn shape_ptr(&self) -> $crate::runtime::HeapPtr<$crate::runtime::shape::Shape> {
+                self.shape
+            }
+
+            #[allow(dead_code)]
+            #[inline]
+            pub fn shape(&self) -> $crate::runtime::Handle<$crate::runtime::shape::Shape> {
+                self.shape.to_handle()
+            }
+
+            #[allow(dead_code)]
+            #[inline]
+            pub fn set_shape(&mut self, shape: $crate::runtime::HeapPtr<$crate::runtime::shape::Shape>)  {
+                self.shape = shape
+            }
+
+            /// Pointer to the start of the inline properties array.
+            #[inline]
+            fn inline_properties_ptr(&mut self) -> *mut $crate::runtime::Value {
+                let inline_properties_offset = self.shape_ptr().inline_properties_offset() as usize;
+                unsafe {
+                    let self_ptr = self as *mut _ as *mut u8;
+                    self_ptr.add(inline_properties_offset) as *mut _
+                }
+            }
+
+            /// Get an inline property value at a precomputed byte offset from the start of the
+            /// object, without bounds checks.
+            #[inline]
+            pub fn get_inline_property_unchecked(
+                &self,
+                byte_offset: usize,
+            ) -> $crate::runtime::Value {
+                debug_assert!(byte_offset >= self.shape_ptr().inline_properties_offset() as usize
+                    && byte_offset + size_of::<$crate::runtime::Value>()
+                        <= self.shape_ptr().object_byte_size()
+                );
+
+                unsafe {
+                    let self_ptr = self as *const _ as *const u8;
+                    (self_ptr.add(byte_offset) as *const $crate::runtime::Value).read()
+                }
+            }
+
+            /// Set an inline property value at a precomputed byte offset from the start of the
+            /// object, without bounds checks.
+            #[inline]
+            pub fn set_inline_property_unchecked(
+                &mut self,
+                byte_offset: usize,
+                value: $crate::runtime::Value,
+            ) {
+                debug_assert!(byte_offset >= self.shape_ptr().inline_properties_offset() as usize
+                    && byte_offset + size_of::<$crate::runtime::Value>()
+                        <= self.shape_ptr().object_byte_size()
+                );
+
+                unsafe {
+                    let self_ptr = self as *mut _ as *mut u8;
+                    (self_ptr.add(byte_offset) as *mut $crate::runtime::Value).write(value)
+                }
+            }
+
+            #[inline]
+            pub fn inline_properties_as_slice_mut(
+                &mut self,
+            ) -> &mut [$crate::runtime::Value] {
+                let capacity = self.shape_ptr().inline_properties_capacity() as usize;
+                unsafe { std::slice::from_raw_parts_mut(self.inline_properties_ptr(), capacity) }
+            }
+
+            #[inline]
+            pub fn object_byte_size(&self) -> usize {
+                self.shape_ptr().object_byte_size()
+            }
+        }
+
+        impl $(<$($generics),*>)? $crate::runtime::HeapPtr<$name $(<$($generics),*>)?> {
+            #[allow(dead_code)]
+            #[inline]
+            pub fn as_object(&self) -> $crate::runtime::HeapPtr<$crate::runtime::object_value::ObjectValue> {
+                self.cast()
+            }
+
+            #[allow(dead_code)]
+            #[inline]
+            pub fn as_value(&self) -> $crate::runtime::Value {
+                self.as_object().into()
+            }
+        }
+
+        impl $(<$($generics),*>)? $crate::runtime::Handle<$name $(<$($generics),*>)?> {
+            #[allow(dead_code)]
+            #[inline]
+            pub fn as_object(&self) -> $crate::runtime::Handle<$crate::runtime::object_value::ObjectValue> {
+                self.cast()
+            }
+
+            #[allow(dead_code)]
+            #[inline]
+            pub fn as_value(&self) -> $crate::runtime::Handle<$crate::runtime::Value> {
+                self.cast()
+            }
+
+            /// Cast to an ordinary object so that ordinary object's methods can be called. Only
+            /// used when we know we want the default ordinary methods to be called.
+            #[allow(dead_code)]
+            #[inline]
+            pub fn ordinary_object(&self) -> $crate::runtime::Handle<$crate::runtime::ordinary_object::OrdinaryObject> {
+                self.cast()
+            }
+        }
+    }
+}
+
+// Extend from object for all subclasses. Use this instead of extend_object_without_conversions for
+// all objects except the root object.
+#[macro_export]
+macro_rules! extend_object {
+    ($(#[$struct_meta:meta])* $vis:vis struct $name:ident $(<$($generics:tt),*>)? {
+        $($(#[$field_meta:meta])* $field_vis:vis $field_name:ident: $field_type:ty,)*
+    }) => {
+        $crate::extend_object_without_conversions! {
+            $(#[$struct_meta])*
+            $vis struct $name $(<$($generics),*>)? {
+                $($(#[$field_meta])* $field_vis $field_name: $field_type,)*
+            }
+        }
+
+        impl $(<$($generics),*>)? From<$crate::runtime::HeapPtr<$name $(<$($generics),*>)?>> for $crate::runtime::HeapPtr<$crate::runtime::object_value::ObjectValue> {
+            fn from(value: $crate::runtime::HeapPtr<$name $(<$($generics),*>)?>) -> Self {
+                value.cast()
+            }
+        }
+
+        impl $(<$($generics),*>)? From<$crate::runtime::Handle<$name $(<$($generics),*>)?>> for $crate::runtime::Handle<$crate::runtime::object_value::ObjectValue> {
+            fn from(value: $crate::runtime::Handle<$name $(<$($generics),*>)?>) -> Self {
+                value.cast::<$crate::runtime::object_value::ObjectValue>()
+            }
+        }
+
+        impl $(<$($generics),*>)? $name $(<$($generics),*>)? {
+            /// Build the inline properties slice for this object, given the provided offset and
+            /// capacity for the inline properties array.
+            #[inline]
+            fn inline_properties_as_slice_mut_from_raw(
+                &mut self,
+                inline_properties_offset: usize,
+                inline_properties_capacity: usize,
+            ) -> &mut [$crate::runtime::Value] {
+                unsafe {
+                    let self_ptr = self as *mut _ as *mut u8;
+                    let inline_properties_ptr =
+                        self_ptr.add(inline_properties_offset) as *mut $crate::runtime::Value;
+                    std::slice::from_raw_parts_mut(inline_properties_ptr, inline_properties_capacity)
+                }
+            }
+        }
+
+        impl $(<$($generics),*>)? $crate::runtime::HeapPtr<$name $(<$($generics),*>)?> {
+            #[inline]
+            pub fn visit_object_pointers(&mut self, visitor: &mut impl $crate::runtime::gc::HeapVisitor) {
+                // Capture the inline properties layout before visiting the shape field, since
+                // visiting may rewrite the field to an usable encoding (e.g. an offset).
+                let shape = visitor.resolve_shape(self.shape);
+                let inline_properties_offset = shape.inline_properties_offset() as usize;
+                let inline_properties_capacity = shape.inline_properties_capacity() as usize;
+
+                visitor.visit_pointer(&mut self.shape);
+                visitor.visit_pointer(&mut self.named_properties);
+                visitor.visit_pointer(&mut self.array_properties);
+
+                let inline_properties = self.inline_properties_as_slice_mut_from_raw(
+                    inline_properties_offset,
+                    inline_properties_capacity,
+                );
+                for value in inline_properties {
+                    visitor.visit_value(value);
+                }
+            }
+        }
+    }
+}
+
+// Generic object type encompassing ordinary objects and all forms of exotic objects.
+extend_object_without_conversions! {
+    pub struct ObjectValue {}
+}
+
+impl ObjectValue {
+    /// The lazily assigned identity hash code, if any (crate-internal: `embed::swap_host_objects` keeps it with the address).
+    pub(crate) fn raw_hash_code(&self) -> Option<std::num::NonZeroU32> {
+        self.hash_code
+    }
+
+    pub(crate) fn set_raw_hash_code(&mut self, hash_code: Option<std::num::NonZeroU32>) {
+        self.hash_code = hash_code;
+    }
+
+    /// Whether this object has the [[IsHTMLDDA]] internal slot (ECMA-262 B.3.6): `typeof` reports
+    /// "undefined" for it, `ToBoolean` reports false, and `==` compares equal to null and
+    /// undefined. This is the flag test the three semantics checks are built on.
+    #[inline]
+    pub fn is_htmldda(&self) -> bool {
+        self.shape.is_htmldda()
+    }
+
+    /// Give this object the [[IsHTMLDDA]] internal slot (ECMA-262 B.3.6), the emulated-undefined
+    /// behavior an embedder needs for `document.all` and the test262 hook `$262.IsHTMLDDA` needs.
+    ///
+    /// Called while creating the object, before any other object can reach it: the object moves
+    /// onto a private copy of its shape that carries the flag, because a shape is shared by every
+    /// object that has it and is immutable once in use.
+    pub fn init_htmldda(&mut self, cx: Context) -> AllocResult<()> {
+        // Nothing may allocate between the clone and installing it, since until the new shape is
+        // reachable from the object a garbage collection would collect it.
+        let shape = self.shape.to_handle().clone_with_htmldda(cx)?;
+        self.shape = shape;
+
+        Ok(())
+    }
+
+    // Array properties methods
+    pub fn array_properties_length(&self) -> u32 {
+        self.array_properties.array_length()
+    }
+
+    /// Resolve a property location to it's equivalent cached location.
+    #[inline]
+    pub fn cached_location(location: PropertyLocation) -> CachedPropertyLocation {
+        match location {
+            PropertyLocation::Inline { byte_offset } => {
+                CachedPropertyLocation::Inline { byte_offset }
+            }
+            PropertyLocation::ExternalArray { index } => CachedPropertyLocation::External {
+                byte_offset: BsVec::<Value>::element_byte_offset(index as usize) as u16,
+            },
+        }
+    }
+
+    /// Resolve the cached location and attributes of a named property stored in this map mode
+    /// object.
+    pub fn map_mode_cached_location(&self, key: PropertyKey) -> MapModeCachedLocation {
+        debug_assert!(self.shape.is_map_mode());
+
+        let map = self.named_properties.cast::<NamedPropertiesMap>();
+        let Some(property) = map.get(&key) else {
+            return MapModeCachedLocation::NotFound;
+        };
+
+        // Properties in large maps may be at an offset that cannot be represented in a cache
+        let byte_offset = property.value_ptr() as usize - map.as_ptr() as usize;
+        let Ok(byte_offset) = u16::try_from(byte_offset) else {
+            return MapModeCachedLocation::Uncacheable;
+        };
+
+        MapModeCachedLocation::Found(
+            CachedPropertyLocation::External { byte_offset },
+            property.flags(),
+        )
+    }
+
+    /// Fetch a named property value from the object given its property location.
+    ///
+    /// Assumes the object is in array mode and the property location is valid.
+    #[inline]
+    pub fn lookup_location_unchecked(&self, location: PropertyLocation) -> Value {
+        match location {
+            PropertyLocation::Inline { byte_offset } => {
+                self.get_inline_property_unchecked(byte_offset as usize)
+            }
+            PropertyLocation::ExternalArray { index } => *self
+                .named_properties
+                .cast::<ValueVec>()
+                .get_unchecked(index as usize),
+        }
+    }
+
+    /// Fetch a named property value from the object given its cached property location.
+    ///
+    /// Assumes the cached property location is valid for the object.
+    #[inline]
+    pub fn lookup_cached_location_unchecked(&self, location: CachedPropertyLocation) -> Value {
+        match location {
+            CachedPropertyLocation::Inline { byte_offset } => {
+                self.get_inline_property_unchecked(byte_offset as usize)
+            }
+            CachedPropertyLocation::External { byte_offset } => {
+                let named_properties_ptr = self.named_properties.as_ptr().cast::<u8>();
+                unsafe {
+                    named_properties_ptr
+                        .add(byte_offset as usize)
+                        .cast::<Value>()
+                        .read()
+                }
+            }
+        }
+    }
+
+    /// Set a named property value on the object given its property location.
+    ///
+    /// Assumes the object is in array mode and the property location is valid.
+    #[inline]
+    pub fn set_location_unchecked(&mut self, location: PropertyLocation, value: Value) {
+        match location {
+            PropertyLocation::Inline { byte_offset } => {
+                self.set_inline_property_unchecked(byte_offset as usize, value)
+            }
+            PropertyLocation::ExternalArray { index } => {
+                self.named_properties
+                    .cast::<ValueVec>()
+                    .set_unchecked(index as usize, value);
+            }
+        }
+    }
+
+    /// Set a named property value on the object given its cached property location.
+    ///
+    /// Assumes the cached property location is valid for the object.
+    #[inline]
+    pub fn set_cached_location_unchecked(
+        &mut self,
+        location: CachedPropertyLocation,
+        value: Value,
+    ) {
+        match location {
+            CachedPropertyLocation::Inline { byte_offset } => {
+                self.set_inline_property_unchecked(byte_offset as usize, value)
+            }
+            CachedPropertyLocation::External { byte_offset } => {
+                let named_properties_ptr = self.named_properties.as_ptr().cast::<u8>();
+                unsafe {
+                    named_properties_ptr
+                        .add(byte_offset as usize)
+                        .cast::<Value>()
+                        .write(value)
+                }
+            }
+        }
+    }
+
+    fn get_named_property(&self, cx: Context, key: Handle<PropertyKey>) -> Option<Property> {
+        match self.named_properties() {
+            NamedProperties::Array => {
+                if let Some(def) = self.shape.lookup_own_property(*key) {
+                    let value = self.lookup_location_unchecked(def.location);
+                    Some(Property::from_heap(cx, &HeapProperty::new(value, def.attributes)))
+                } else {
+                    None
+                }
+            }
+            NamedProperties::Map(map) => map
+                .get(&key)
+                .map(|property| Property::from_heap(cx, property)),
+        }
+    }
+
+    pub fn has_named_property(&self, key: Handle<PropertyKey>) -> bool {
+        match self.named_properties() {
+            NamedProperties::Array => self.shape.has_own_property(*key),
+            NamedProperties::Map(map) => map.contains_key(&key),
+        }
+    }
+
+    // Property accessors and mutators
+    pub fn get_property(&self, cx: Context, key: Handle<PropertyKey>) -> Option<Property> {
+        if key.is_array_index() {
+            let array_index = key.as_array_index();
+            return self.array_properties.get_property(cx, array_index);
+        }
+
+        self.get_named_property(cx, key)
+    }
+
+    /// Return the accessor for a named property if the property exists and is an accessor property.
+    pub fn get_named_accessor(&self, key: Handle<PropertyKey>) -> Option<HeapPtr<Accessor>> {
+        match self.named_properties() {
+            NamedProperties::Array => {
+                let def = self.shape.lookup_own_property(*key)?;
+                if !def.attributes.is_accessor() {
+                    return None;
+                }
+
+                let value = self.lookup_location_unchecked(def.location);
+
+                Some(Accessor::from_value(value))
+            }
+            NamedProperties::Map(map) => {
+                let property = map.get(&key)?;
+                if !property.flags().is_accessor() {
+                    return None;
+                }
+
+                Some(Accessor::from_value(property.value()))
+            }
+        }
+    }
+
+    /// PrivateElementFind (https://tc39.es/ecma262/#sec-privateelementfind)
+    pub fn private_element_find(
+        &self,
+        cx: Context,
+        private_name: Handle<SymbolValue>,
+    ) -> Option<Property> {
+        let property_key = PropertyKey::symbol(private_name);
+        self.get_named_property(cx, property_key)
+    }
+
+    pub fn has_private_element(&self, private_name: Handle<SymbolValue>) -> bool {
+        let property_key = PropertyKey::symbol(private_name);
+        self.has_named_property(property_key)
+    }
+
+    /// An iterator over the named properties and their keys of this object that is not GC safe.
+    /// Caller must ensure that a GC cannot occur while the iterator is in use.
+    #[inline]
+    pub fn iter_named_properties_gc_unsafe<F: FnMut(PropertyKey, PropertyFlags)>(&self, mut f: F) {
+        match self.named_properties() {
+            NamedProperties::Array => {
+                self.shape
+                    .iter_own_properties_gc_unsafe(|property_key, flags| {
+                        f(property_key, flags);
+                    });
+            }
+            NamedProperties::Map(map) => {
+                for (property_key, property) in map.iter_gc_unsafe() {
+                    f(property_key, property.flags());
+                }
+            }
+        }
+    }
+}
+
+// Object field accessors
+impl ObjectValue {
+    #[inline]
+    pub fn prototype(&self) -> Option<HeapPtr<ObjectValue>> {
+        self.shape.prototype_ptr()
+    }
+
+    #[inline]
+    fn named_properties(&self) -> NamedProperties {
+        if self.named_properties.is::<ValueVec>() {
+            NamedProperties::Array
+        } else {
+            NamedProperties::Map(self.named_properties.cast::<NamedPropertiesMap>())
+        }
+    }
+
+    #[inline]
+    pub fn named_properties_array(&self) -> HeapPtr<ValueVec> {
+        self.named_properties.cast::<ValueVec>()
+    }
+
+    #[inline]
+    pub fn named_properties_map_opt(&self) -> Option<HeapPtr<NamedPropertiesMap>> {
+        if self.named_properties.is::<NamedPropertiesMap>() {
+            Some(self.named_properties.cast::<NamedPropertiesMap>())
+        } else {
+            None
+        }
+    }
+
+    #[inline]
+    pub fn set_named_properties_array(&mut self, properties: HeapPtr<ValueVec>) {
+        self.named_properties = properties.as_any();
+    }
+
+    #[inline]
+    pub fn set_named_properties_map(&mut self, properties: HeapPtr<NamedPropertiesMap>) {
+        self.named_properties = properties.as_any();
+    }
+
+    #[inline]
+    pub fn array_properties(&self) -> HeapPtr<ArrayProperties> {
+        self.array_properties
+    }
+
+    #[inline]
+    pub fn set_array_properties(&mut self, array_properties: HeapPtr<ArrayProperties>) {
+        self.array_properties = array_properties;
+    }
+
+    #[inline]
+    pub fn set_uninit_hash_code(&mut self) {
+        self.hash_code = None;
+    }
+
+    /// Return the Context for this heap item. Only use when absolutely necessary - prefer to
+    /// instead explicitly pass in the Context.
+    #[inline]
+    fn cx(&self) -> Context {
+        HeapInfo::from_raw_heap_ptr(self as *const _).cx()
+    }
+}
+
+impl ObjectValue {
+    #[inline]
+    pub fn is_shared_array_buffer(&self) -> bool {
+        false
+    }
+
+    #[inline]
+    pub fn is_typed_array(&self) -> bool {
+        let kind = self.shape_ptr().kind() as u8;
+        (kind >= HeapItemKind::Int8ArrayObject as u8)
+            && (kind <= HeapItemKind::Float64ArrayObject as u8)
+    }
+
+    #[inline]
+    pub fn is_arguments_object(&self) -> bool {
+        matches!(
+            self.shape_ptr().kind(),
+            HeapItemKind::MappedArgumentsObject | HeapItemKind::UnmappedArgumentsObject
+        )
+    }
+}
+
+impl HeapPtr<ObjectValue> {
+    #[inline]
+    pub fn hash_code(&mut self) -> NonZeroU32 {
+        match self.hash_code {
+            Some(hash_code) => hash_code,
+            None => {
+                // May be called from std::hash::Hash so cannot pass in Context
+                let hash_code = self.cx().rand.r#gen::<NonZeroU32>();
+                self.hash_code = Some(hash_code);
+                hash_code
+            }
+        }
+    }
+}
+
+impl Handle<ObjectValue> {
+    /// Cast as a virtual object, allowing virtual methods to be called. Manually constructs a
+    /// trait object using the vtable stored in the object shape.
+    #[inline]
+    fn as_trait_object(&self) -> ObjectTraitObject {
+        let data = self as *const Handle<ObjectValue>;
+        let vtable = self.shape_ptr().vtable();
+
+        ObjectTraitObject { data, vtable }
+    }
+
+    #[inline]
+    fn virtual_object(&self) -> &dyn VirtualObject {
+        let trait_object = self.as_trait_object();
+        unsafe { transmute_copy::<ObjectTraitObject, &dyn VirtualObject>(&trait_object) }
+    }
+
+    #[inline]
+    fn virtual_object_mut(&mut self) -> &mut dyn VirtualObject {
+        let trait_object = self.as_trait_object();
+        unsafe { transmute_copy::<ObjectTraitObject, &mut dyn VirtualObject>(&trait_object) }
+    }
+
+    /// Push named property, assuming the object is in array mode.
+    pub fn push_named_array_property(
+        &mut self,
+        cx: Context,
+        value: Handle<Value>,
+    ) -> AllocResult<()> {
+        NamedPropertiesVecField(*self)
+            .maybe_grow_for_push(cx)?
+            .push_without_growing(*value);
+
+        Ok(())
+    }
+
+    /// Initialize the inline named properties of this object with the given values. Assumes the
+    /// object has an array properties shape with the correct number of inline properties (e.g. a
+    /// common shape) and has no properties set yet.
+    pub fn init_inline_properties(&mut self, values: &[Handle<Value>]) {
+        debug_assert!(values.len() == self.shape_ptr().inline_properties_capacity() as usize);
+
+        for (slot, value) in self.inline_properties_as_slice_mut().iter_mut().zip(values) {
+            *slot = **value;
+        }
+    }
+
+    fn set_named_property(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        property: Property,
+    ) -> AllocResult<()> {
+        match self.named_properties() {
+            NamedProperties::Array => {
+                // Add property to the shape which may transition to a new shape
+                let (new_shape, location) =
+                    self.shape()
+                        .define_own_property(cx, key, property.flags())?;
+
+                match location {
+                    DefinePropertyLocation::Location(location) => {
+                        self.set_shape(new_shape);
+                        self.set_location_unchecked(location, *property.value());
+                    }
+                    DefinePropertyLocation::NewArrayProperty => {
+                        self.set_shape(new_shape);
+                        self.push_named_array_property(cx, property.value())?;
+                    }
+                    DefinePropertyLocation::EnterMapMode => {
+                        self.enter_map_mode(cx)?;
+                        self.set_named_property_map_mode(cx, key, property)?;
+                    }
+                }
+            }
+            NamedProperties::Map(_) => {
+                self.set_named_property_map_mode(cx, key, property)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn set_named_property_map_mode(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        property: Property,
+    ) -> AllocResult<()> {
+        let mut map = self.named_properties_map_opt().unwrap();
+
+        // Overwrite an existing entry in place without growing the map so that its cached location
+        // remains stable.
+        let needs_new_shape = if let Some(existing) = map.get_mut(&key) {
+            let flags_changed = existing.flags() != property.flags();
+            *existing = property.to_heap();
+            flags_changed
+        } else {
+            NamedPropertiesMapField(*self)
+                .maybe_grow_for_insertion(cx)?
+                .insert_without_growing(*key, property.to_heap());
+            true
+        };
+
+        if needs_new_shape {
+            self.update_shape_for_map_mode_mutation(cx)?;
+        }
+
+        self.shape.invalidate_if_prototype_object();
+
+        Ok(())
+    }
+
+    fn remove_named_property(&mut self, cx: Context, key: Handle<PropertyKey>) -> AllocResult<()> {
+        // Array mode does not support removing properties so convert to map mode first
+        let mut map = match self.named_properties() {
+            NamedProperties::Array => *self.enter_map_mode(cx)?,
+            NamedProperties::Map(map) => map,
+        };
+
+        // Removing a nonexistent property is not a shape-changing mutation
+        if !map.remove(&key) {
+            return Ok(());
+        }
+
+        self.update_shape_for_map_mode_mutation(cx)?;
+        self.shape.invalidate_if_prototype_object();
+
+        Ok(())
+    }
+
+    fn update_shape_for_map_mode_mutation(&mut self, cx: Context) -> AllocResult<()> {
+        debug_assert!(matches!(self.named_properties(), NamedProperties::Map(_)));
+
+        // Prototype object shapes are 1:1 with their object, even in map mode
+        if self.shape.is_prototype_object() {
+            return Ok(());
+        }
+
+        let new_shape = self.shape().clone_for_map_mode_mutation(cx)?;
+        self.set_shape(new_shape);
+
+        Ok(())
+    }
+
+    // Property accessors and mutators
+    pub fn set_property(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        property: Property,
+    ) -> AllocResult<()> {
+        if key.is_array_index() {
+            let array_index = key.as_array_index();
+            ArrayProperties::set_property(cx, *self, array_index, property)?;
+
+            return Ok(());
+        }
+
+        self.set_named_property(cx, key, property)
+    }
+
+    pub fn remove_property(&mut self, cx: Context, key: Handle<PropertyKey>) -> AllocResult<()> {
+        if key.is_array_index() {
+            let array_index = key.as_array_index();
+            self.array_properties.remove_property(array_index);
+
+            return Ok(());
+        }
+
+        self.remove_named_property(cx, key)
+    }
+
+    pub fn private_element_set(
+        &mut self,
+        cx: Context,
+        private_name: Handle<SymbolValue>,
+        value: Handle<Value>,
+    ) -> AllocResult<()> {
+        let property_key = PropertyKey::symbol(private_name);
+        let property = Property::private_field(value);
+
+        self.set_named_property(cx, property_key, property)
+    }
+
+    /// PrivateFieldAdd (https://tc39.es/ecma262/#sec-privatefieldadd)
+    /// PrivateMethodOrAccessorAdd (https://tc39.es/ecma262/#sec-privatemethodoraccessoradd)
+    pub fn private_property_add(
+        &mut self,
+        cx: Context,
+        private_name: Handle<SymbolValue>,
+        private_property: Property,
+    ) -> EvalResult<()> {
+        if !self.is_extensible(cx)? {
+            // PrivateFieldAdd and PrivateMethodSet both start by refusing a non-extensible object,
+            // whether or not the private element already exists on it.
+            return type_error(cx, "cannot add a private element to a non-extensible object");
+        }
+
+        if self.has_private_element(private_name) {
+            type_error(cx, "private property already defined")
+        } else {
+            let property_key = PropertyKey::symbol(private_name);
+            self.set_named_property(cx, property_key, private_property)?;
+
+            Ok(())
+        }
+    }
+
+    pub fn set_array_properties_length(
+        &mut self,
+        cx: Context,
+        new_length: u32,
+    ) -> AllocResult<bool> {
+        ArrayProperties::set_len(cx, *self, new_length)
+    }
+
+    /// Convert this object into map mode, which replaces it with a hash map from property keys to
+    /// property values.
+    ///
+    /// Return the new named properties map.
+    pub fn enter_map_mode(&mut self, cx: Context) -> AllocResult<Handle<NamedPropertiesMap>> {
+        debug_assert!(!self.shape.is_map_mode());
+
+        // Replace properties array with a map built from the shape's property definitions
+        let num_properties = self.shape.num_properties();
+        let map_capacity = NamedPropertiesMap::min_capacity_needed(num_properties as usize);
+        let mut map = NamedPropertiesMap::new(cx, map_capacity)?.to_handle();
+
+        for property_definition in self.shape.property_definitions_slice() {
+            let value = self.lookup_location_unchecked(property_definition.location);
+            let property = HeapProperty::new(value, property_definition.attributes);
+            map.insert_without_growing(property_definition.key, property);
+        }
+
+        // Clear the inline properties to avoid leaking strong references
+        for slot in self.inline_properties_as_slice_mut() {
+            *slot = Value::undefined();
+        }
+
+        self.set_named_properties_map(*map);
+
+        // Convert shape to map mode, possibly allocating a new one
+        let mut old_shape = self.shape();
+        let new_shape = old_shape.convert_to_map_mode(cx)?;
+        self.set_shape(new_shape);
+
+        Ok(map)
+    }
+}
+
+// Non-virtual object internal methods from spec
+impl Handle<ObjectValue> {
+    /// The [[GetPrototypeOf]] internal method for all objects. Dispatches to type-specific
+    /// implementations as necessary.
+    pub fn get_prototype_of(&self, cx: Context) -> EvalResult<Option<Handle<ObjectValue>>> {
+        if let Some(proxy_object) = self.as_opt::<ProxyObject>() {
+            proxy_object.get_prototype_of(cx)
+        } else if let Some(handler) = self.host_proxy_handler() {
+            embed_host(cx).proxy_get_prototype(cx, handler, *self)
+        } else {
+            Ok(self.prototype().map(|p| p.to_handle()))
+        }
+    }
+
+    /// The [[SetPrototypeOf]] internal method for all objects. Dispatches to type-specific
+    /// implementations as necessary.
+    pub fn set_prototype_of(
+        &mut self,
+        cx: Context,
+        new_prototype: Option<Handle<ObjectValue>>,
+    ) -> EvalResult<bool> {
+        if let Some(mut proxy_object) = self.as_opt::<ProxyObject>() {
+            proxy_object.set_prototype_of(cx, new_prototype)
+        } else if let Some(handler) = self.host_proxy_handler() {
+            embed_host(cx).proxy_set_prototype(cx, handler, *self, new_prototype)
+        } else {
+            self.ordinary_set_prototype_of(cx, new_prototype)
+        }
+    }
+
+    /// The [[IsExtensible]] internal method for all objects. Dispatches to type-specific
+    /// implementations as necessary.
+    pub fn is_extensible(&self, cx: Context) -> EvalResult<bool> {
+        if let Some(proxy_object) = self.as_opt::<ProxyObject>() {
+            proxy_object.is_extensible(cx)
+        } else if let Some(handler) = self.host_proxy_handler() {
+            embed_host(cx).proxy_is_extensible(cx, handler, *self)
+        } else {
+            Ok(self.shape.is_extensible())
+        }
+    }
+
+    /// The [[PreventExtensions]] internal method for all objects. Dispatches to type-specific
+    /// implementations as necessary.
+    pub fn prevent_extensions(&mut self, cx: Context) -> EvalResult<bool> {
+        if let Some(mut proxy_object) = self.as_opt::<ProxyObject>() {
+            return proxy_object.prevent_extensions(cx);
+        }
+
+        if let Some(handler) = self.host_proxy_handler() {
+            return embed_host(cx).proxy_prevent_extensions(cx, handler, *self);
+        }
+
+        self.ordinary_prevent_extensions(cx)
+    }
+
+    /// The [[PreventExtensions]] internal method for all non-proxy objects.
+    pub fn ordinary_prevent_extensions(&mut self, cx: Context) -> EvalResult<bool> {
+        if self.is_typed_array() {
+            if !is_typed_array_fixed_length(self.as_typed_array()) {
+                return Ok(false);
+            }
+        }
+
+        // OrdinaryPreventExtensions (https://tc39.es/ecma262/#sec-ordinarypreventextensions)
+        match self.shape().prevent_extensions(cx)? {
+            TransitionResult::Transitioned(new_shape) => {
+                self.set_shape(new_shape);
+            }
+            TransitionResult::EnterMapMode => {
+                self.enter_map_mode(cx)?;
+                match self.shape().prevent_extensions(cx)? {
+                    TransitionResult::Transitioned(new_shape) => self.set_shape(new_shape),
+                    TransitionResult::EnterMapMode => unreachable!("already in map mode"),
+                }
+            }
+        }
+
+        Ok(true)
+    }
+}
+
+impl Handle<ObjectValue> {
+    /// The proxy handler of a host proxy object, if this is one.
+    #[inline]
+    fn host_proxy_handler(&self) -> Option<*const std::ffi::c_void> {
+        let host_object = self.as_opt::<HostObject>()?;
+        let header = host_object.header();
+        if header.is_proxy() {
+            Some(header.handler())
+        } else {
+            None
+        }
+    }
+}
+
+/// IsTypedArrayFixedLength (https://tc39.es/ecma262/#sec-istypedarrayfixedlength)
+fn is_typed_array_fixed_length(typed_array: DynTypedArray) -> bool {
+    if typed_array.array_length().is_none() {
+        return false;
+    }
+
+    typed_array.viewed_array_buffer().is_fixed_length()
+}
+
+// Wrap all virtual methods for easy access
+impl Handle<ObjectValue> {
+    #[inline]
+    pub fn get_own_property(
+        &self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+    ) -> EvalResult<Option<Property>> {
+        self.virtual_object().get_own_property(cx, key)
+    }
+
+    #[inline]
+    pub fn define_own_property(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        desc: PropertyDescriptor,
+    ) -> EvalResult<bool> {
+        self.virtual_object_mut().define_own_property(cx, key, desc)
+    }
+
+    #[inline]
+    pub fn create_data_property(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        value: Handle<Value>,
+    ) -> EvalResult<bool> {
+        self.virtual_object_mut()
+            .create_data_property(cx, key, value)
+    }
+
+    #[inline]
+    pub fn has_property(&self, cx: Context, key: Handle<PropertyKey>) -> EvalResult<bool> {
+        self.virtual_object().has_property(cx, key)
+    }
+
+    #[inline]
+    pub fn get(
+        &self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        receiver: Handle<Value>,
+    ) -> EvalResult<Handle<Value>> {
+        self.virtual_object().get(cx, key, receiver)
+    }
+
+    #[inline]
+    pub fn set(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        value: Handle<Value>,
+        receiver: Handle<Value>,
+    ) -> EvalResult<bool> {
+        self.virtual_object_mut().set(cx, key, value, receiver)
+    }
+
+    #[inline]
+    pub fn delete(&mut self, cx: Context, key: Handle<PropertyKey>) -> EvalResult<bool> {
+        self.virtual_object_mut().delete(cx, key)
+    }
+
+    #[inline]
+    pub fn own_property_keys(&self, cx: Context) -> EvalResult<Vec<Handle<Value>>> {
+        self.virtual_object().own_property_keys(cx)
+    }
+
+    /// Call this object through its virtual [[Call]] method. Only valid for callable exotic
+    /// objects (proxies and host objects).
+    #[inline]
+    pub fn call_virtual(
+        &self,
+        cx: Context,
+        this_argument: Handle<Value>,
+        arguments: &[Handle<Value>],
+    ) -> EvalResult<Handle<Value>> {
+        self.virtual_object().call(cx, this_argument, arguments)
+    }
+
+    /// Construct this object through its virtual [[Construct]] method. Only valid for constructor
+    /// exotic objects (proxies and host objects).
+    #[inline]
+    pub fn construct_virtual(
+        &self,
+        cx: Context,
+        arguments: &[Handle<Value>],
+        new_target: Handle<ObjectValue>,
+    ) -> EvalResult<Handle<ObjectValue>> {
+        self.virtual_object().construct(cx, arguments, new_target)
+    }
+
+    // Type utilities
+    #[inline]
+    pub fn is_callable(&self) -> bool {
+        is_callable_object(**self)
+    }
+
+    #[inline]
+    pub fn is_constructor(&self) -> bool {
+        is_constructor_object_value(*self)
+    }
+
+    #[inline]
+    pub fn get_realm(&self, cx: Context) -> EvalResult<HeapPtr<Realm>> {
+        self.virtual_object().get_realm(cx)
+    }
+
+    #[inline]
+    pub fn as_typed_array(&self) -> DynTypedArray {
+        self.virtual_object().as_typed_array()
+    }
+
+    /// Request a validity guard for this object's entire prototype chain. Returns the validity
+    /// guard of the object's prototype object, or None if this object has no prototype.
+    pub fn request_prototype_validity_guard(
+        &mut self,
+        cx: Context,
+    ) -> AllocResult<Option<ValidityGuard>> {
+        let Some(prototype) = self.prototype() else {
+            return Ok(None);
+        };
+
+        let mut prototype = prototype.to_handle();
+
+        Ok(Some(prototype.request_own_validity_guard(cx)?))
+    }
+
+    /// Request a validity guard for this prototype object. Assumes that this is called on a
+    /// prototype object, lazily converting its shape if it is not already a prototype object shape.
+    pub fn request_own_validity_guard(&mut self, cx: Context) -> AllocResult<ValidityGuard> {
+        let mut shape = self.shape();
+
+        // Shapes are lazily converted into prototype shapes
+        if !shape.is_prototype_object() {
+            let prototype_shape = shape.clone_as_prototype_object_shape(cx)?;
+            self.set_shape(*prototype_shape);
+            shape = prototype_shape;
+        }
+
+        shape.request_validity_guard(cx)
+    }
+}
+
+impl Handle<ObjectValue> {
+    /// Whether this is a heap item of a particular type.
+    #[inline]
+    pub fn is<T: WithHeapItemKind>(&self) -> bool {
+        self.shape_ptr().kind() == T::KIND
+    }
+
+    /// Return this value as a heap item of a particular type, or None if it is not of that type.
+    #[inline]
+    pub fn as_opt<T: WithHeapItemKind>(&self) -> Option<Handle<T>> {
+        if self.is::<T>() {
+            Some(self.cast())
+        } else {
+            None
+        }
+    }
+}
+
+pub type VirtualObjectVtable = *const ();
+
+/// Virtual methods for an object. Creates vtable which is stored in object shape.
+pub trait VirtualObject {
+    fn as_ordinary_object(&self) -> Handle<OrdinaryObject>;
+
+    fn get_own_property(
+        &self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+    ) -> EvalResult<Option<Property>> {
+        self.as_ordinary_object().get_own_property(cx, key)
+    }
+
+    fn define_own_property(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        desc: PropertyDescriptor,
+    ) -> EvalResult<bool> {
+        self.as_ordinary_object().define_own_property(cx, key, desc)
+    }
+
+    /// Specialized version of [[DefineOwnProperty]] for defining an ordinary data property.
+    ///
+    /// CreateDataProperty (https://tc39.es/ecma262/#sec-createdataproperty)
+    fn create_data_property(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        value: Handle<Value>,
+    ) -> EvalResult<bool> {
+        let desc = PropertyDescriptor::default_data(value);
+        self.define_own_property(cx, key, desc)
+    }
+
+    fn has_property(&self, cx: Context, key: Handle<PropertyKey>) -> EvalResult<bool> {
+        self.as_ordinary_object().has_property(cx, key)
+    }
+
+    fn get(
+        &self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        receiver: Handle<Value>,
+    ) -> EvalResult<Handle<Value>> {
+        self.as_ordinary_object().get(cx, key, receiver)
+    }
+
+    fn set(
+        &mut self,
+        cx: Context,
+        key: Handle<PropertyKey>,
+        value: Handle<Value>,
+        receiver: Handle<Value>,
+    ) -> EvalResult<bool> {
+        self.as_ordinary_object().set(cx, key, value, receiver)
+    }
+
+    fn delete(&mut self, cx: Context, key: Handle<PropertyKey>) -> EvalResult<bool> {
+        self.as_ordinary_object().delete(cx, key)
+    }
+
+    fn own_property_keys(&self, cx: Context) -> EvalResult<Vec<Handle<Value>>> {
+        self.as_ordinary_object().own_property_keys(cx)
+    }
+
+    fn call(
+        &self,
+        _: Context,
+        _this_argument: Handle<Value>,
+        _arguments: &[Handle<Value>],
+    ) -> EvalResult<Handle<Value>> {
+        panic!("[[Call]] not implemented for this object")
+    }
+
+    fn construct(
+        &self,
+        _: Context,
+        _arguments: &[Handle<Value>],
+        _new_target: Handle<ObjectValue>,
+    ) -> EvalResult<Handle<ObjectValue>> {
+        panic!("[[Construct]] not implemented for this object")
+    }
+
+    fn get_realm(&self, cx: Context) -> EvalResult<HeapPtr<Realm>> {
+        Ok(cx.current_realm_ptr())
+    }
+
+    fn as_typed_array(&self) -> DynTypedArray {
+        unreachable!("as_typed_array can only be called on typed arrays")
+    }
+}
+
+enum NamedProperties {
+    Array,
+    Map(HeapPtr<NamedPropertiesMap>),
+}
+
+impl_index_map_instance!(NamedPropertiesMap, PropertyKey, HeapProperty, FastHasher);
+
+impl HeapItem for NamedPropertiesMap {
+    fn byte_size(map: HeapPtr<NamedPropertiesMap>) -> usize {
+        NamedPropertiesMap::calculate_size_in_bytes(map.capacity())
+    }
+
+    fn visit_pointers(map: HeapPtr<NamedPropertiesMap>, visitor: &mut impl HeapVisitor) {
+        NamedPropertiesMap::visit_pointers_impl(map, visitor, |mut map, visitor| {
+            for (property_key, property) in map.iter_mut_gc_unsafe() {
+                visitor.visit_property_key(property_key);
+                property.visit_pointers(visitor);
+            }
+        });
+    }
+}
+
+pub struct NamedPropertiesMapField(Handle<ObjectValue>);
+
+impl BsIndexMapField<NamedPropertiesMap> for NamedPropertiesMapField {
+    fn get(&self) -> HeapPtr<NamedPropertiesMap> {
+        self.0.named_properties.cast::<NamedPropertiesMap>()
+    }
+
+    fn set_new(
+        &mut self,
+        cx: Context,
+        capacity: usize,
+    ) -> AllocResult<HeapPtr<NamedPropertiesMap>> {
+        let map = NamedPropertiesMap::new(cx, capacity)?;
+        self.0.set_named_properties_map(map);
+        Ok(map)
+    }
+}
+
+struct NamedPropertiesVecField(Handle<ObjectValue>);
+
+impl BsVecField<ValueVec> for NamedPropertiesVecField {
+    fn get(&self) -> HeapPtr<ValueVec> {
+        self.0.named_properties_array()
+    }
+
+    fn set_new(&mut self, cx: Context, capacity: usize) -> AllocResult<HeapPtr<ValueVec>> {
+        let new_vec = ValueVec::new(cx, capacity)?;
+        self.0.set_named_properties_array(new_vec);
+        Ok(new_vec)
+    }
+}
+
+// Same layout as in std::raw, which is not exposed in stable. This definition is only used
+// to properly type our custom trait object creation.
+#[repr(C)]
+struct ObjectTraitObject {
+    data: *const Handle<ObjectValue>,
+    vtable: *const (),
+}
+
+// Only necessary so we get deref for HeapPtrs.
+impl IsHeapItem for ObjectValue {}
+
+/// The result of resolving the cached location of a named property in a map mode object.
+pub enum MapModeCachedLocation {
+    Found(CachedPropertyLocation, PropertyFlags),
+    NotFound,
+    Uncacheable,
+}

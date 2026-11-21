@@ -1,0 +1,36 @@
+[package]
+name = "lucinanet-ui"
+version = "0.1.0"
+description = "LucinaNet's window, and what any engine behind it has to do"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+
+[features]
+# A window on a Linux desktop (`--desktop`), for the build host; Juno builds go without it.
+desktop = ["dep:winit", "dep:softbuffer"]
+
+[dependencies]
+keyboard-types = "0.8"
+# LucinaOS main: the Mac preview needs lucina-app with macOS support (66742c78a4)
+# and lucina-glass with the browser widgets (b76584ac31), both merged into this tip.
+# This tip also has 008c7b99a, which takes lucina-app's input_watch off Linux.
+lucina-app = { path = "../../lucinaos/crates/lucina-app" }
+
+lucina-glass = { path = "../../lucinaos/crates/lucina-glass" }
+
+libc = "0.2"
+lucinanet-omnibox = { path = "../lucinanet-omnibox" }
+lucinanet-shortcuts = { path = "../lucinanet-shortcuts" }
+lucinanet-zoom = { path = "../lucinanet-zoom" }
+png = "0.18"
+url = "2"
+
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+softbuffer = { version = "0.4", optional = true, default-features = false, features = ["x11", "x11-dlopen"] }
+winit = { version = "0.30", optional = true, default-features = false, features = ["x11", "rwh_06"] }
+
+# macOS: winit uses AppKit and softbuffer CoreGraphics; neither needs a platform feature.
+[target.'cfg(target_os = "macos")'.dependencies]
+softbuffer = { version = "0.4", optional = true, default-features = false }
+winit = { version = "0.30", optional = true, default-features = false, features = ["rwh_06"] }

@@ -1,0 +1,29 @@
+[package]
+name = "gltrace"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "MPL-2.0"
+description = "Replays swgl call traces (LUCINANET_GLTRACE) offline: frames as PNG, timings, per-draw hashes"
+
+[dependencies]
+# Every gltrace run compares against strict swgl (compare.sh, PERF.md, DESIGN.md "Correctness bar").
+swgl = { path = "../../swgl", features = ["strict-fp"] }
+gleam = "0.15.1"
+png = "0.17"
+
+[workspace]
+
+# swgl compiles its C++ asserts out when debug assertions are off (NDEBUG, swgl/build.rs), as the shipped build does;
+# the replays in tests/ compare against that build. opt-level 3 keeps the trace replays quick.
+[profile.dev]
+opt-level = 3
+debug-assertions = false
+
+# lucinanet-raster needs cross-crate inlining (lane ops, samplers, blend) to keep up with swgl's one C++ unit:
+# fat LTO and one codegen unit (raster/PERF.md).
+[profile.release]
+opt-level = 3
+debug = false
+lto = "fat"
+codegen-units = 1

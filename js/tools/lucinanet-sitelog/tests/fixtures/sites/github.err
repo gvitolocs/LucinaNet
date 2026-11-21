@@ -1,0 +1,589 @@
+phase 51705.506374 main
+phase 51705.507130 engine thread
+phase 51705.510562 rendering context
+phase 51705.513859 servo built
+phase 51705.516789 web view built
+lucinanet: engine up in 9 ms, rss 35456 KiB
+phase font list: 8 faces in 0 ms
+phase 51705.522355 first frame painted
+netphase 51705.534911 fetch https://github.com/servo/servo 0.0 ms
+netphase 51705.536669 request https://github.com/servo/servo 0.0 ms
+netphase 51705.546158 dns github.com 8.5 ms
+netphase 51705.547505 dns-wait github.com 10.7 ms
+netphase 51705.565104 dns+tcp 28.3 ms
+netphase 51705.585635 certificate verification 1.4 ms
+netphase 51705.585832 connected https://github.com/ (dns+tcp+tls) 49.1 ms
+netphase 51706.394524 response headers https://github.com/servo/servo 857.9 ms
+netphase 51706.397102 fetch https://github.githubassets.com/assets/light-0011b1fed09cb294.css 0.0 ms
+netphase 51706.397308 request https://github.githubassets.com/assets/light-0011b1fed09cb294.css 0.0 ms
+netphase 51706.397403 fetch https://github.githubassets.com/assets/light_high_contrast-267ab2e12d3b7ade.css 0.0 ms
+netphase 51706.398029 fetch https://github.githubassets.com/assets/dark-37b5e41810563d82.css 0.0 ms
+netphase 51706.398067 fetch https://github.githubassets.com/assets/dark_high_contrast-d69295870cb5f203.css 0.0 ms
+netphase 51706.398672 request https://github.githubassets.com/assets/light_high_contrast-267ab2e12d3b7ade.css 0.0 ms
+netphase 51706.398906 fetch https://github.githubassets.com/assets/primer-primitives-bd624c4ec96b42e9.css 0.0 ms
+netphase 51706.398931 fetch https://github.githubassets.com/assets/primer-2aeb1babdc762f70.css 0.0 ms
+netphase 51706.398949 fetch https://github.githubassets.com/assets/global-747fc17113063fdc.css 0.0 ms
+netphase 51706.398966 fetch https://github.githubassets.com/assets/github-d4a7053a1b3b1731.css 0.0 ms
+netphase 51706.398984 fetch https://github.githubassets.com/assets/repository-97bab336048c27cf.css 0.0 ms
+netphase 51706.399007 fetch https://github.githubassets.com/assets/code-c001ff1d5956e7b2.css 0.0 ms
+netphase 51706.399080 request https://github.githubassets.com/assets/dark-37b5e41810563d82.css 0.0 ms
+netphase 51706.399117 request https://github.githubassets.com/assets/dark_high_contrast-d69295870cb5f203.css 0.0 ms
+lucinanet: history depth 3 over 1 tabs (was None)
+netphase 51706.399331 request https://github.githubassets.com/assets/primer-primitives-bd624c4ec96b42e9.css 0.0 ms
+netphase 51706.399374 request https://github.githubassets.com/assets/primer-2aeb1babdc762f70.css 0.0 ms
+netphase 51706.399407 request https://github.githubassets.com/assets/global-747fc17113063fdc.css 0.0 ms
+netphase 51706.399448 request https://github.githubassets.com/assets/github-d4a7053a1b3b1731.css 0.0 ms
+netphase 51706.399479 request https://github.githubassets.com/assets/repository-97bab336048c27cf.css 0.0 ms
+netphase 51706.399515 request https://github.githubassets.com/assets/code-c001ff1d5956e7b2.css 0.0 ms
+netphase 51706.400066 fetch https://github.githubassets.com/assets/react-fa5e2e82e6e0ecc0.js 0.0 ms
+netphase 51706.403062 fetch https://github.githubassets.com/assets/react-compiler-runtime-4610bd6d3de9c049.j 0.0 ms
+netphase 51706.403251 fetch https://github.githubassets.com/assets/scheduler-58b860b049ca307c.js 0.0 ms
+netphase 51706.403302 fetch https://github.githubassets.com/assets/react-dom-c7f52540bb6b77ed.js 0.0 ms
+netphase 51706.403361 fetch https://github.githubassets.com/assets/high-contrast-cookie-35ae5dee64dc5768.js 0.0 ms
+netphase 51706.403416 fetch https://github.githubassets.com/assets/core-0cd015bc14513580.js 0.0 ms
+netphase 51706.403460 fetch https://github.githubassets.com/assets/app-runtime.0cb71910f854d01a.module.css 0.0 ms
+netphase 51706.403586 request https://github.githubassets.com/assets/react-fa5e2e82e6e0ecc0.js 0.0 ms
+netphase 51706.403635 request https://github.githubassets.com/assets/react-compiler-runtime-4610bd6d3de9c049.j 0.0 ms
+netphase 51706.403672 request https://github.githubassets.com/assets/scheduler-58b860b049ca307c.js 0.0 ms
+netphase 51706.403709 request https://github.githubassets.com/assets/react-dom-c7f52540bb6b77ed.js 0.0 ms
+netphase 51706.403755 request https://github.githubassets.com/assets/high-contrast-cookie-35ae5dee64dc5768.js 0.0 ms
+netphase 51706.403809 request https://github.githubassets.com/assets/core-0cd015bc14513580.js 0.0 ms
+netphase 51706.403847 request https://github.githubassets.com/assets/app-runtime.0cb71910f854d01a.module.css 0.0 ms
+netphase 51706.404277 fetch https://github.githubassets.com/assets/react-core.8256156a5a5d800d.module.css 0.0 ms
+netphase 51706.404307 fetch https://github.githubassets.com/assets/codespaces-081eef7494b3d734.js 0.0 ms
+netphase 51706.404325 fetch https://github.githubassets.com/assets/repositories-cc7988450bbef15e.js 0.0 ms
+netphase 51706.404367 fetch https://github.githubassets.com/assets/code-menu-2d323ddc5adb0f64.js 0.0 ms
+netphase 51706.404388 fetch https://github.githubassets.com/assets/code-view-a0e205571facc60b.js 0.0 ms
+netphase 51706.404410 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.404436 fetch https://github.githubassets.com/assets/code-view.366e6704256fed98.module.css 0.0 ms
+netphase 51706.404454 fetch https://github.githubassets.com/assets/react-dom-client-35b308126995de85.js 0.0 ms
+netphase 51706.404483 fetch https://github.githubassets.com/assets/react-is-e0b593954b4706d8.js 0.0 ms
+netphase 51706.404506 fetch https://github.githubassets.com/assets/react-jsx-runtime-4915cb0f5b3aff04.js 0.0 ms
+netphase 51706.404528 fetch https://github.githubassets.com/assets/react-reconciler-8e99e505c4429605.js 0.0 ms
+netphase 51706.404553 fetch https://github.githubassets.com/assets/light-0011b1fed09cb294.css 0.0 ms
+netphase 51706.404582 fetch https://github.githubassets.com/assets/light_high_contrast-267ab2e12d3b7ade.css 0.0 ms
+netphase 51706.404618 fetch https://github.githubassets.com/assets/dark-37b5e41810563d82.css 0.0 ms
+netphase 51706.404641 fetch https://github.githubassets.com/assets/dark_high_contrast-d69295870cb5f203.css 0.0 ms
+netphase 51706.404662 fetch https://github.githubassets.com/assets/primer-primitives-bd624c4ec96b42e9.css 0.0 ms
+netphase 51706.404684 fetch https://github.githubassets.com/assets/primer-2aeb1babdc762f70.css 0.0 ms
+netphase 51706.404706 fetch https://github.githubassets.com/assets/global-747fc17113063fdc.css 0.0 ms
+netphase 51706.404728 fetch https://github.githubassets.com/assets/github-d4a7053a1b3b1731.css 0.0 ms
+netphase 51706.404772 fetch https://github.githubassets.com/assets/repository-97bab336048c27cf.css 0.0 ms
+netphase 51706.404793 fetch https://github.githubassets.com/assets/code-c001ff1d5956e7b2.css 0.0 ms
+netphase 51706.404813 fetch https://github.githubassets.com/assets/high-contrast-cookie-35ae5dee64dc5768.js 0.0 ms
+netphase 51706.404840 fetch https://github.githubassets.com/assets/wp-runtime-0bff36c3ac4b18b2.js 0.0 ms
+netphase 51706.404867 fetch https://github.githubassets.com/assets/app-runtime-445d965f204dd5cb.js 0.0 ms
+netphase 51706.404888 fetch https://github.githubassets.com/assets/react-core-477123209932519b.js 0.0 ms
+netphase 51706.404913 fetch https://github.githubassets.com/assets/pb-f24056aed715c435.js 0.0 ms
+netphase 51706.404935 fetch https://github.githubassets.com/assets/core-0cd015bc14513580.js 0.0 ms
+netphase 51706.404961 fetch https://github.githubassets.com/assets/app-runtime.0cb71910f854d01a.module.css 0.0 ms
+netphase 51706.404983 fetch https://github.githubassets.com/assets/react-core.8256156a5a5d800d.module.css 0.0 ms
+netphase 51706.405004 fetch https://github.githubassets.com/assets/codespaces-081eef7494b3d734.js 0.0 ms
+netphase 51706.405029 fetch https://github.githubassets.com/assets/repositories-cc7988450bbef15e.js 0.0 ms
+netphase 51706.405047 fetch https://github.githubassets.com/assets/code-menu-2d323ddc5adb0f64.js 0.0 ms
+netphase 51706.405069 fetch https://github.githubassets.com/assets/primer-react-9ee791437767e925.js 0.0 ms
+netphase 51706.405093 fetch https://github.githubassets.com/assets/ncx-6706f20793d34656.js 0.0 ms
+netphase 51706.405117 fetch https://github.githubassets.com/assets/9zy-9ec7aab53bbbd693.js 0.0 ms
+netphase 51706.405141 fetch https://github.githubassets.com/assets/360-fd75fa985cb61e08.js 0.0 ms
+netphase 51706.405225 fetch https://github.githubassets.com/assets/t7l-27c9c7756dcbe66c.js 0.0 ms
+netphase 51706.405249 fetch https://github.githubassets.com/assets/4u-239741f82c1b95c5.js 0.0 ms
+netphase 51706.405288 fetch https://github.githubassets.com/assets/s07-cebf3c025b8dd15c.js 0.0 ms
+netphase 51706.405312 fetch https://github.githubassets.com/assets/25q-c1b9e628aa3a5e24.js 0.0 ms
+netphase 51706.405333 fetch https://github.githubassets.com/assets/dp-993d789c33687e4b.js 0.0 ms
+netphase 51706.405356 fetch https://github.githubassets.com/assets/5tu-813cca64bc7f06c7.js 0.0 ms
+netphase 51706.405377 fetch https://github.githubassets.com/assets/t9-20624ad3b98e40a4.js 0.0 ms
+netphase 51706.405402 fetch https://github.githubassets.com/assets/32-6b2101ea75bd40cf.js 0.0 ms
+netphase 51706.405429 fetch https://github.githubassets.com/assets/36-446ba8f1d834f9f4.js 0.0 ms
+netphase 51706.405456 fetch https://github.githubassets.com/assets/aeu-6a4091c303803d3e.js 0.0 ms
+netphase 51706.405477 fetch https://github.githubassets.com/assets/5q-de34e5bb2b58cfed.js 0.0 ms
+netphase 51706.405500 fetch https://github.githubassets.com/assets/tm-66ee5abbe695d4d4.js 0.0 ms
+netphase 51706.405520 fetch https://github.githubassets.com/assets/p8-59fd0b9bf98b8e16.js 0.0 ms
+netphase 51706.405542 fetch https://github.githubassets.com/assets/btj-94ef665a646d9f2e.js 0.0 ms
+netphase 51706.405563 fetch https://github.githubassets.com/assets/kaz-4925e4a6841c5464.js 0.0 ms
+netphase 51706.405630 request https://github.githubassets.com/assets/kaz-4925e4a6841c5464.js 0.0 ms
+netphase 51706.405648 fetch https://github.githubassets.com/assets/1pd-7d88f0795e085a74.js 0.0 ms
+netphase 51706.405675 fetch https://github.githubassets.com/assets/ltp-51ccedb330239f19.js 0.0 ms
+netphase 51706.405697 fetch https://github.githubassets.com/assets/4m-749bf68f9bbaa418.js 0.0 ms
+netphase 51706.405724 fetch https://github.githubassets.com/assets/ej-b83f46aa21893807.js 0.0 ms
+netphase 51706.405746 fetch https://github.githubassets.com/assets/x5t-809814f9594025a2.js 0.0 ms
+netphase 51706.405767 fetch https://github.githubassets.com/assets/deu-76e4d4074e8aad8b.js 0.0 ms
+netphase 51706.405789 fetch https://github.githubassets.com/assets/dhl-5c7fb92ccab12257.js 0.0 ms
+netphase 51706.405827 fetch https://github.githubassets.com/assets/rs-1659f66b66745469.js 0.0 ms
+netphase 51706.406266 request https://github.githubassets.com/assets/repositories-cc7988450bbef15e.js 0.0 ms
+netphase 51706.406316 request https://github.githubassets.com/assets/code-menu-2d323ddc5adb0f64.js 0.0 ms
+netphase 51706.406377 fetch https://github.githubassets.com/assets/bv-745ce3e21fd0c584.js 0.0 ms
+netphase 51706.406594 request https://github.githubassets.com/assets/code-view-a0e205571facc60b.js 0.0 ms
+netphase 51706.406649 request https://github.githubassets.com/assets/codespaces-081eef7494b3d734.js 0.0 ms
+netphase 51706.406691 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.406726 request https://github.githubassets.com/assets/code-view.366e6704256fed98.module.css 0.0 ms
+netphase 51706.406757 request https://github.githubassets.com/assets/react-dom-client-35b308126995de85.js 0.0 ms
+netphase 51706.406797 request https://github.githubassets.com/assets/react-is-e0b593954b4706d8.js 0.0 ms
+netphase 51706.406831 request https://github.githubassets.com/assets/react-jsx-runtime-4915cb0f5b3aff04.js 0.0 ms
+netphase 51706.406877 request https://github.githubassets.com/assets/react-reconciler-8e99e505c4429605.js 0.0 ms
+netphase 51706.406915 request https://github.githubassets.com/assets/light-0011b1fed09cb294.css 0.0 ms
+netphase 51706.406958 request https://github.githubassets.com/assets/light_high_contrast-267ab2e12d3b7ade.css 0.0 ms
+netphase 51706.406990 request https://github.githubassets.com/assets/dark-37b5e41810563d82.css 0.0 ms
+netphase 51706.407045 request https://github.githubassets.com/assets/dark_high_contrast-d69295870cb5f203.css 0.0 ms
+netphase 51706.407079 request https://github.githubassets.com/assets/primer-primitives-bd624c4ec96b42e9.css 0.0 ms
+netphase 51706.407123 request https://github.githubassets.com/assets/primer-2aeb1babdc762f70.css 0.0 ms
+netphase 51706.407155 request https://github.githubassets.com/assets/global-747fc17113063fdc.css 0.0 ms
+netphase 51706.407232 fetch https://github.githubassets.com/assets/xoe-cba39f4ba391b091.js 0.0 ms
+netphase 51706.407256 fetch https://github.githubassets.com/assets/2l-89c2ef9755fdfb6f.js 0.0 ms
+netphase 51706.407278 fetch https://github.githubassets.com/assets/os-38dca81808beaa9e.js 0.0 ms
+netphase 51706.407313 fetch https://github.githubassets.com/assets/code-view-a0e205571facc60b.js 0.0 ms
+netphase 51706.407334 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.407356 fetch https://github.githubassets.com/assets/code-view.366e6704256fed98.module.css 0.0 ms
+netphase 51706.407966 dns github.githubassets.com 10.5 ms
+netphase 51706.408019 request https://github.githubassets.com/assets/github-d4a7053a1b3b1731.css 0.0 ms
+netphase 51706.408045 request https://github.githubassets.com/assets/react-core-477123209932519b.js 0.0 ms
+netphase 51706.408078 request https://github.githubassets.com/assets/react-core.8256156a5a5d800d.module.css 0.0 ms
+netphase 51706.408102 request https://github.githubassets.com/assets/pb-f24056aed715c435.js 0.0 ms
+netphase 51706.408128 request https://github.githubassets.com/assets/core-0cd015bc14513580.js 0.0 ms
+netphase 51706.408152 request https://github.githubassets.com/assets/app-runtime.0cb71910f854d01a.module.css 0.0 ms
+netphase 51706.408178 request https://github.githubassets.com/assets/codespaces-081eef7494b3d734.js 0.0 ms
+netphase 51706.408200 request https://github.githubassets.com/assets/code-menu-2d323ddc5adb0f64.js 0.0 ms
+netphase 51706.408221 request https://github.githubassets.com/assets/repositories-cc7988450bbef15e.js 0.0 ms
+netphase 51706.408249 request https://github.githubassets.com/assets/primer-react-9ee791437767e925.js 0.0 ms
+netphase 51706.408273 request https://github.githubassets.com/assets/ncx-6706f20793d34656.js 0.0 ms
+netphase 51706.408295 request https://github.githubassets.com/assets/9zy-9ec7aab53bbbd693.js 0.0 ms
+netphase 51706.408319 request https://github.githubassets.com/assets/t7l-27c9c7756dcbe66c.js 0.0 ms
+netphase 51706.408340 request https://github.githubassets.com/assets/360-fd75fa985cb61e08.js 0.0 ms
+netphase 51706.408366 request https://github.githubassets.com/assets/4u-239741f82c1b95c5.js 0.0 ms
+netphase 51706.408387 request https://github.githubassets.com/assets/s07-cebf3c025b8dd15c.js 0.0 ms
+netphase 51706.408408 request https://github.githubassets.com/assets/25q-c1b9e628aa3a5e24.js 0.0 ms
+netphase 51706.408701 dns-wait github.githubassets.com 11.3 ms
+netphase 51706.408821 request https://github.githubassets.com/assets/dp-993d789c33687e4b.js 0.0 ms
+netphase 51706.409120 request https://github.githubassets.com/assets/5tu-813cca64bc7f06c7.js 0.0 ms
+netphase 51706.409145 request https://github.githubassets.com/assets/t9-20624ad3b98e40a4.js 0.0 ms
+netphase 51706.409169 request https://github.githubassets.com/assets/32-6b2101ea75bd40cf.js 0.0 ms
+netphase 51706.409191 request https://github.githubassets.com/assets/36-446ba8f1d834f9f4.js 0.0 ms
+netphase 51706.409217 request https://github.githubassets.com/assets/aeu-6a4091c303803d3e.js 0.0 ms
+netphase 51706.409244 request https://github.githubassets.com/assets/5q-de34e5bb2b58cfed.js 0.0 ms
+netphase 51706.409276 request https://github.githubassets.com/assets/tm-66ee5abbe695d4d4.js 0.0 ms
+netphase 51706.409465 request https://github.githubassets.com/assets/p8-59fd0b9bf98b8e16.js 0.0 ms
+netphase 51706.409492 request https://github.githubassets.com/assets/btj-94ef665a646d9f2e.js 0.0 ms
+netphase 51706.409516 request https://github.githubassets.com/assets/high-contrast-cookie-35ae5dee64dc5768.js 0.0 ms
+netphase 51706.409544 request https://github.githubassets.com/assets/repository-97bab336048c27cf.css 0.0 ms
+netphase 51706.409565 request https://github.githubassets.com/assets/code-c001ff1d5956e7b2.css 0.0 ms
+netphase 51706.409598 request https://github.githubassets.com/assets/wp-runtime-0bff36c3ac4b18b2.js 0.0 ms
+netphase 51706.409621 request https://github.githubassets.com/assets/app-runtime-445d965f204dd5cb.js 0.0 ms
+netphase 51706.409647 request https://github.githubassets.com/assets/react-core.8256156a5a5d800d.module.css 0.0 ms
+netphase 51706.409669 request https://github.githubassets.com/assets/1pd-7d88f0795e085a74.js 0.0 ms
+netphase 51706.409694 request https://github.githubassets.com/assets/ltp-51ccedb330239f19.js 0.0 ms
+netphase 51706.409716 request https://github.githubassets.com/assets/4m-749bf68f9bbaa418.js 0.0 ms
+netphase 51706.409739 request https://github.githubassets.com/assets/ej-b83f46aa21893807.js 0.0 ms
+netphase 51706.409762 request https://github.githubassets.com/assets/x5t-809814f9594025a2.js 0.0 ms
+netphase 51706.409786 request https://github.githubassets.com/assets/deu-76e4d4074e8aad8b.js 0.0 ms
+netphase 51706.409808 request https://github.githubassets.com/assets/dhl-5c7fb92ccab12257.js 0.0 ms
+netphase 51706.409830 request https://github.githubassets.com/assets/rs-1659f66b66745469.js 0.0 ms
+netphase 51706.409855 request https://github.githubassets.com/assets/bv-745ce3e21fd0c584.js 0.0 ms
+netphase 51706.409890 request https://github.githubassets.com/assets/xoe-cba39f4ba391b091.js 0.0 ms
+netphase 51706.409912 request https://github.githubassets.com/assets/2l-89c2ef9755fdfb6f.js 0.0 ms
+netphase 51706.409937 request https://github.githubassets.com/assets/os-38dca81808beaa9e.js 0.0 ms
+netphase 51706.409952 dns avatars.githubusercontent.com 9.9 ms
+netphase 51706.409960 request https://github.githubassets.com/assets/code-view-a0e205571facc60b.js 0.0 ms
+netphase 51706.410008 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.410030 request https://github.githubassets.com/assets/code-view.366e6704256fed98.module.css 0.0 ms
+netphase 51706.410047 dns-wait avatars.githubusercontent.com 11.0 ms
+netphase 51706.413392 dns user-images.githubusercontent.com 11.3 ms
+netphase 51706.414140 dns+tcp 16.8 ms
+netphase 51706.415053 dns+tcp 16.0 ms
+netphase 51706.415204 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.415263 fetch https://github.githubassets.com/assets/keyboard-shortcuts-dialog.ada6f7429db4130 0.0 ms
+netphase 51706.415296 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.415328 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.415296 fetch https://github.githubassets.com/assets/app-install-banner-partial.cc57459fbab6cf 0.0 ms
+netphase 51706.415370 fetch https://github.githubassets.com/assets/marketing-header.eb52909b838b7563.module. 0.0 ms
+netphase 51706.416089 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.416226 request https://github.githubassets.com/assets/app-install-banner-partial.cc57459fbab6cf 0.0 ms
+netphase 51706.416249 request https://github.githubassets.com/assets/marketing-header.eb52909b838b7563.module. 0.0 ms
+netphase 51706.416283 request https://github.githubassets.com/assets/keyboard-shortcuts-dialog.ada6f7429db4130 0.0 ms
+netphase 51706.416309 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.416337 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.415344 fetch https://github.githubassets.com/assets/primer-react-brand-css.97609ed1d71c6231.m 0.0 ms
+netphase 51706.417784 fetch https://github.githubassets.com/assets/platform-dark-ac89fbf373737ed3.png 0.0 ms
+netphase 51706.417812 fetch https://github.githubassets.com/favicons/favicon.png 0.0 ms
+netphase 51706.417838 request https://github.githubassets.com/assets/primer-react-brand-css.97609ed1d71c6231.m 0.0 ms
+netphase 51706.417861 fetch https://github.githubassets.com/favicons/favicon.svg 0.0 ms
+netphase 51706.417907 fetch https://github.githubassets.com/assets/platform-4ce65ae0bf273ce2.png 0.0 ms
+netphase 51706.418025 request https://github.githubassets.com/favicons/favicon.png 0.0 ms
+netphase 51706.418070 request https://github.githubassets.com/favicons/favicon.svg 0.0 ms
+netphase 51706.418107 request https://github.githubassets.com/assets/platform-4ce65ae0bf273ce2.png 0.0 ms
+netphase 51706.418212 request https://github.githubassets.com/assets/platform-dark-ac89fbf373737ed3.png 0.0 ms
+netphase 51706.418415 fetch https://github.githubassets.com/assets/keyboard-shortcuts-dialog-5465726d9dd88ba 0.0 ms
+netphase 51706.418511 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.418539 fetch https://github.githubassets.com/assets/app-install-banner-partial.cc57459fbab6cf 0.0 ms
+netphase 51706.418558 fetch https://github.githubassets.com/assets/k0-e993cfed22be4fad.js 0.0 ms
+netphase 51706.418595 fetch https://github.githubassets.com/assets/fz-4625459279202f71.js 0.0 ms
+netphase 51706.418616 fetch https://github.githubassets.com/assets/0dc-53ca0efddcf3617a.js 0.0 ms
+netphase 51706.418636 fetch https://github.githubassets.com/assets/yi-42188680a2fc81aa.js 0.0 ms
+netphase 51706.418657 fetch https://github.githubassets.com/assets/ug6-2d393962ae7dc533.js 0.0 ms
+netphase 51706.418675 fetch https://github.githubassets.com/assets/ix9-624d608a6c2c4fe1.js 0.0 ms
+netphase 51706.418694 fetch https://github.githubassets.com/assets/marketing-header-c86ccb236d1a3d30.js 0.0 ms
+netphase 51706.418712 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.418735 fetch https://github.githubassets.com/assets/primer-react-brand-css.97609ed1d71c6231.m 0.0 ms
+netphase 51706.418756 fetch https://github.githubassets.com/assets/marketing-header.eb52909b838b7563.module. 0.0 ms
+netphase 51706.418774 fetch https://github.githubassets.com/assets/platform-4ce65ae0bf273ce2.png 0.0 ms
+netphase 51706.418794 fetch https://github.githubassets.com/assets/platform-dark-ac89fbf373737ed3.png 0.0 ms
+netphase 51706.418812 fetch https://github.githubassets.com/assets/copilot-e2b89335a66dba00.png 0.0 ms
+netphase 51706.418835 fetch https://github.githubassets.com/assets/copilot-dark-2b28403b6080e898.png 0.0 ms
+netphase 51706.418854 fetch https://github.githubassets.com/assets/changelog-fd687bff072883b0.png 0.0 ms
+netphase 51706.418876 fetch https://github.githubassets.com/assets/changelog-dark-b1c25ae971bd641b.png 0.0 ms
+netphase 51706.418897 fetch https://github.githubassets.com/assets/universe-a98cd54821b27569.png 0.0 ms
+netphase 51706.418920 fetch https://github.githubassets.com/assets/keyboard-shortcuts-dialog.ada6f7429db4130 0.0 ms
+netphase 51706.418943 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.418964 fetch https://github.githubassets.com/assets/af-3d7356f3270fb5ab.js 0.0 ms
+netphase 51706.418988 fetch https://github.githubassets.com/assets/app-install-banner-partial-27c4eaaddac16e 0.0 ms
+netphase 51706.419201 request https://github.githubassets.com/assets/0dc-53ca0efddcf3617a.js 0.0 ms
+netphase 51706.419244 request https://github.githubassets.com/assets/marketing-header-c86ccb236d1a3d30.js 0.0 ms
+netphase 51706.419294 request https://github.githubassets.com/assets/yi-42188680a2fc81aa.js 0.0 ms
+netphase 51706.419332 request https://github.githubassets.com/assets/ug6-2d393962ae7dc533.js 0.0 ms
+netphase 51706.419366 request https://github.githubassets.com/assets/ix9-624d608a6c2c4fe1.js 0.0 ms
+netphase 51706.419407 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.419441 request https://github.githubassets.com/assets/primer-react-brand-css.97609ed1d71c6231.m 0.0 ms
+netphase 51706.419482 request https://github.githubassets.com/assets/platform-4ce65ae0bf273ce2.png 0.0 ms
+netphase 51706.419518 request https://github.githubassets.com/assets/marketing-header.eb52909b838b7563.module. 0.0 ms
+netphase 51706.419622 request https://github.githubassets.com/assets/platform-dark-ac89fbf373737ed3.png 0.0 ms
+netphase 51706.419687 request https://github.githubassets.com/assets/copilot-e2b89335a66dba00.png 0.0 ms
+netphase 51706.419739 request https://github.githubassets.com/assets/copilot-dark-2b28403b6080e898.png 0.0 ms
+netphase 51706.419974 request https://github.githubassets.com/assets/changelog-fd687bff072883b0.png 0.0 ms
+netphase 51706.420045 request https://github.githubassets.com/assets/changelog-dark-b1c25ae971bd641b.png 0.0 ms
+netphase 51706.420116 dns github-cloud.s3.amazonaws.com 20.0 ms
+netphase 51706.420190 request https://github.githubassets.com/assets/universe-a98cd54821b27569.png 0.0 ms
+netphase 51706.420253 request https://github.githubassets.com/assets/keyboard-shortcuts-dialog.ada6f7429db4130 0.0 ms
+netphase 51706.420293 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.420346 request https://github.githubassets.com/assets/af-3d7356f3270fb5ab.js 0.0 ms
+netphase 51706.420388 request https://github.githubassets.com/assets/app-install-banner-partial-27c4eaaddac16e 0.0 ms
+netphase 51706.420440 request https://github.githubassets.com/assets/k0-e993cfed22be4fad.js 0.0 ms
+netphase 51706.420730 request https://github.githubassets.com/assets/app-install-banner-partial.cc57459fbab6cf 0.0 ms
+netphase 51706.420774 request https://github.githubassets.com/assets/fz-4625459279202f71.js 0.0 ms
+netphase 51706.421597 certificate verification 0.3 ms
+netphase 51706.419120 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.423876 fetch https://github.githubassets.com/assets/copilot-e2b89335a66dba00.png 0.0 ms
+netphase 51706.423917 fetch https://github.githubassets.com/assets/copilot-dark-2b28403b6080e898.png 0.0 ms
+netphase 51706.424014 connected https://github.githubassets.com/ (dns+tcp+tls) 26.7 ms
+netphase 51706.424177 request https://github.githubassets.com/assets/copilot-dark-2b28403b6080e898.png 0.0 ms
+netphase 51706.419147 request https://github.githubassets.com/assets/keyboard-shortcuts-dialog-5465726d9dd88ba 0.0 ms
+netphase 51706.424443 request https://github.githubassets.com/assets/copilot-e2b89335a66dba00.png 0.0 ms
+netphase 51706.424443 certificate verification 0.7 ms
+netphase 51706.424545 preconnected https://avatars.githubusercontent.com/ (made) 25.5 ms
+netphase 51706.425022 fetch https://github.githubassets.com/assets/changelog-fd687bff072883b0.png 0.0 ms
+netphase 51706.425037 fetch https://github.githubassets.com/assets/platform-4ce65ae0bf273ce2.png 0.0 ms
+netphase 51706.426044 fetch https://github.githubassets.com/assets/platform-dark-ac89fbf373737ed3.png 0.0 ms
+netphase 51706.426155 fetch https://github.githubassets.com/assets/copilot-e2b89335a66dba00.png 0.0 ms
+netphase 51706.426184 fetch https://github.githubassets.com/assets/copilot-dark-2b28403b6080e898.png 0.0 ms
+netphase 51706.426206 fetch https://github.githubassets.com/assets/changelog-dark-b1c25ae971bd641b.png 0.0 ms
+netphase 51706.426267 request https://github.githubassets.com/assets/changelog-fd687bff072883b0.png 0.0 ms
+netphase 51706.426309 request https://github.githubassets.com/assets/changelog-dark-b1c25ae971bd641b.png 0.0 ms
+netphase 51706.429137 fetch https://github.githubassets.com/assets/universe-a98cd54821b27569.png 0.0 ms
+netphase 51706.429183 fetch https://github.githubassets.com/assets/changelog-fd687bff072883b0.png 0.0 ms
+netphase 51706.429228 fetch https://github.githubassets.com/assets/changelog-dark-b1c25ae971bd641b.png 0.0 ms
+netphase 51706.429248 fetch https://github.githubassets.com/assets/universe-a98cd54821b27569.png 0.0 ms
+netphase 51706.429356 request https://github.githubassets.com/assets/universe-a98cd54821b27569.png 0.0 ms
+netphase 51706.429399 request https://github.githubassets.com/assets/universe-a98cd54821b27569.png 0.0 ms
+netphase 51706.429910 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.429943 fetch https://github.githubassets.com/assets/universe-a98cd54821b27569.png 0.0 ms
+netphase 51706.430622 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.430657 fetch https://github.githubassets.com/assets/global-nav-bar.1b047ee439f81044.module.cs 0.0 ms
+netphase 51706.430738 request https://github.githubassets.com/assets/global-nav-bar.1b047ee439f81044.module.cs 0.0 ms
+netphase 51706.431385 response headers https://github.githubassets.com/assets/light-0011b1fed09cb294.css 34.1 ms
+netphase 51706.433168 fetch https://github.githubassets.com/assets/4jt-387d705f0ba1295a.js 0.0 ms
+netphase 51706.433317 request https://github.githubassets.com/assets/4jt-387d705f0ba1295a.js 0.0 ms
+netphase 51706.433401 fetch https://github.githubassets.com/assets/nm-b0b699c386522663.js 0.0 ms
+netphase 51706.433442 fetch https://github.githubassets.com/assets/r3a-bd87b87368f26941.js 0.0 ms
+netphase 51706.433465 fetch https://github.githubassets.com/assets/ioz-5b670749bb4b4262.js 0.0 ms
+netphase 51706.433535 request https://github.githubassets.com/assets/nm-b0b699c386522663.js 0.0 ms
+netphase 51706.433577 request https://github.githubassets.com/assets/r3a-bd87b87368f26941.js 0.0 ms
+netphase 51706.433626 request https://github.githubassets.com/assets/ioz-5b670749bb4b4262.js 0.0 ms
+netphase 51706.433649 fetch https://github.githubassets.com/assets/bga-7bebcf7092f0e64c.js 0.0 ms
+netphase 51706.433677 fetch https://github.githubassets.com/assets/knb-e7076cdf82d63181.js 0.0 ms
+netphase 51706.433697 fetch https://github.githubassets.com/assets/55-7760500a6d18ef9d.js 0.0 ms
+netphase 51706.433717 fetch https://github.githubassets.com/assets/npj-e8dd526b9ad39e1a.js 0.0 ms
+netphase 51706.433738 fetch https://github.githubassets.com/assets/s2r-5853942161a306db.js 0.0 ms
+netphase 51706.433760 fetch https://github.githubassets.com/assets/dr-a05e60b3bf226205.js 0.0 ms
+netphase 51706.433805 request https://github.githubassets.com/assets/bga-7bebcf7092f0e64c.js 0.0 ms
+netphase 51706.433829 fetch https://github.githubassets.com/assets/global-nav-bar-d037bfd956664f0e.js 0.0 ms
+netphase 51706.433873 request https://github.githubassets.com/assets/55-7760500a6d18ef9d.js 0.0 ms
+netphase 51706.433907 request https://github.githubassets.com/assets/knb-e7076cdf82d63181.js 0.0 ms
+netphase 51706.433954 request https://github.githubassets.com/assets/npj-e8dd526b9ad39e1a.js 0.0 ms
+netphase 51706.433975 fetch https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.434034 request https://github.githubassets.com/assets/s2r-5853942161a306db.js 0.0 ms
+netphase 51706.434084 request https://github.githubassets.com/assets/dr-a05e60b3bf226205.js 0.0 ms
+netphase 51706.434103 fetch https://github.githubassets.com/assets/global-nav-bar.1b047ee439f81044.module.cs 0.0 ms
+netphase 51706.434150 request https://github.githubassets.com/assets/global-nav-bar-d037bfd956664f0e.js 0.0 ms
+netphase 51706.434190 request https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 0.0 ms
+netphase 51706.434226 request https://github.githubassets.com/assets/global-nav-bar.1b047ee439f81044.module.cs 0.0 ms
+netphase 51706.436550 fetch https://avatars.githubusercontent.com/u/2566135?s=60&v=4 0.0 ms
+netphase 51706.436673 request https://avatars.githubusercontent.com/u/2566135?s=60&v=4 0.0 ms
+netphase 51706.436707 preconnected https://avatars.githubusercontent.com/ (used) 0.0 ms
+netphase 51706.437730 fetch https://avatars.githubusercontent.com/u/2566135?s=60&v=4 0.0 ms
+netphase 51706.437850 request https://avatars.githubusercontent.com/u/2566135?s=60&v=4 0.0 ms
+netphase 51706.437913 fetch https://avatars.githubusercontent.com/u/2566135?s=60&v=4 0.0 ms
+netphase 51706.447698 response headers https://avatars.githubusercontent.com/u/2566135?s=60&v=4 11.0 ms
+netphase 51706.457084 response headers https://avatars.githubusercontent.com/u/2566135?s=60&v=4 19.2 ms
+netphase 51706.459120 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 49.1 ms
+netphase 51706.459352 response headers https://github.githubassets.com/assets/os-38dca81808beaa9e.js 49.4 ms
+netphase 51706.459466 response headers https://github.githubassets.com/assets/core-0cd015bc14513580.js 51.3 ms
+netphase 51706.459481 response headers https://github.githubassets.com/assets/dhl-5c7fb92ccab12257.js 49.7 ms
+netphase 51706.459553 response headers https://github.githubassets.com/assets/9zy-9ec7aab53bbbd693.js 51.3 ms
+netphase 51706.459632 response headers https://github.githubassets.com/assets/32-6b2101ea75bd40cf.js 50.5 ms
+netphase 51706.459650 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 40.2 ms
+netphase 51706.459709 response headers https://github.githubassets.com/assets/react-dom-client-35b308126995de85.js 53.0 ms
+netphase 51706.459724 response headers https://github.githubassets.com/assets/tm-66ee5abbe695d4d4.js 50.4 ms
+netphase 51706.459753 response headers https://github.githubassets.com/assets/ncx-6706f20793d34656.js 51.5 ms
+netphase 51706.459782 response headers https://github.githubassets.com/assets/xoe-cba39f4ba391b091.js 49.9 ms
+netphase 51706.459815 response headers https://github.githubassets.com/assets/marketing-header.eb52909b838b7563.module. 43.6 ms
+netphase 51706.459844 response headers https://github.githubassets.com/assets/repository-97bab336048c27cf.css 50.3 ms
+netphase 51706.459948 response headers https://github.githubassets.com/assets/light_high_contrast-267ab2e12d3b7ade.css 61.3 ms
+netphase 51706.460605 response headers https://github.githubassets.com/assets/0dc-53ca0efddcf3617a.js 41.4 ms
+netphase 51706.460686 response headers https://github.githubassets.com/assets/primer-primitives-bd624c4ec96b42e9.css 53.6 ms
+netphase 51706.460853 response headers https://github.githubassets.com/assets/primer-2aeb1babdc762f70.css 61.5 ms
+netphase 51706.461468 response headers https://github.githubassets.com/assets/ltp-51ccedb330239f19.js 51.8 ms
+netphase 51706.461571 response headers https://github.githubassets.com/assets/36-446ba8f1d834f9f4.js 52.4 ms
+netphase 51706.461651 response headers https://github.githubassets.com/assets/wp-runtime-0bff36c3ac4b18b2.js 52.1 ms
+netphase 51706.461701 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 42.6 ms
+netphase 51706.461761 response headers https://github.githubassets.com/assets/react-fa5e2e82e6e0ecc0.js 58.2 ms
+netphase 51706.461809 response headers https://github.githubassets.com/assets/app-install-banner-partial.cc57459fbab6cf 41.1 ms
+netphase 51706.461876 response headers https://github.githubassets.com/assets/yi-42188680a2fc81aa.js 42.6 ms
+netphase 51706.476174 response headers https://github.githubassets.com/assets/1pd-7d88f0795e085a74.js 66.5 ms
+netphase 51706.476394 response headers https://github.githubassets.com/assets/keyboard-shortcuts-dialog.ada6f7429db4130 60.1 ms
+netphase 51706.476538 response headers https://github.githubassets.com/assets/app-install-banner-partial-27c4eaaddac16e 56.2 ms
+netphase 51706.476690 response headers https://github.githubassets.com/assets/app-runtime-445d965f204dd5cb.js 67.1 ms
+netphase 51706.476770 response headers https://github.githubassets.com/assets/repositories-cc7988450bbef15e.js 70.5 ms
+netphase 51706.476819 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 56.5 ms
+netphase 51706.476837 response headers https://github.githubassets.com/assets/code-view.366e6704256fed98.module.css 66.8 ms
+netphase 51706.476896 response headers https://github.githubassets.com/assets/4u-239741f82c1b95c5.js 68.5 ms
+netphase 51706.476991 response headers https://github.githubassets.com/assets/react-compiler-runtime-4610bd6d3de9c049.j 73.4 ms
+netphase 51706.477093 response headers https://github.githubassets.com/assets/p8-59fd0b9bf98b8e16.js 67.6 ms
+netphase 51706.477166 response headers https://github.githubassets.com/assets/universe-a98cd54821b27569.png 47.8 ms
+netphase 51706.477214 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 46.6 ms
+netphase 51706.477257 response headers https://github.githubassets.com/favicons/favicon.png 59.2 ms
+netphase 51706.477337 response headers https://github.githubassets.com/assets/t7l-27c9c7756dcbe66c.js 69.0 ms
+netphase 51706.477405 response headers https://github.githubassets.com/assets/t9-20624ad3b98e40a4.js 68.3 ms
+netphase 51706.477490 response headers https://github.githubassets.com/assets/high-contrast-cookie-35ae5dee64dc5768.js 68.0 ms
+netphase 51706.477558 response headers https://github.githubassets.com/favicons/favicon.svg 59.5 ms
+netphase 51706.477622 response headers https://github.githubassets.com/assets/primer-primitives-bd624c4ec96b42e9.css 78.3 ms
+netphase 51706.477671 response headers https://github.githubassets.com/assets/platform-4ce65ae0bf273ce2.png 58.2 ms
+netphase 51706.477728 response headers https://github.githubassets.com/assets/marketing-header.eb52909b838b7563.module. 58.2 ms
+netphase 51706.477742 response headers https://github.githubassets.com/assets/bv-745ce3e21fd0c584.js 67.9 ms
+netphase 51706.477796 response headers https://github.githubassets.com/assets/light-0011b1fed09cb294.css 70.9 ms
+netphase 51706.477839 response headers https://github.githubassets.com/assets/code-c001ff1d5956e7b2.css 78.3 ms
+netphase 51706.477854 response headers https://github.githubassets.com/assets/repository-97bab336048c27cf.css 78.4 ms
+netphase 51706.477895 response headers https://github.githubassets.com/assets/platform-dark-ac89fbf373737ed3.png 59.7 ms
+netphase 51706.477944 response headers https://github.githubassets.com/assets/universe-a98cd54821b27569.png 48.5 ms
+netphase 51706.477988 response headers https://github.githubassets.com/assets/changelog-dark-b1c25ae971bd641b.png 57.9 ms
+netphase 51706.478062 response headers https://github.githubassets.com/assets/k0-e993cfed22be4fad.js 57.6 ms
+netphase 51706.478107 response headers https://github.githubassets.com/assets/code-view-a0e205571facc60b.js 68.1 ms
+netphase 51706.478136 response headers https://github.githubassets.com/assets/react-core-477123209932519b.js 70.1 ms
+netphase 51706.478195 response headers https://github.githubassets.com/assets/dark_high_contrast-d69295870cb5f203.css 79.1 ms
+netphase 51706.478200 response headers https://github.githubassets.com/assets/dark_high_contrast-d69295870cb5f203.css 71.2 ms
+netphase 51706.478309 response headers https://github.githubassets.com/assets/primer-2aeb1babdc762f70.css 71.2 ms
+netphase 51706.478365 response headers https://github.githubassets.com/assets/high-contrast-cookie-35ae5dee64dc5768.js 74.6 ms
+netphase 51706.478405 response headers https://github.githubassets.com/assets/360-fd75fa985cb61e08.js 70.1 ms
+netphase 51706.478540 response headers https://github.githubassets.com/assets/x5t-809814f9594025a2.js 68.8 ms
+netphase 51706.478580 response headers https://github.githubassets.com/assets/keyboard-shortcuts-dialog-5465726d9dd88ba 59.4 ms
+netphase 51706.478618 response headers https://github.githubassets.com/assets/aeu-6a4091c303803d3e.js 69.4 ms
+netphase 51706.478671 response headers https://github.githubassets.com/assets/global-747fc17113063fdc.css 79.3 ms
+netphase 51706.478687 response headers https://github.githubassets.com/assets/dp-993d789c33687e4b.js 69.9 ms
+netphase 51706.478752 response headers https://github.githubassets.com/assets/repositories-cc7988450bbef15e.js 70.5 ms
+netphase 51706.478767 response headers https://github.githubassets.com/assets/react-core.8256156a5a5d800d.module.css 69.1 ms
+netphase 51706.478818 response headers https://github.githubassets.com/assets/ug6-2d393962ae7dc533.js 59.5 ms
+netphase 51706.478839 response headers https://github.githubassets.com/assets/app-runtime.0cb71910f854d01a.module.css 70.7 ms
+netphase 51706.478898 response headers https://github.githubassets.com/assets/app-runtime.0cb71910f854d01a.module.css 75.1 ms
+netphase 51706.478904 response headers https://github.githubassets.com/assets/btj-94ef665a646d9f2e.js 69.4 ms
+netphase 51706.478955 response headers https://github.githubassets.com/assets/primer-react-brand-css.97609ed1d71c6231.m 61.1 ms
+netphase 51706.479006 response headers https://github.githubassets.com/assets/4m-749bf68f9bbaa418.js 69.3 ms
+netphase 51706.479064 response headers https://github.githubassets.com/assets/changelog-fd687bff072883b0.png 59.1 ms
+netphase 51706.479092 response headers https://github.githubassets.com/assets/2l-89c2ef9755fdfb6f.js 69.2 ms
+netphase 51706.479122 response headers https://github.githubassets.com/assets/codespaces-081eef7494b3d734.js 70.9 ms
+netphase 51706.479148 response headers https://github.githubassets.com/assets/code-view.366e6704256fed98.module.css 72.4 ms
+netphase 51706.479195 response headers https://github.githubassets.com/assets/pb-f24056aed715c435.js 71.1 ms
+netphase 51706.479221 response headers https://github.githubassets.com/assets/global-747fc17113063fdc.css 72.1 ms
+netphase 51706.479286 response headers https://github.githubassets.com/assets/react-is-e0b593954b4706d8.js 72.5 ms
+netphase 51706.479315 response headers https://github.githubassets.com/assets/af-3d7356f3270fb5ab.js 59.0 ms
+netphase 51706.479372 response headers https://github.githubassets.com/assets/light_high_contrast-267ab2e12d3b7ade.css 72.4 ms
+netphase 51706.479577 response headers https://github.githubassets.com/assets/keyboard-shortcuts-dialog.ada6f7429db4130 59.3 ms
+netphase 51706.479652 response headers https://github.githubassets.com/assets/marketing-header-c86ccb236d1a3d30.js 60.4 ms
+netphase 51706.479677 response headers https://github.githubassets.com/assets/ej-b83f46aa21893807.js 69.9 ms
+netphase 51706.479703 response headers https://github.githubassets.com/assets/code-view-a0e205571facc60b.js 73.1 ms
+netphase 51706.479795 response headers https://github.githubassets.com/assets/react-core.8256156a5a5d800d.module.css 71.7 ms
+netphase 51706.479881 response headers https://github.githubassets.com/assets/s07-cebf3c025b8dd15c.js 71.5 ms
+netphase 51706.479936 response headers https://github.githubassets.com/assets/changelog-fd687bff072883b0.png 53.7 ms
+netphase 51706.479968 response headers https://github.githubassets.com/assets/primer-react-brand-css.97609ed1d71c6231.m 60.5 ms
+netphase 51706.479997 response headers https://github.githubassets.com/assets/github-d4a7053a1b3b1731.css 80.5 ms
+netphase 51706.480038 response headers https://github.githubassets.com/assets/core-0cd015bc14513580.js 76.2 ms
+netphase 51706.482319 response headers https://github.githubassets.com/assets/rs-1659f66b66745469.js 72.5 ms
+netphase 51706.482380 response headers https://github.githubassets.com/assets/platform-4ce65ae0bf273ce2.png 64.3 ms
+netphase 51706.482446 response headers https://github.githubassets.com/assets/github-d4a7053a1b3b1731.css 74.4 ms
+netphase 51706.482477 response headers https://github.githubassets.com/assets/kaz-4925e4a6841c5464.js 76.8 ms
+netphase 51706.482504 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 66.4 ms
+netphase 51706.483721 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 77.0 ms
+netphase 51706.483998 response headers https://github.githubassets.com/assets/app-install-banner-partial.cc57459fbab6cf 67.8 ms
+netphase 51706.484106 response headers https://github.githubassets.com/assets/5tu-813cca64bc7f06c7.js 75.0 ms
+netphase 51706.484142 response headers https://github.githubassets.com/assets/deu-76e4d4074e8aad8b.js 74.4 ms
+netphase 51706.484172 response headers https://github.githubassets.com/assets/ix9-624d608a6c2c4fe1.js 64.8 ms
+netphase 51706.484199 response headers https://github.githubassets.com/assets/copilot-e2b89335a66dba00.png 64.5 ms
+netphase 51706.484234 response headers https://github.githubassets.com/assets/code-menu-2d323ddc5adb0f64.js 77.9 ms
+netphase 51706.484397 response headers https://github.githubassets.com/assets/react-reconciler-8e99e505c4429605.js 77.5 ms
+netphase 51706.484435 response headers https://github.githubassets.com/assets/dark-37b5e41810563d82.css 85.4 ms
+netphase 51706.492240 response headers https://github.githubassets.com/assets/dark-37b5e41810563d82.css 85.3 ms
+netphase 51706.500793 response headers https://github.githubassets.com/assets/react-dom-c7f52540bb6b77ed.js 97.1 ms
+netphase 51706.503527 response headers https://github.githubassets.com/assets/universe-a98cd54821b27569.png 83.3 ms
+netphase 51706.503665 response headers https://github.githubassets.com/assets/react-jsx-runtime-4915cb0f5b3aff04.js 96.8 ms
+netphase 51706.503779 response headers https://github.githubassets.com/assets/code-menu-2d323ddc5adb0f64.js 95.6 ms
+netphase 51706.508256 response headers https://github.githubassets.com/assets/5q-de34e5bb2b58cfed.js 99.0 ms
+netphase 51706.508457 response headers https://github.githubassets.com/assets/fz-4625459279202f71.js 87.7 ms
+netphase 51706.508748 response headers https://github.githubassets.com/assets/copilot-dark-2b28403b6080e898.png 89.0 ms
+netphase 51706.509144 response headers https://github.githubassets.com/assets/global-nav-bar.1b047ee439f81044.module.cs 78.4 ms
+netphase 51706.517871 response headers https://github.githubassets.com/assets/copilot-dark-2b28403b6080e898.png 93.7 ms
+netphase 51706.517991 response headers https://github.githubassets.com/assets/scheduler-58b860b049ca307c.js 114.3 ms
+netphase 51706.520089 response headers https://github.githubassets.com/assets/codespaces-081eef7494b3d734.js 113.4 ms
+netphase 51706.520165 response headers https://github.githubassets.com/assets/platform-dark-ac89fbf373737ed3.png 100.5 ms
+netphase 51706.520249 response headers https://github.githubassets.com/assets/changelog-dark-b1c25ae971bd641b.png 93.9 ms
+netphase 51706.520298 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 104.0 ms
+netphase 51706.520829 response headers https://github.githubassets.com/assets/25q-c1b9e628aa3a5e24.js 112.4 ms
+netphase 51706.519846 response headers https://github.githubassets.com/assets/copilot-e2b89335a66dba00.png 95.4 ms
+netphase 51706.537976 response headers https://github.githubassets.com/assets/global-nav-bar.1b047ee439f81044.module.cs 103.8 ms
+netphase 51706.538413 response headers https://github.githubassets.com/assets/global-nav-bar-d037bfd956664f0e.js 104.3 ms
+netphase 51706.540238 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 106.0 ms
+netphase 51706.544147 response headers https://github.githubassets.com/assets/dr-a05e60b3bf226205.js 110.1 ms
+netphase 51706.544713 response headers https://github.githubassets.com/assets/s2r-5853942161a306db.js 110.7 ms
+netphase 51706.544900 response headers https://github.githubassets.com/assets/ioz-5b670749bb4b4262.js 111.3 ms
+netphase 51706.544938 response headers https://github.githubassets.com/assets/r3a-bd87b87368f26941.js 111.4 ms
+netphase 51706.545144 response headers https://github.githubassets.com/assets/primer-react-9ee791437767e925.js 136.9 ms
+netphase 51706.545396 response headers https://github.githubassets.com/assets/bga-7bebcf7092f0e64c.js 111.6 ms
+netphase 51706.548814 response headers https://github.githubassets.com/assets/4jt-387d705f0ba1295a.js 115.5 ms
+netphase 51706.549302 response headers https://github.githubassets.com/assets/code-c001ff1d5956e7b2.css 139.7 ms
+netphase 51706.549419 response headers https://github.githubassets.com/assets/nm-b0b699c386522663.js 115.9 ms
+netphase 51706.549718 response headers https://github.githubassets.com/assets/55-7760500a6d18ef9d.js 115.8 ms
+netphase 51706.549902 response headers https://github.githubassets.com/assets/knb-e7076cdf82d63181.js 116.0 ms
+netphase 51706.551101 response headers https://github.githubassets.com/assets/primer-react-css.c1a2dd122c3e290e.module. 134.8 ms
+netphase 51706.551292 response headers https://github.githubassets.com/assets/npj-e8dd526b9ad39e1a.js 117.3 ms
+netphase 51707.062078 fetch https://github.githubassets.com/assets/wu-f180908ddd574872.js 0.0 ms
+netphase 51707.062096 fetch https://github.githubassets.com/assets/chunk-1y-0074d9ed8ad7dbce.js 0.0 ms
+netphase 51707.062932 request https://github.githubassets.com/assets/wu-f180908ddd574872.js 0.0 ms
+netphase 51707.063143 request https://github.githubassets.com/assets/chunk-1y-0074d9ed8ad7dbce.js 0.0 ms
+netphase 51707.071402 response headers https://github.githubassets.com/assets/wu-f180908ddd574872.js 8.5 ms
+netphase 51707.072429 response headers https://github.githubassets.com/assets/chunk-1y-0074d9ed8ad7dbce.js 9.3 ms
+console Error: Error at https://github.githubassets.com/assets/code-view-a0e205571facc60b.js:2:184560 ReferenceError: `Intl` is not defined
+netphase 51707.196517 fetch https://github.githubassets.com/assets/chunk-lazy-element-select-panel-048b5f95e 0.0 ms
+netphase 51707.196745 request https://github.githubassets.com/assets/chunk-lazy-element-select-panel-048b5f95e 0.0 ms
+netphase 51707.197330 fetch https://github.githubassets.com/assets/chunk-lazy-element-toggle-switch-813ece53 0.0 ms
+netphase 51707.197425 request https://github.githubassets.com/assets/chunk-lazy-element-toggle-switch-813ece53 0.0 ms
+netphase 51707.198052 fetch https://github.githubassets.com/assets/chunk-lazy-element-cookie-consent-link-8c 0.0 ms
+netphase 51707.198133 request https://github.githubassets.com/assets/chunk-lazy-element-cookie-consent-link-8c 0.0 ms
+netphase 51707.200686 fetch https://github.githubassets.com/assets/chunk-lazy-element-ghcc-consent-eb69adcb4 0.0 ms
+netphase 51707.200761 fetch https://github.githubassets.com/assets/chunk-lazy-element-webauthn-get-d00a09637 0.0 ms
+netphase 51707.200910 request https://github.githubassets.com/assets/chunk-lazy-element-ghcc-consent-eb69adcb4 0.0 ms
+netphase 51707.201031 request https://github.githubassets.com/assets/chunk-lazy-element-webauthn-get-d00a09637 0.0 ms
+netphase 51707.202443 response headers https://github.githubassets.com/assets/chunk-lazy-element-select-panel-048b5f95e 5.7 ms
+netphase 51707.205708 fetch https://github.githubassets.com/assets/kq9.fe1d3ed6827ca69b.module.css 0.0 ms
+netphase 51707.205838 fetch https://github.githubassets.com/assets/chunk-lazy-react-partial-app-install-bann 0.0 ms
+netphase 51707.205877 fetch https://github.githubassets.com/assets/bvx.c99850cf2b742edc.module.css 0.0 ms
+netphase 51707.205907 fetch https://github.githubassets.com/assets/chunk-lazy-react-partial-global-nav-bar-e 0.0 ms
+netphase 51707.206006 request https://github.githubassets.com/assets/kq9.fe1d3ed6827ca69b.module.css 0.0 ms
+netphase 51707.206164 request https://github.githubassets.com/assets/chunk-lazy-react-partial-app-install-bann 0.0 ms
+netphase 51707.206212 request https://github.githubassets.com/assets/bvx.c99850cf2b742edc.module.css 0.0 ms
+netphase 51707.206249 request https://github.githubassets.com/assets/chunk-lazy-react-partial-global-nav-bar-e 0.0 ms
+netphase 51707.206869 fetch https://github.githubassets.com/assets/u2l.bea5b19e9d67f00d.module.css 0.0 ms
+netphase 51707.206950 request https://github.githubassets.com/assets/u2l.bea5b19e9d67f00d.module.css 0.0 ms
+netphase 51707.207051 response headers https://github.githubassets.com/assets/chunk-lazy-element-cookie-consent-link-8c 8.9 ms
+netphase 51707.207419 response headers https://github.githubassets.com/assets/chunk-lazy-element-ghcc-consent-eb69adcb4 6.5 ms
+netphase 51707.207685 response headers https://github.githubassets.com/assets/chunk-lazy-element-webauthn-get-d00a09637 6.7 ms
+netphase 51707.207790 response headers https://github.githubassets.com/assets/chunk-lazy-element-toggle-switch-813ece53 10.4 ms
+netphase 51707.208050 fetch https://github.githubassets.com/assets/chunk-lazy-react-partial-keyboard-shortcu 0.0 ms
+netphase 51707.208127 request https://github.githubassets.com/assets/chunk-lazy-react-partial-keyboard-shortcu 0.0 ms
+netphase 51707.209823 fetch https://github.githubassets.com/assets/jdp.e5850a4dc814890e.module.css 0.0 ms
+netphase 51707.209932 request https://github.githubassets.com/assets/jdp.e5850a4dc814890e.module.css 0.0 ms
+netphase 51707.210031 fetch https://github.githubassets.com/assets/chunk-lazy-react-partial-marketing-header 0.0 ms
+netphase 51707.210102 request https://github.githubassets.com/assets/chunk-lazy-react-partial-marketing-header 0.0 ms
+netphase 51707.211329 response headers https://github.githubassets.com/assets/kq9.fe1d3ed6827ca69b.module.css 5.3 ms
+netphase 51707.217596 response headers https://github.githubassets.com/assets/jdp.e5850a4dc814890e.module.css 7.7 ms
+netphase 51707.219885 response headers https://github.githubassets.com/assets/chunk-lazy-react-partial-app-install-bann 13.7 ms
+netphase 51707.220218 response headers https://github.githubassets.com/assets/bvx.c99850cf2b742edc.module.css 14.0 ms
+netphase 51707.220400 response headers https://github.githubassets.com/assets/chunk-lazy-react-partial-marketing-header 10.3 ms
+netphase 51707.220535 response headers https://github.githubassets.com/assets/chunk-lazy-react-partial-keyboard-shortcu 12.4 ms
+netphase 51707.220785 response headers https://github.githubassets.com/assets/u2l.bea5b19e9d67f00d.module.css 13.8 ms
+netphase 51707.220899 response headers https://github.githubassets.com/assets/chunk-lazy-react-partial-global-nav-bar-e 14.7 ms
+netphase 51707.329420 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329544 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329598 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329647 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329698 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329754 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329803 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329844 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329896 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.329943 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330186 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330231 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330263 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330277 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330291 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330306 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330323 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330339 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330353 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330368 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330382 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330403 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330422 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330439 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330455 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330475 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330492 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330510 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330527 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330554 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330573 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330590 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330607 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330624 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330641 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330664 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330680 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330700 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330716 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330731 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330748 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330765 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330781 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330799 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330820 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330839 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330856 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330873 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330889 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330906 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330925 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330942 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+netphase 51707.330959 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIG 0.0 ms
+console Warn: No valid entry type provided to observe().
+phase 51707.569094 load complete
+phase navigation Ok(String("[[\"https://github.com/servo/servo\",0,0,0,2.22,0,0,0,894.18,928.67,1644.25,2034.04,2038.11,0],[\"first-paint\",null,null,null,null,null,null,null,null,null,null,null,null,1868.58],[\"first-contentful-paint\",null,null,null,null,null,null,null,null,null,null,null,null,1868.58]]"))
+netphase 51707.578723 fetch https://collector.github.com/github/collect 0.0 ms
+netphase 51707.579124 request https://collector.github.com/github/collect 0.0 ms
+netphase 51707.579490 fetch https://api.github.com/_private/browser/stats 0.0 ms
+netphase 51707.579699 request https://api.github.com/_private/browser/stats 0.0 ms
+netphase 51707.592923 dns api.github.com 13.2 ms
+netphase 51707.593017 dns-wait api.github.com 13.3 ms
+netphase 51707.602261 dns collector.github.com 23.1 ms
+netphase 51707.602355 dns-wait collector.github.com 23.2 ms
+netphase 51707.610848 dns+tcp 31.1 ms
+netphase 51707.631369 certificate verification 0.6 ms
+netphase 51707.631566 connected https://api.github.com/ (dns+tcp+tls) 51.8 ms
+netphase 51707.690091 dns+tcp 110.9 ms
+netphase 51707.785089 certificate verification 0.4 ms
+netphase 51707.785399 connected https://collector.github.com/ (dns+tcp+tls) 206.2 ms
+netphase 51707.796684 response headers https://api.github.com/_private/browser/stats 217.0 ms
+netphase 51707.810224 fetch https://github.githubassets.com/assets/q4.57024d69717dd307.module.css 0.0 ms
+netphase 51707.810443 request https://github.githubassets.com/assets/q4.57024d69717dd307.module.css 0.0 ms
+netphase 51707.810624 fetch https://github.githubassets.com/assets/chunk-q4-efd0f697e0a91c4a.js 0.0 ms
+netphase 51707.810703 request https://github.githubassets.com/assets/chunk-q4-efd0f697e0a91c4a.js 0.0 ms
+netphase 51707.823540 response headers https://github.githubassets.com/assets/chunk-q4-efd0f697e0a91c4a.js 12.8 ms
+netphase 51707.823844 response headers https://github.githubassets.com/assets/q4.57024d69717dd307.module.css 13.4 ms
+lucinanet: js idle trim done, 62313 KiB of parse trees kept
+netphase 51707.965889 response headers https://collector.github.com/github/collect 386.8 ms
+render: settled 2313 ms after load (43 frames, quiet 1500 ms, at most 12000 ms)
+render: complete true in 4376 ms, rss 364956 KiB
+rc=0

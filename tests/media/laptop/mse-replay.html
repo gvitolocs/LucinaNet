@@ -1,0 +1,44 @@
+<!doctype html><meta charset="utf-8"><title>mse-replay</title>
+<body style="margin:0;background:#000">
+<video id="m" style="width:100%;height:100%"></video>
+<script src="../common.js"></script>
+<script>
+// A page's MSE session recorded by LUCINANET_MEDIA_MSE_DUMP (calls.tsv + one .bin per append), replayed through this browser's
+// own MediaSource: the same appends, in the same order, into the same SourceBuffers. ?dir=clips/<recording> (default clips/yt).
+// endOfStream() after the last recorded call, so the page ends where the recording's media ends.
+const log = (s) => console.log("media-test: " + s);
+const dir = new URLSearchParams(location.search).get("dir") || "clips/yt";
+const el = document.getElementById("m");
+mediaTest(el, { name: "mse-replay", timeoutMs: 150000, minUpdates: 20 });
+const updated = (sb) => new Promise((ok, bad) => {
+  const done = () => { sb.removeEventListener("updateend", done); ok(); };
+  sb.addEventListener("updateend", done);
+  sb.addEventListener("error", () => bad(new Error("SourceBuffer error")), { once: true });
+});
+(async () => {
+  const calls = (await (await fetch(dir + "/calls.tsv")).text()).split("\n").filter(Boolean).map((l) => l.split("\t"));
+  const ms = new MediaSource();
+  el.src = URL.createObjectURL(ms);
+  await new Promise((ok) => ms.addEventListener("sourceopen", ok, { once: true }));
+  const sbs = {};
+  let appends = 0;
+  for (const [, call, sb, ...args] of calls) {
+    if (call === "add_source_buffer" && args[1] !== "error") sbs[sb] = ms.addSourceBuffer(args[0]);
+    else if (call === "set_duration" && !Object.values(sbs).some((b) => b.updating)) ms.duration = parseFloat(args[0]);
+    else if (call === "append" && sbs[sb]) {
+      const data = await (await fetch(dir + "/" + args[2])).arrayBuffer();
+      const p = updated(sbs[sb]);
+      sbs[sb].appendBuffer(data);
+      await p;
+      appends++;
+    } else if (call === "remove" && sbs[sb]) {
+      const p = updated(sbs[sb]);
+      sbs[sb].remove(parseFloat(args[0]), parseFloat(args[1]));
+      await p;
+    }
+    if (appends === 4 && el.paused) el.play().catch((e) => log("play rejected " + e));
+  }
+  log("appended " + appends + " buffered " + Object.entries(sbs).map(([k, b]) => k + ":" + (b.buffered.length ? b.buffered.end(b.buffered.length - 1).toFixed(2) : "none")).join(" "));
+  ms.endOfStream();
+})().catch((e) => log("FAIL " + e));
+</script>

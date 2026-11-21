@@ -1,0 +1,8 @@
+[CompiledRegExp: /x?/] {
+  Flags: ""
+  Match Start: Unknown
+     0: Branch(4, 3)
+     3: Accept
+     4: CodePointLiteral(x)
+     5: Jump(3)
+}

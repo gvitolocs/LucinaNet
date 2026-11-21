@@ -1,0 +1,7 @@
+{
+  "known_failures": { "tests": [], "features": [] },
+  "unimplemented": { "tests": [], "features": [] },
+  "non_standard": { "tests": [], "features": [] },
+  "slow": { "tests": [], "features": [] },
+  "gc_stress_test": { "tests": [], "features": [] }
+}

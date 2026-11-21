@@ -1,0 +1,167 @@
+[BytecodeFunction: <global>] {
+  Parameters: 0, Registers: 1
+     0: NewClosure r0, c0
+     3: StoreGlobal r0, c1, k0
+     7: NewClosure r0, c2
+    10: StoreGlobal r0, c3, k1
+    14: NewClosure r0, c4
+    17: StoreGlobal r0, c5, k2
+    21: LoadUndefined r0
+    23: Ret r0
+  Constant Table:
+    0: [BytecodeFunction: simpleBreak]
+    1: [String: simpleBreak]
+    2: [BytecodeFunction: nestedBreaks]
+    3: [String: nestedBreaks]
+    4: [BytecodeFunction: noCapturesInBreak]
+    5: [String: noCapturesInBreak]
+}
+
+[BytecodeFunction: simpleBreak] {
+  Parameters: 0, Registers: 3
+     0: PushLexicalScope c0
+     2: LoadEmpty r2
+     4: StoreToScope r2, 0, 0
+     8: NewClosure r1, c1
+    11: LoadImmediate r2, 0
+    14: StoreToScope r2, 0, 0
+    18: LoadImmediate r2, 1
+    21: JumpToBooleanFalse r2, 6 (.L0)
+    24: PopScope 
+    25: Jump 6 (.L1)
+  .L0:
+    27: Mov r0, r1
+    30: PopScope 
+  .L1:
+    31: LoadImmediate r2, 2
+    34: LoadUndefined r2
+    36: Ret r2
+  Constant Table:
+    0: [ScopeNames]
+    1: [BytecodeFunction: inner]
+}
+
+[BytecodeFunction: inner] {
+  Parameters: 0, Registers: 1
+    0: LoadFromScope r0, 0, 0
+    4: CheckTdz r0, c0
+    7: Ret r0
+  Constant Table:
+    0: [String: x]
+}
+
+[BytecodeFunction: nestedBreaks] {
+  Parameters: 0, Registers: 3
+      0: PushLexicalScope c0
+      2: LoadEmpty r2
+      4: StoreToScope r2, 0, 0
+      8: LoadImmediate r2, 0
+     11: StoreToScope r2, 0, 0
+     15: LoadImmediate r2, 1
+     18: JumpToBooleanFalse r2, 6 (.L0)
+     21: PopScope 
+     22: Jump 90 (.L8)
+  .L0:
+     24: PushLexicalScope c1
+     26: LoadEmpty r2
+     28: StoreToScope r2, 0, 0
+     32: LoadImmediate r2, 1
+     35: StoreToScope r2, 0, 0
+     39: LoadImmediate r2, 1
+     42: JumpToBooleanFalse r2, 7 (.L1)
+     45: PopScope 
+     46: PopScope 
+     47: Jump 65 (.L8)
+  .L1:
+     49: LoadImmediate r2, 2
+     52: JumpToBooleanFalse r2, 6 (.L2)
+     55: PopScope 
+     56: Jump 55 (.L7)
+  .L2:
+     58: PushLexicalScope c2
+     60: LoadEmpty r2
+     62: StoreToScope r2, 0, 0
+     66: NewClosure r1, c3
+     69: LoadImmediate r2, 2
+     72: StoreToScope r2, 0, 0
+     76: LoadImmediate r2, 1
+     79: JumpToBooleanFalse r2, 8 (.L3)
+     82: PopScope 
+     83: PopScope 
+     84: PopScope 
+     85: Jump 27 (.L8)
+  .L3:
+     87: LoadImmediate r2, 2
+     90: JumpToBooleanFalse r2, 7 (.L4)
+     93: PopScope 
+     94: PopScope 
+     95: Jump 16 (.L7)
+  .L4:
+     97: LoadImmediate r2, 3
+    100: JumpToBooleanFalse r2, 6 (.L5)
+    103: PopScope 
+    104: Jump 6 (.L6)
+  .L5:
+    106: Mov r0, r1
+    109: PopScope 
+  .L6:
+    110: PopScope 
+  .L7:
+    111: PopScope 
+  .L8:
+    112: LoadUndefined r2
+    114: Ret r2
+  Constant Table:
+    0: [ScopeNames]
+    1: [ScopeNames]
+    2: [ScopeNames]
+    3: [BytecodeFunction: inner]
+}
+
+[BytecodeFunction: inner] {
+  Parameters: 0, Registers: 2
+     0: LoadFromScope r0, 0, 2
+     4: CheckTdz r0, c0
+     7: LoadFromScope r1, 0, 1
+    11: CheckTdz r1, c1
+    14: Add r0, r0, r1
+    18: LoadFromScope r1, 0, 0
+    22: CheckTdz r1, c2
+    25: Add r0, r0, r1
+    29: Ret r0
+  Constant Table:
+    0: [String: x]
+    1: [String: y]
+    2: [String: z]
+}
+
+[BytecodeFunction: noCapturesInBreak] {
+  Parameters: 0, Registers: 3
+     0: PushFunctionScope c0
+     2: LoadEmpty r2
+     4: StoreToScope r2, 0, 0
+     8: LoadImmediate r2, 0
+    11: StoreToScope r2, 0, 0
+    15: NewClosure r1, c1
+    18: LoadImmediate r2, 1
+    21: JumpToBooleanFalse r2, 5 (.L0)
+    24: Jump 5 (.L1)
+  .L0:
+    26: Mov r0, r1
+  .L1:
+    29: LoadImmediate r2, 2
+    32: LoadUndefined r2
+    34: Ret r2
+  Constant Table:
+    0: [ScopeNames]
+    1: [BytecodeFunction: inner]
+}
+
+[BytecodeFunction: inner] {
+  Parameters: 0, Registers: 1
+    0: LoadFromScope r0, 0, 0
+    4: CheckTdz r0, c0
+    7: Ret r0
+  Constant Table:
+    0: [String: x]
+}

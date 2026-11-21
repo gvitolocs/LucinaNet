@@ -1,0 +1,11 @@
+[package]
+name = "lucinanet-historydb"
+version = "0.1.0"
+description = "Visited-page store with Firefox frecency and history queries (pure, in memory)"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

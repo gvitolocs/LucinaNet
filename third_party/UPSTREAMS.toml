@@ -1,0 +1,110 @@
+# Every upstream project this repository carries or derives from: where it comes from, the commit our directory is based
+# on, what we changed in one line, and its licence. A directory can be diffed against its upstream at the commit named here.
+# "unchanged" means the files are the upstream files at that commit, with only the exclusions named in `omitted`.
+
+[servo]
+dir = "third_party/servo"
+upstream = "https://github.com/servo/servo"
+base = "2b94d76a6971d2c41b6447b1b6d8251412d6ac72"
+ours = "145 commits on top of the base, merged into the fork at c84698e6e419e5009a3a6de7500a51029d797029"
+changes = "LucinaEngine: a Rust implementation of the SpiderMonkey host API over LucinaJS, Rust font, storage and network-policy components, media-element contracts, software-render paths"
+omitted = ["tests/wpt", "tests/blink_perf_tests", "tests/html", "python/tidy/tests"]
+license = "MPL-2.0; LICENSE_WHATWG_SPECS (BSD-3-Clause) for specification text"
+
+[brimstone]
+dir = "third_party/brimstone"
+upstream = "https://github.com/Hans-Halverson/brimstone"
+base = "64d66980ce03f3c9c0a38a16d09e7fa056a1171d"
+ours = "389 commits on top of the base, at f899c97e9a1f5902b2268fd9f149c99bb0019f76"
+changes = "LucinaJS: the engine as an embedded library for a browser (Annex B, host hooks, a moving garbage collector, Intl on ICU4X data), plus Verus-checked rules"
+omitted = ["docs/research"]
+license = "MIT"
+
+[js]
+dir = "js"
+upstream = "https://github.com/servo/mozjs"
+base = "API of mozjs 0.26.13 (crates.io); no SpiderMonkey source is carried"
+ours = "glue at e986bf626f0504fc8d345b79d4dad79ab3600ed0"
+changes = "mozjs and mozjs-sys re-implemented in Rust as the SpiderMonkey host API over LucinaJS, with an engine edge wrap that contains panics"
+omitted = ["docs/research", "docs/evidence"]
+license = "MPL-2.0"
+
+[webrender]
+dir = "third_party/webrender"
+upstream = "https://github.com/servo/webrender (published as the webrender crate)"
+base = "webrender 0.70.1 from crates.io"
+ours = "7 commits on top, at 29c07a6da20eac5e993f87f5994a8c6d62028313"
+changes = "software compositor and spatial-tree changes for the software rendering path"
+license = "MPL-2.0"
+
+[wr-glyph-rasterizer]
+dir = "third_party/wr-glyph-rasterizer"
+upstream = "https://github.com/servo/webrender (published as the wr_glyph_rasterizer crate)"
+base = "wr_glyph_rasterizer 0.70.1 from crates.io"
+ours = "3 commits on top, at d2cc636fe889400da6864498c66ab2f5f3ef9eb6"
+changes = "glyph rasterizer on skrifa outlines and zeno coverage instead of FreeType; GlyphKey bit packing with a Verus proof"
+license = "MPL-2.0 AND FTL (src/platform/unix/font.rs is derived from FreeType; see FTL.TXT)"
+
+[swgl]
+dir = "swgl"
+upstream = "https://github.com/servo/webrender (published as the swgl crate)"
+base = "swgl 0.70.0 from crates.io"
+ours = "this directory"
+changes = "call-trace replay and a profiling hook for the rasterizer comparison, small fixes in gl.cc and composite.h"
+license = "MPL-2.0 (res/Proggy.ttf is ProggyClean, MIT)"
+
+[blitz]
+dir = "third_party/blitz"
+upstream = "https://github.com/DioxusLabs/blitz"
+base = "d0f48bd17224130c3697b9c6a2de9c090cfdebc7"
+ours = "2 commits on top, branch lucinanet"
+changes = "comparison engine kept for the rendering comparison; the browser build does not use it"
+license = "MIT OR Apache-2.0"
+
+[stylo]
+dir = "third_party/stylo"
+upstream = "https://github.com/servo/stylo"
+base = "890aa121c6aa930c1a3c52f307fd4ba5d9410068"
+ours = "none"
+changes = "unchanged"
+license = "MPL-2.0 (servo_arc and malloc_size_of: MIT OR Apache-2.0)"
+
+[rav1d]
+dir = "third_party/rav1d"
+upstream = "https://github.com/memorysafety/rav1d"
+base = "2e7216c20ac2a75de204d6c8d7268b75a45959b4"
+ours = "none"
+changes = "unchanged"
+omitted = ["tests"]
+license = "BSD-2-Clause (COPYING: VideoLAN and the Internet Security Research Group)"
+
+[indexmap-allocator-api]
+dir = "third_party/indexmap-allocator-api"
+upstream = "https://github.com/Hans-Halverson/indexmap-allocator-api"
+base = "36852f985c01fb9f58f2d9e510655ca1dbb1f4d0"
+ours = "none"
+changes = "unchanged"
+license = "Apache-2.0 OR MIT"
+
+[fonts]
+dir = "fonts"
+upstream = "original code, derived by behaviour from FreeType 2.13.2 (lucina-ftcompat) and from the OpenType Sanitizer (lucina-fontsan)"
+base = "none"
+ours = "this directory"
+changes = "Rust replacement for the FreeType-backed font code of the engine: size and metric arithmetic, face metrics, font sanitising"
+license = "MPL-2.0; lucina-ftcompat also FTL; lucina-fontsan also BSD-3-Clause (fonts/LICENSES)"
+
+[lucinaos]
+dir = "lucinaos"
+upstream = "https://github.com/gvitolocs/lucina"
+base = "5bd41b051d594a1b77b99b015c0c92ecf126aebb"
+ours = "crates written for LucinaOS: lucina-app, lucina-ax, lucina-events, lucina-glass, lucina-intents, lucina-nav, lucina-netlink, lucina-resolv, lucina-video, lucina-video-play, lucina-audio-decode, plus the eyra stack under third_party/eyra-stack"
+changes = "taken as they are at that commit; lucinaos/LICENSE lists what is not under the MIT licence"
+license = "MIT, except the code listed in lucinaos/LICENSE; eyra stack Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+
+[chromium-derived]
+dir = "crates/lucinanet-omnibox, crates/lucinanet-shortcuts, crates/lucinanet-zoom, crates/lucinanet-permissions"
+upstream = "Chromium (BSD-3-Clause); crates/lucinanet-shortcuts also Firefox (MPL-2.0)"
+base = "constants and formulas as published; the code is written anew in Rust"
+changes = "each crate's NOTICE file states what was taken"
+license = "MPL-2.0 for our code; BSD-3-Clause and MPL-2.0 for the derived tables, see each NOTICE"

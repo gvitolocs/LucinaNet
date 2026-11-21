@@ -1,0 +1,329 @@
+lucinanet-media: media elem event=play paused=0 ended=0 seeking=0 potentially_playing=0 player_playing=0 cmd=play
+[2026-11-19T13:02:04Z INFO  lucinanet_media::player] lucinanet-media: no pictures: cannot read: the player closed
+[2026-11-19T13:02:04Z INFO  lucinanet_media::player] lucinanet-media: no sound: not a format this plays: unsupported feature: core (probe): no suitable format reader found
+lucinanet-media: opened: no
+lucinanet-media: audio wait start ENTER: queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio cmd Paused true
+lucinanet-media: audio wait start still (12 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio wait start still (112 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio wait start still (64 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: show pts=0 now=Some(0) sound=None
+[2026-11-19T13:02:05Z INFO  lucinanet_media::player] lucinanet-media: first frame after 543 ms
+lucinanet-media: audio cmd Start pts=0 paused=true running=false
+lucinanet-media: audio wait start LEAVE: progress, 73 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (65 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (52 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (84 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (71 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (52 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (61 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (54 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (56 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (119 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (53 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: mixer stream 0: taken=0 heard=0 held=Some(0) queued=96000 playing=false | device written=0 played=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (54 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (55 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: media elem event=waiting paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=0 cmd=play
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: player play on Script#1 mirror(paused=true,can_resume=false)
+lucinanet-media:   1: <lucinanet_media::player::LucinaPlayer as servo_media_player::Player>::play
+lucinanet-media:   2: <script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::update_media_state
+lucinanet-media:   3: <script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::change_ready_state
+lucinanet-media:   4: <script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::playback_state_changed
+lucinanet-media:   5: <<script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::create_media_player::{closure#0}::handle_player_event<<script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::create_media_player::{closure#0}::{closure#0}> as script_bindings::tasks::TaskOnce>::run_once
+lucinanet-media:   6: <script_bindings::tasks::CancellableTask<<script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::create_media_player::{closure#0}::handle_player_event<<script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::create_media_player::{closure#0}::{closure#0}>> as script_bindings::tasks::TaskBox>::run_box
+lucinanet-media:   7: <script::tasks::task_queue::TaskQueue<script::messaging::MainThreadScriptMsg>>::run_task
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: mixer stream 0 set_playing(true) resumed, latch 0 released from crates/lucinanet-media/src/mse_play.rs:418
+[2026-11-19T13:02:07Z INFO  lucinanet_media::hold] lucinanet-media: screen hold on
+[2026-11-19T13:02:07Z INFO  lucinanet_media::mixer] lucinanet-media: sound sink none (LUCINANET_MEDIA_SINK=none): nothing is played
+lucinanet-media: audio cmd Paused false
+lucinanet-media: audio cmd Paused false
+lucinanet-media: audio wait room LEAVE: progress, 109 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(41) cursor_pts=Some(1101000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 26 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(24729) cursor_pts=Some(1121000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 4 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(31791) cursor_pts=Some(1141000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 20 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(51937) cursor_pts=Some(1161000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+[2026-11-19T13:02:07Z WARN  lucinanet_media::player] lucinanet-media: clock source: system -> audio at 0.052 s
+lucinanet-media: show pts=42000 now=Some(51937) sound=Some(51937)
+lucinanet-media: audio wait room still (12 ms): queued=96000 playing=true position_us=Some(64875) cursor_pts=Some(1161000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 10 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(75020) cursor_pts=Some(1181000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 21 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8361333) cursor_pts=Some(9461000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (0 ms): queued=96000 playing=true position_us=Some(8361541) cursor_pts=Some(9461000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8342000 now=Some(8361583) sound=Some(8361583)
+lucinanet-media: media elem event=play-redundant paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=1 cmd=none
+lucinanet-media: audio wait room LEAVE: progress, 11 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8372687) cursor_pts=Some(9481000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (12 ms): queued=96000 playing=true position_us=Some(8384875) cursor_pts=Some(9481000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8383000 now=Some(8384979) sound=Some(8384979)
+lucinanet-media: audio wait room LEAVE: progress, 5 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8390291) cursor_pts=Some(9501000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8400583) cursor_pts=Some(9501000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 10 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8410854) cursor_pts=Some(9521000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8421250) cursor_pts=Some(9521000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8425000 now=Some(8429645) sound=Some(8429645)
+lucinanet-media: audio wait room LEAVE: progress, 13 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8434791) cursor_pts=Some(9541000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (20 ms): queued=96000 playing=true position_us=Some(8441583) cursor_pts=Some(9541000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 1 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8456666) cursor_pts=Some(9561000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (6 ms): queued=96000 playing=true position_us=Some(8462708) cursor_pts=Some(9561000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 8 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8470875) cursor_pts=Some(9581000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8484062) cursor_pts=Some(9581000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8467000 now=Some(8484145) sound=Some(8484145)
+lucinanet-media: audio wait room LEAVE: progress, 5 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8490020) cursor_pts=Some(9601000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8500812) cursor_pts=Some(9601000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 13 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8513854) cursor_pts=Some(9621000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8508000 now=Some(8513854) sound=Some(8513854)
+lucinanet-media: audio wait room still (9 ms): queued=96000 playing=true position_us=Some(8524166) cursor_pts=Some(9621000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 8 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8532479) cursor_pts=Some(9641000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (11 ms): queued=96000 playing=true position_us=Some(8544000) cursor_pts=Some(9641000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8550000 now=Some(8554145) sound=Some(8554145)
+lucinanet-media: audio wait room LEAVE: progress, 10 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8554145) cursor_pts=Some(9661000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8565270) cursor_pts=Some(9661000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 5 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8570500) cursor_pts=Some(9681000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8580833) cursor_pts=Some(9681000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 13 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8592812) cursor_pts=Some(9701000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8592000 now=Some(8598000) sound=Some(8598000)
+lucinanet-media: audio wait room still (8 ms): queued=96000 playing=true position_us=Some(8603062) cursor_pts=Some(9701000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 11 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8613208) cursor_pts=Some(9721000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (11 ms): queued=96000 playing=true position_us=Some(8623791) cursor_pts=Some(9721000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8633000 now=Some(8635145) sound=Some(8635145)
+lucinanet-media: audio wait room LEAVE: progress, 18 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8640208) cursor_pts=Some(9741000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 7 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8650375) cursor_pts=Some(9761000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (9 ms): queued=96000 playing=true position_us=Some(8662729) cursor_pts=Some(9761000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 10 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8672875) cursor_pts=Some(9781000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8675000 now=Some(8677937) sound=Some(8677937)
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8683020) cursor_pts=Some(9781000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 10 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8693208) cursor_pts=Some(9801000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8703541) cursor_pts=Some(9801000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 13 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8717125) cursor_pts=Some(9821000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8717000 now=Some(8717125) sound=Some(8717125)
+lucinanet-media: audio wait room still (4 ms): queued=96000 playing=true position_us=Some(8722166) cursor_pts=Some(9821000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 13 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8735375) cursor_pts=Some(9841000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (5 ms): queued=96000 playing=true position_us=Some(8740520) cursor_pts=Some(9841000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: media elem event=play-redundant paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=1 cmd=none
+lucinanet-media: media elem event=play-redundant paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=1 cmd=none
+lucinanet-media: audio wait room LEAVE: progress, 14 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8754833) cursor_pts=Some(9861000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8759000 now=Some(8759916) sound=Some(8759916)
+lucinanet-media: audio wait room still (8 ms): queued=96000 playing=true position_us=Some(8765791) cursor_pts=Some(9861000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 7 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8773770) cursor_pts=Some(9881000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8784270) cursor_pts=Some(9881000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+phase 655617.191074 load started
+lucinanet-media: audio wait room still (5 ms): queued=96000 playing=true position_us=Some(29610875) cursor_pts=Some(30701000) start_at=None frames=3553 buffered_end_us=Some(71061000) generation=1 track=1 buffers=2 ended=false seeks=2
+lucinanet-media: audio wait room LEAVE: progress, 10 ms
+lucinanet-media: starving queued=0 eof=false now=Some(29621020)
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(29621020) cursor_pts=Some(30721000) start_at=None frames=3553 buffered_end_us=Some(71061000) generation=1 track=1 buffers=2 ended=false seeks=2
+phase 655617.206685 first frame painted
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(29631166) cursor_pts=Some(30721000) start_at=None frames=3553 buffered_end_us=Some(71061000) generation=1 track=1 buffers=2 ended=false seeks=2
+lucinanet-media: starving queued=0 eof=false now=Some(29639687)
+lucinanet-media: audio wait room LEAVE: progress, 13 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(29644770) cursor_pts=Some(30741000) start_at=None frames=3553 buffered_end_us=Some(71061000) generation=1 track=1 buffers=2 ended=false seeks=2
+[2026-11-19T13:02:38Z INFO  lucinanet_media::hold] lucinanet-media: screen hold off
+lucinanet-media: played VP9 seconds=34.0 shown=618 dropped=36 jumps=2 decoded=659 on_venus=0 skipped=46 decode_ms_mean=43.5 decode_ms_worst=314.0 sound_frames=616 late_ms_mean=315.0 late_ms_worst=1956.0
+lucinanet-media: mixer stream 0 playing true -> false held=Some(380152) queued=96000 from crates/lucinanet-media/src/mse_play.rs:398
+phase 655618.582064 load started
+phase 655618.624211 first frame painted
+lucinanet-media: media elem event=play paused=0 ended=0 seeking=0 potentially_playing=0 player_playing=0 cmd=play
+[2026-11-19T13:02:43Z INFO  lucinanet_media::player] lucinanet-media: no pictures: cannot read: the player closed
+[2026-11-19T13:02:43Z INFO  lucinanet_media::player] lucinanet-media: no sound: not a format this plays: unsupported feature: core (probe): no suitable format reader found
+lucinanet-media: opened: no
+lucinanet-media: audio wait start ENTER: queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio cmd Paused true
+lucinanet-media: audio wait start still (0 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio wait start still (100 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio wait start still (100 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio wait start still (50 ms): queued=0 playing=false cursor_pts=None start_at=None frames=0 buffered_end_us=None generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(0)
+lucinanet-media: audio wait start still (10 ms): queued=0 playing=false cursor_pts=None start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=0 now=Some(0) sound=None
+[2026-11-19T13:02:43Z INFO  lucinanet_media::player] lucinanet-media: first frame after 346 ms
+lucinanet-media: audio cmd Start pts=0 paused=true running=false
+lucinanet-media: audio wait start LEAVE: progress, 7 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (52 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (52 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (53 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (57 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (52 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (56 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (57 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (53 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (54 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (55 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (65 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (55 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: mixer stream 0: taken=0 heard=0 held=Some(0) queued=96000 playing=false | device written=0 played=0
+lucinanet-media: audio wait room still (54 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (54 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (53 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (52 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (51 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (50 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (53 ms): queued=96000 playing=false position_us=None cursor_pts=Some(1001000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: media elem event=waiting paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=0 cmd=play
+lucinanet-media: player play on Script#1 mirror(paused=true,can_resume=false)
+lucinanet-media:   1: <lucinanet_media::player::LucinaPlayer as servo_media_player::Player>::play
+lucinanet-media:   2: <script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::update_media_state
+lucinanet-media:   3: <script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::change_ready_state
+lucinanet-media:   4: <script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::playback_state_changed
+lucinanet-media:   5: <<script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::create_media_player::{closure#0}::handle_player_event<<script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::create_media_player::{closure#0}::{closure#0}> as script_bindings::tasks::TaskOnce>::run_once
+lucinanet-media:   6: <script_bindings::tasks::CancellableTask<<script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::create_media_player::{closure#0}::handle_player_event<<script::dom::html::embedded_content::htmlmediaelement::HTMLMediaElement>::create_media_player::{closure#0}::{closure#0}>> as script_bindings::tasks::TaskBox>::run_box
+lucinanet-media:   7: <script::tasks::task_queue::TaskQueue<script::messaging::MainThreadScriptMsg>>::run_task
+lucinanet-media: mixer stream 0 set_playing(true) resumed, latch 0 released from crates/lucinanet-media/src/mse_play.rs:418
+[2026-11-19T13:02:46Z INFO  lucinanet_media::hold] lucinanet-media: screen hold on
+lucinanet-media: audio cmd Paused false
+lucinanet-media: audio cmd Paused false
+lucinanet-media: audio wait room LEAVE: progress, 14 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(20) cursor_pts=Some(1101000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 9 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(10166) cursor_pts=Some(1121000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (17 ms): queued=96000 playing=true position_us=Some(27791) cursor_pts=Some(1121000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 13 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(41145) cursor_pts=Some(1141000) start_at=None frames=500 buffered_end_us=Some(10001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 5 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8791583) cursor_pts=Some(9901000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8800000 now=Some(8804062) sound=Some(8804062)
+lucinanet-media: audio wait room still (16 ms): queued=96000 playing=true position_us=Some(8804062) cursor_pts=Some(9901000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 6 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8814583) cursor_pts=Some(9921000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8825041) cursor_pts=Some(9921000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 4 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8830125) cursor_pts=Some(9941000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (13 ms): queued=96000 playing=true position_us=Some(8843479) cursor_pts=Some(9941000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: media elem event=play-redundant paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=1 cmd=none
+lucinanet-media: audio wait room LEAVE: progress, 10 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8853645) cursor_pts=Some(9961000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8842000 now=Some(8853645) sound=Some(8858708)
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8864125) cursor_pts=Some(9961000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 12 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8874875) cursor_pts=Some(9981000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (12 ms): queued=96000 playing=true position_us=Some(8880166) cursor_pts=Some(9981000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 5 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8893791) cursor_pts=Some(10001000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=8884000 now=Some(8893791) sound=Some(8893791)
+lucinanet-media: starving queued=0 eof=false now=Some(8893791)
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(8904083) cursor_pts=Some(10001000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 6 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(8910604) cursor_pts=Some(10021000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(9832229)
+lucinanet-media: audio wait room still (15 ms): queued=96000 playing=true position_us=Some(9843416) cursor_pts=Some(10941000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 11 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(9858416) cursor_pts=Some(10961000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(9858416)
+lucinanet-media: audio wait room LEAVE: progress, 9 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(9870166) cursor_pts=Some(10981000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (10 ms): queued=96000 playing=true position_us=Some(9880708) cursor_pts=Some(10981000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 9 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(9890687) cursor_pts=Some(11001000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: show pts=9593000 now=Some(9896333) sound=Some(9896333)
+lucinanet-media: media elem event=play-redundant paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=1 cmd=none
+lucinanet-media: starving queued=0 eof=false now=Some(9896333)
+lucinanet-media: media elem event=play-redundant paused=0 ended=0 seeking=0 potentially_playing=1 player_playing=1 cmd=none
+lucinanet-media: audio wait room still (21 ms): queued=96000 playing=true position_us=Some(9909708) cursor_pts=Some(11001000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room LEAVE: progress, 2 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(9914770) cursor_pts=Some(11021000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: drop pts=Some(9634000) now=Some(9930375) sound=true
+lucinanet-media: show pts=9676000 now=Some(9930375) sound=Some(9930375)
+lucinanet-media: starving queued=0 eof=false now=Some(9930375)
+lucinanet-media: audio wait room LEAVE: progress, 15 ms
+lucinanet-media: audio wait room ENTER: queued=96000 playing=true position_us=Some(9930375) cursor_pts=Some(11041000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: audio wait room still (9 ms): queued=96000 playing=true position_us=Some(9940541) cursor_pts=Some(11041000) start_at=None frames=1500 buffered_end_us=Some(30001000) generation=1 track=1 buffers=2 ended=false seeks=0
+lucinanet-media: starving queued=0 eof=false now=Some(9945625)

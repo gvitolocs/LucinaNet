@@ -1,0 +1,5 @@
+# url https://slow.example.com/
+render: down to frame 406000 us
+render: down to frame 501000 us
+render: down to frame 530000 us
+render: complete true in 6200 ms, rss 180000 KiB

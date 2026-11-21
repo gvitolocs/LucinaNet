@@ -1,0 +1,14 @@
+{"features":["WeakRef"],"message":"","path":"/corpus/test/built-ins/WeakRef/deref.js","result":"pass","variant":"sloppy"}
+{"features":["WeakRef"],"message":"Test262Error: expected false, got true","path":"/corpus/test/built-ins/WeakRef/deref.js","result":"fail","variant":"strict"}
+{"features":["Temporal"],"message":"uncaught undefined: Expected SameValue(«1», «0») to be true","path":"/corpus/test/built-ins/Temporal/PlainDate/valueOf.js","result":"fail","variant":"sloppy"}
+{"features":["Temporal"],"message":"","path":"/corpus/test/built-ins/Temporal/PlainDate/valueOf.js","result":"pass","variant":"strict"}
+{"features":["Object"],"message":"uncaught undefined: Expected SameValue(«7», «3») to be true","path":"/corpus/test/built-ins/Object/assign/numbers.js","result":"fail","variant":"sloppy"}
+{"features":["Symbol.iterator","IsHTMLDDA"],"message":"feature-not-supported: IsHTMLDDA","path":"/corpus/test/annexB/built-ins/Array/iterator.js","result":"skipped","variant":"sloppy"}
+{"features":["Symbol.iterator","IsHTMLDDA"],"message":"feature-not-supported: IsHTMLDDA","path":"/corpus/test/annexB/built-ins/Array/iterator.js","result":"skipped","variant":"strict"}
+{"features":["destructuring-binding","iterable-array-like"],"message":"","path":"/corpus/test/language/expressions/destructuring/array.js","result":"pass","variant":"sloppy"}
+{"features":["destructuring-binding","iterable-array-like"],"message":"Test262Error: mismatch","path":"/corpus/test/language/expressions/destructuring/array.js","result":"fail","variant":"strict"}
+{"features":[],"message":"","path":"/corpus/test/language/statements/const/redefine.js","result":"pass","variant":"sloppy"}
+{"features":[],"message":"uncaught TypeError: `x` is not defined","path":"/corpus/test/language/statements/const/redefine.js","result":"fail","variant":"strict"}
+{"features":["arrow-function"],"message":"exceeded 30000 ms","path":"/corpus/test/language/expressions/arrow-function/scope.js","result":"timeout","variant":"sloppy"}
+{"features":["Intl"],"message":"","path":"/corpus/test/intl402/DateTimeFormat/basic.js","result":"pass","variant":"sloppy"}
+{"features":["await"],"message":"module-unsupported","path":"/corpus/test/staging/await/a.js","result":"skipped","variant":"strict"}

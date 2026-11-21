@@ -1,0 +1,24 @@
+[package]
+name = "servo-zstd"
+version = "0.8.0"
+authors = ["The Servo Project Developers"]
+license = "MPL-2.0"
+edition = "2024"
+publish = false
+rust-version = "1.88.0"
+description = "LucinaNet: zstd Content-Encoding in Rust (ruzstd), in place of libzstd."
+
+[lib]
+name = "servo_zstd"
+path = "lib.rs"
+
+[dependencies]
+pin-project-lite = "0.2"
+ruzstd = { workspace = true, features = ["hash"] }
+tokio = { workspace = true, features = ["io-util"] }
+
+[dev-dependencies]
+# C libzstd: the test oracle only, never a normal dependency.
+zstd = "0.13"
+rand = "0.8"
+tokio = { workspace = true, features = ["rt", "macros", "io-util"] }

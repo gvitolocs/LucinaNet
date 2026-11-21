@@ -1,0 +1,79 @@
+// @generated
+/// Implement `DataProvider<CurrencySymbolsV1>` on the given struct using the data
+/// hardcoded in this file. This allows the struct to be used with
+/// `icu`'s `_unstable` constructors.
+///
+/// Using this implementation will embed the following data in the binary's data segment:
+/// * 1717B for the lookup data structure (233 data identifiers)
+/// * 2815B[^1] for the actual data (102 unique structs)
+///
+/// [^1]: these numbers can be smaller in practice due to linker deduplication
+///
+/// This macro requires the following crates:
+/// * `icu_locale_fallback/compiled_data`
+/// * `icu_provider`
+/// * `icu_provider/baked`
+/// * `zerovec`
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __impl_currency_symbols_v1 {
+    ($ provider : ty) => {
+        #[clippy::msrv = "1.88"]
+        const _: () = <$provider>::MUST_USE_MAKE_PROVIDER_MACRO;
+        #[clippy::msrv = "1.88"]
+        impl $provider {
+            const DATA_CURRENCY_SYMBOLS_V1: icu_provider::baked::zerotrie::DataForVarULEs<icu_experimental::dimension::provider::currency::symbols::CurrencySymbolsV1> = {
+                const TRIE: icu_provider::baked::zerotrie::ZeroTrieSimpleAscii<&'static [u8]> = icu_provider::baked::zerotrie::ZeroTrieSimpleAscii {
+                    store: b"\xE1ddeiu\0\x03\x03C\xC1\xECa\x1E\xC2ns*/\xC7BDINRST\x03\x07\x0B\x0F\x13\x17YN\x8BKK\x90\x01SK\x90\x01OK\x90\x01ON\x90\x0CEK\x90\x01WD\x90./\xC3ADT\x04\x08UD\x905KK\x90\x01HB\x90+n\xE1b\x1E-\0\x0Cs/\xC2JU\x03PY\x8DSD\x83\xE1v0ABCDEFGIJKLMNPRSTUVWZ\0\0\0\0\0\0\x01\x01\x01\x01\x01\x01\x01\x02\x02\x02\x02\x02\x02\x03\x03\x11e\x9C\xD3\xE6\xEF\tI\\d\x89\xA5\xF45R[\xC1\xF0\xF9\x0C\x1501\x1Es/\xC2JU\x04PY\x90>SD\x90J\xC3GIU\x07\x0E\x1Es/XCD\x83\x1Es/XCD\x83\x1E\xC2ns)/\xC7BCEIPSU\x03\x06\n\x0E\x12\x16DT\x86UP\x8FGP\x90\x03SK\x90\x12YG\x90%EK\x90\x12YU\x900/\xC3ASX\x03\x07UD\x83CR\x90\x1APF\x90S\xC6BIMSWZ\x07\x0F\x16\x1D$\x1Es/BBD\x83\x1Es/BIF\x907\x1Es/BMD\x83\x1Es/BSD\x83\x1Es/BWP\x8A\x1Es/BZD\x83\xC4ACKX\x1A!(\x1Es/\xC4CJUX\x03\x07\x0BAD\x83PY\x90>SD\x90JCG\x90O\x1Es/AUD\x83\x1Es/NZD\x83\x1Es/AUD\x83\xC2KM\x08\x1Es/DKK\x90\x01\x1Es/XCD\x83R\x1Es/ERN\x90:\xC2JK\x07\x1Es/FJD\x83\x1Es/\xC2FG\x04KP\x90\x03BP\x90;\xC6DEHIMY\x07\x0F\x17%-\x1Es/XCD\x83\x1Es/GEL\x90\x08\x1Es/GHS\x90\t\x1Es/G\xC2BI\x03P\x90;P\x90\x03\x1Es/GMD\x90<\x1Es/GYD\x83\xC2DN\x08\x1Es/IDR\x90\x0F\x1Es/USD\x83M\x1Es/JMD\x83\xC4EINY\x08\x0F\x16\x1Es/KES\x90?\x1Es/AUD\x83\x1Es/XCD\x83\x1Es/KYD\x83\xC3CRS\x07\x0E\x1Es/XCD\x83\x1Es/LRD\x83\x1Es/ZAR\x902\xC8GOSTUVWY\x08\x10\x17\x1F'/7\x1Es/MGA\x90\x1D\x1Es/MOP\x90@\x1Es/XCD\x83\x1Es/GBP\x90;\x1Es/MUR\x90\x1A\x1Es/MVR\x90A\x1Es/MWK\x90B\x1Es/MYR\x90 \xC7AFGORUZ\x07\x0E\x16\x1E%,\x1Es/NAD\x83\x1Es/AUD\x83\x1Es/NGN\x90!\x1Es/NOK\x90\x02\x1Es/AUD\x83\x1Es/NZD\x83\x1Es/NZD\x83\xC3GKN\x08\x10\x1Es/PGK\x90\x1E\x1Es/PKR\x90\x1A\x1Es/NZD\x83W\x1Es/RWF\x90)\xC9BCEGHLSXZ\x07\x0F\x17\x1E-5DL\x1Es/SBD\x83\x1Es/SCR\x90E\x1Es/SEK\x90\x02\x1Es/SGD\x83\x1Es/\xC2GS\x04BP\x90;HP\x90\x03\x1Es/SLE\x90F\x1Es/\xC2GS\x04BP\x90;SP\x90\x03\x1Es/ANG\x904\x1Es/SZL\x90G\xC5KOTVZ\x07\x0F\x16\x1D\x1Es/NZD\x83\x1Es/TOP\x90,\x1Es/TTD\x83\x1Es/AUD\x83\x1Es/TZS\x90HG\x1Es/UGX\x90I\xC2CU\x07\x1Es/XCD\x83\x1Es/VUV\x90KS\x1Es/WST\x90L\xC2AM\x08\x1Es/ZAR\x902\x1Es/ZMW\x90\x1Et\x1E\xC2ns\x18/\xC4BENT\x03\x07\x0BYN\x8CGP\x90\x04OK\x90#WD\x90./\xC2TX\x04HB\x90+CG\x90Pnd\x1E\xE1bns\x02\x0F/\xE1vABCDEFGHIJKLMNPRSTUVXZ\0\0\0\0\0\0\0\0\0\0\0\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x18@ajy\x82\xA4\xB7\xCB\xD3\xF5\x12/K^m\x92\xA9\xB6\xBF\xC2\xC6FMORUZ\x02\x04\x06\x08\nN\x80D\x81A\x82S\x83D\x83N\x84\xCAABDMNORSWZ\x02\x04\x06\x08\n\x0C\x0E\x10\x12M\x85D\x83T\x87D\x83D\x83B\x88L\x89D\x83P\x8AD\x83\xC7ALNORUZ\x02\x04\x06\x08\n\x10D\x83P\x83Y\x8DP\x83C\x8E\xC2CP\x01\x83\x83K\x90\0\xC2KO\x03K\x90\x02P\x83\xC3GSU\x03\x06P\x90\x05P\x90\x06R\x90\x07\xC2JK\x02D\x83P\x90\x03\xC7BEHINTY\x03\x06\t\x0C\x0F\x12P\x90\x03L\x90\x08S\x90\tP\x90\x03F\x90\nQ\x90\x0BD\x83\xC4KNRU\x02\x05\x08D\x83L\x90\x0CK\x90\rF\x90\x0E\xC4DLNS\x03\x06\tR\x90\x0FS\x90\x10R\x90\x11K\x90\x02\xC2MP\x02D\x83Y\x8D\xC7GHMPRYZ\x03\x06\t\x0C\x0F\x11S\x90\x13R\x90\x14F\x90\x15W\x90\x16W\x90\x16D\x83T\x90\x17\xC6ABKRTV\x03\x06\t\x0B\x0EK\x90\x18P\x90\x19R\x90\x1AD\x83L\x90\x1BL\x90\x1C\xC6GMNUXY\x03\x06\t\x0C\x0EA\x90\x1DK\x90\x1ET\x90\x1FR\x90\x1AN\x83R\x90 \xC6AGIOPZ\x02\x05\x08\x0B\x0ED\x83N\x90!O\x90\"K\x90\x02R\x90\x1AD\x83\xC4HKLY\x02\x05\x08P\x8FR\x90\x1AN\x90$G\x90&\xC3OUW\x03\x06N\x90'B\x90(F\x90)\xC8BEGHRSTY\x02\x05\x07\n\x0C\x0F\x12D\x83K\x90\x02D\x83P\x90\x03D\x83P\x90\x03N\x90*P\x90\x03\xC5HORTW\x03\x06\t\x0BB\x90+P\x90,Y\x90-D\x83D\x83\xC3ASY\x03\x05H\x90/D\x83U\x83\xC2EN\x02F\x88D\x901CD\x83\xC2AM\x03R\x902W\x903/\xD0ABCEGHIJKMNPTUVX\x04\x07\x11\x15\x19\x1D'+/37:>BFUD\x906RL\x89\xC2AN\x03D\x908Y\x909UR\x90\x07BP\x90\x03KD\x90=\xC2LN\x03S\x90\x10R\x90\x11PY\x90>RW\x90\x16XN\x90CZD\x90DHP\x8FWD\x90.SD\x90JND\x901\xC5ACOPX\x03\x0B\x0E\x11F\x90M\xC2DG\x02\x90N\x90QF\x90RF\x90TX\x90U",
+                };
+                const VALUES: &'static zerovec::VarZeroSlice<<<icu_experimental::dimension::provider::currency::symbols::CurrencySymbolsV1 as icu_provider::baked::zerotrie::DynamicDataMarker>::DataStruct as icu_provider::ule::MaybeAsVarULE>::EncodedStruct, zerovec::vecs::Index32> = unsafe { zerovec::vecs::VarZeroSlice32::from_bytes_unchecked(b"f\0\0\0\x03\0\0\0\x06\0\0\0\t\0\0\0\x0B\0\0\0\x0F\0\0\0\x12\0\0\0\x15\0\0\0\x19\0\0\0\x1C\0\0\0\x1F\0\0\0!\0\0\0%\0\0\0(\0\0\0+\0\0\0/\0\0\x003\0\0\x007\0\0\0;\0\0\0>\0\0\0A\0\0\0E\0\0\0I\0\0\0M\0\0\0Q\0\0\0U\0\0\0[\0\0\0^\0\0\0`\0\0\0b\0\0\0e\0\0\0h\0\0\0k\0\0\0o\0\0\0s\0\0\0v\0\0\0z\0\0\0~\0\0\0\x81\0\0\0\x85\0\0\0\x89\0\0\0\x8D\0\0\0\x91\0\0\0\x94\0\0\0\x97\0\0\0\x9A\0\0\0\x9D\0\0\0\x9F\0\0\0\xA3\0\0\0\xA6\0\0\0\xAA\0\0\0\xAD\0\0\0\xB1\0\0\0\xB5\0\0\0\xB8\0\0\0\xBC\0\0\0\xC0\0\0\0\xC4\0\0\0\xC7\0\0\0\xCA\0\0\0\xCE\0\0\0\xD1\0\0\0\xD5\0\0\0\xD9\0\0\0\xDD\0\0\0\xE0\0\0\0\xE4\0\0\0\xE6\0\0\0\xE9\0\0\0\xEE\0\0\0\xF2\0\0\0\xF5\0\0\0\xF9\0\0\0\xFD\0\0\0\x02\x01\0\0\x06\x01\0\0\x0B\x01\0\0\r\x01\0\0\x11\x01\0\0\x16\x01\0\0\x1A\x01\0\0\x1F\x01\0\0\"\x01\0\0%\x01\0\0)\x01\0\0-\x01\0\x000\x01\0\x003\x01\0\x005\x01\0\09\x01\0\0=\x01\0\0A\x01\0\0D\x01\0\0H\x01\0\0M\x01\0\0Q\x01\0\0T\x01\0\0W\x01\0\0[\x01\0\0c\x01\0\0g\x01\0\0l\x01\0\0\0\xD8\x8B\0\xD6\x8F\x03Kz\0$\0\xE2\x82\xBC\x03KM\x03Tk\0\xE0\xA7\xB3\x03Bs\x02R$\x03P\x02Br.\x03Br\0\xC2\xA5\0\xE2\x82\xA1\0\xE2\x82\xB1\x03K\xC4\x8D\x02kr.\x03kr\0\xC2\xA3\x01\xC2\xA3E\x02E\xC2\xA3\0\xE2\x82\xA7\0\xE2\x82\xAC\0\xE2\x82\xBE\x02GH\xE2\x82\xB5\x03FG\x03Q\x03L\x03kn\x03Ft\x03Rp\0\xE2\x82\xAA\0\xE2\x82\xB9\x03Kr\0\xE2\x83\x80\0\xE1\x9F\x9B\x03CF\0\xE2\x82\xA9\0\xE2\x82\xB8\0\xE2\x82\xAD\x02L\xC2\xA3\x03Rs\x03Lt\x03Ls\x03Ar\x03K\0\xE2\x82\xAE\x03RM\0\xE2\x82\xA6\x02C$\x03NKr\x03z\xC5\x82\x03Gs\0\xE2\x82\xB2\x03lei\0\xE2\x82\xBD\x03RF\x03Db\0\xE0\xB8\xBF\x02T$\0\xE2\x82\xBA\x02NT$\0\xE2\x82\xB4\x01$U\0\xE2\x82\xAB\x03R\x03ZK\x02NAf.\x02AU$\x02A$\x03FBu\x02CA$\x02CN\xC2\xA5\x03Nfk\x02GB\xC2\xA3\x03D\x02HK$\x02JP\xC2\xA5\x03Ksh\x02MOP$\x03Rf\x03MK\x02MX$\x02NZ$\x03SR\x03Le\x03E\x03TSh\x03USh\x02US$\x03VT\x02WS$\x03FCFA\x02EC$\x03Cg\x03Cf\x02Cg.\x03F\xE2\x80\xAFCFA\x03CFP\x03CFPF\0\xC2\xA4") };
+                unsafe { icu_provider::baked::zerotrie::DataForVarULEs::from_trie_and_values_unchecked(TRIE, VALUES) }
+            };
+        }
+        #[clippy::msrv = "1.88"]
+        impl icu_provider::DataProvider<icu_experimental::dimension::provider::currency::symbols::CurrencySymbolsV1> for $provider {
+            fn load(&self, req: icu_provider::DataRequest) -> Result<icu_provider::DataResponse<icu_experimental::dimension::provider::currency::symbols::CurrencySymbolsV1>, icu_provider::DataError> {
+                let mut metadata = icu_provider::DataResponseMetadata::default();
+                let payload = if let Some(payload) = icu_provider::baked::DataStore::get(&Self::DATA_CURRENCY_SYMBOLS_V1, req.id, req.metadata.attributes_prefix_match) {
+                    payload
+                } else {
+                    const FALLBACKER: icu_locale_fallback::LocaleFallbackerWithConfig<'static> = icu_locale_fallback::LocaleFallbacker::new().for_config(<icu_experimental::dimension::provider::currency::symbols::CurrencySymbolsV1 as icu_provider::DataMarker>::INFO.fallback_config);
+                    let mut fallback_iterator = FALLBACKER.fallback_for(req.id.locale.clone());
+                    loop {
+                        if let Some(payload) = icu_provider::baked::DataStore::get(
+                            &Self::DATA_CURRENCY_SYMBOLS_V1,
+                            icu_provider::DataIdentifierBorrowed::for_marker_attributes_and_locale(req.id.marker_attributes, fallback_iterator.get()),
+                            req.metadata.attributes_prefix_match,
+                        ) {
+                            metadata.locale = Some(fallback_iterator.take());
+                            break payload;
+                        }
+                        if fallback_iterator.get().is_unknown() {
+                            return Err(icu_provider::DataErrorKind::IdentifierNotFound.with_req(
+                                <icu_experimental::dimension::provider::currency::symbols::CurrencySymbolsV1 as icu_provider::DataMarker>::INFO,
+                                req,
+                            ));
+                        }
+                        fallback_iterator.step();
+                    }
+                };
+                Ok(icu_provider::DataResponse { payload, metadata })
+            }
+        }
+    };
+    ($ provider : ty , ITER) => {
+        __impl_currency_symbols_v1!($provider);
+        #[clippy::msrv = "1.88"]
+        impl icu_provider::IterableDataProvider<icu_experimental::dimension::provider::currency::symbols::CurrencySymbolsV1> for $provider {
+            fn iter_ids(&self) -> Result<std::collections::BTreeSet<icu_provider::DataIdentifierCow<'static>>, icu_provider::DataError> {
+                Ok(icu_provider::baked::DataStore::iter(&Self::DATA_CURRENCY_SYMBOLS_V1).collect())
+            }
+        }
+    };
+    ($ provider : ty , DRY) => {};
+    ($ provider : ty , DRY , ITER) => {
+        __impl_currency_symbols_v1!($provider, ITER);
+    };
+}
+#[doc(inline)]
+pub use __impl_currency_symbols_v1 as impl_currency_symbols_v1;

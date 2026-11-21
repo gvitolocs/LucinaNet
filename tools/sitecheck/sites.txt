@@ -1,0 +1,24 @@
+# Sites for suite.sh: one `name url` pair per line, `#` starts a comment.
+# `name` becomes the output file stem, so no spaces or slashes. Prefer mostly
+# static or server-rendered pages: a page that redraws itself between the two
+# loads cannot be diffed against a reference browser.
+example https://example.com
+wikipedia https://en.wikipedia.org/wiki/Asterinas
+hn https://news.ycombinator.com
+github https://github.com/servo/servo
+bbc https://www.bbc.com/news
+mdn https://developer.mozilla.org/en-US/docs/Web/JavaScript
+youtube https://www.youtube.com/
+lobste https://lobste.rs/
+oldreddit https://old.reddit.com/r/rust/
+stackoverflow https://stackoverflow.com/questions/2354259/map-reduce-in-python
+rustlang https://www.rust-lang.org/
+docsrs https://docs.rs/serde/latest/serde/
+python https://www.python.org/
+guardian https://www.theguardian.com/international
+wikipediamain https://en.wikipedia.org/wiki/Main_Page
+archiveorg https://archive.org/
+gnu https://www.gnu.org/
+kernel https://www.kernel.org/
+lwn https://lwn.net/
+sqlite https://www.sqlite.org/index.html

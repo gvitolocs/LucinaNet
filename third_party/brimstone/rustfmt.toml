@@ -1,0 +1,26 @@
+# Default line width
+max_width = 100
+
+# Adjust defaults to break expressions that fit on one line less often
+fn_call_width = 80
+attr_fn_like_width = 80
+struct_lit_width = 60
+struct_variant_width = 60
+
+# Unstable features, requires nightly rustfmt
+unstable_features = true
+format_macro_bodies = true
+group_imports = "StdExternalCrate"
+
+# proof text: formatting changes //@ and //@omit lines and the text the mutants scripts search
+ignore = [
+    "src/js/runtime/bytecode/fncache/disk_rules.rs",
+    "src/js/runtime/bytecode/fncache/partition.rs",
+    "src/js/runtime/bytecode/fncache/patch_rules.rs",
+    "src/js/runtime/bytecode/fncache/prov_rules.rs",
+    "src/js/runtime/bytecode/fncache/wire.rs",
+    "src/js/parser/reparse_rules.rs",
+    "src/js/runtime/gc/accounting.rs",
+    "src/js/runtime/gc/sizing.rs",
+    "src/js/runtime/bytecode/call_position.rs",
+]

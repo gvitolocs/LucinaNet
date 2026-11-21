@@ -1,0 +1,865 @@
+phase 51709.956656 main
+phase 51709.957329 engine thread
+phase 51709.968141 rendering context
+phase 51709.984237 servo built
+phase font list: 8 faces in 0 ms
+phase 51709.985193 web view built
+lucinanet: engine up in 27 ms, rss 36728 KiB
+phase 51710.006993 first frame painted
+netphase 51710.015578 fetch https://www.bbc.com/news 0.0 ms
+netphase 51710.019129 request https://www.bbc.com/news 0.0 ms
+netphase 51710.055206 dns www.bbc.com 35.6 ms
+netphase 51710.055356 dns-wait www.bbc.com 36.1 ms
+netphase 51710.061092 dns+tcp 41.9 ms
+netphase 51710.068455 certificate verification 0.3 ms
+netphase 51710.068555 connected https://www.bbc.com/ (dns+tcp+tls) 49.4 ms
+netphase 51710.102157 response headers https://www.bbc.com/news 83.0 ms
+lucinanet: history depth 3 over 1 tabs (was None)
+netphase 51710.110140 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.110419 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.110448 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.110733 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.110862 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.110881 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.112100 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.112134 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113084 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113117 fetch https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js 0.0 ms
+netphase 51710.113130 fetch https://cdn.tinypass.com/api/tinypass.min.js 0.0 ms
+netphase 51710.113148 fetch https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js 0.0 ms
+netphase 51710.113167 fetch https://emp.bbci.co.uk/emp/bump-4/bump-4.js 0.0 ms
+netphase 51710.113183 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113201 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113220 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113235 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113253 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113269 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113292 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113313 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113329 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113344 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113362 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113380 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113396 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113414 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113430 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113446 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113464 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113490 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113511 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113526 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113544 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113566 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113581 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113599 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113616 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113633 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113656 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113672 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113690 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113707 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113722 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113746 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113763 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113782 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113800 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113820 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113841 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113858 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113874 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113893 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113912 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113928 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113945 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113962 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.113985 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.114500 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.114526 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.114620 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.114663 request https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js 0.0 ms
+netphase 51710.114800 request https://cdn.tinypass.com/api/tinypass.min.js 0.0 ms
+netphase 51710.114905 request https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js 0.0 ms
+netphase 51710.115018 request https://emp.bbci.co.uk/emp/bump-4/bump-4.js 0.0 ms
+netphase 51710.115117 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.115164 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.115205 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.115254 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.115294 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.115334 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.115381 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116726 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116773 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116803 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116824 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116846 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116866 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116888 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116909 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116933 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116952 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116973 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.116995 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118060 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118090 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118110 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118137 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118158 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118177 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118200 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118221 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118244 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118265 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118286 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118308 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118330 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118349 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118367 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118393 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118422 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118442 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118461 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118485 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118507 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118527 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118550 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118572 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118594 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118616 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118639 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.118666 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.119850 fetch https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js 0.0 ms
+netphase 51710.120059 request https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js 0.0 ms
+netphase 51710.120827 fetch https://cdn.tinypass.com/api/tinypass.min.js 0.0 ms
+netphase 51710.120854 fetch https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js 0.0 ms
+netphase 51710.120869 fetch https://emp.bbci.co.uk/emp/bump-4/bump-4.js 0.0 ms
+netphase 51710.120891 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.120909 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.120929 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.120946 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.120966 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.120985 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121009 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121117 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121138 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121160 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121176 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121189 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121230 request https://cdn.tinypass.com/api/tinypass.min.js 0.0 ms
+netphase 51710.121244 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121270 request https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js 0.0 ms
+netphase 51710.121287 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121308 request https://emp.bbci.co.uk/emp/bump-4/bump-4.js 0.0 ms
+netphase 51710.121355 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121387 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121420 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121459 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121519 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121551 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121570 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121588 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121605 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121621 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121637 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121652 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121671 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121687 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121701 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121716 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121734 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121926 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121985 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122036 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122124 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122154 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122177 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122196 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122260 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.121309 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122271 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122440 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122543 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122620 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122703 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122773 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122854 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122928 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122991 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123128 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123235 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123252 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123275 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123321 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123337 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123352 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123372 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123389 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123407 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.123426 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.122289 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124066 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124129 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124157 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124179 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124202 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124224 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124247 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124266 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124286 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124315 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124336 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124363 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124383 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124407 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124426 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124446 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124469 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124489 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124510 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124531 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124553 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124572 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124599 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124618 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124637 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124658 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124684 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124709 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124728 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124751 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.124776 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.120986 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.127080 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.128103 dns cdn.tinypass.com 12.5 ms
+netphase 51710.130063 dns-wait cdn.tinypass.com 15.2 ms
+netphase 51710.132359 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.132565 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.132634 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/3774/live/60c41ee0-de7d-11f1-b88b-3f 0.0 ms
+netphase 51710.132697 request https://ichef.bbci.co.uk/news/480/cpsprodpb/3774/live/60c41ee0-de7d-11f1-b88b-3f 0.0 ms
+netphase 51710.133659 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.133773 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.133831 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/2a2c/live/a70e9220-de61-11f1-a701-fd 0.0 ms
+netphase 51710.133903 request https://ichef.bbci.co.uk/news/480/cpsprodpb/2a2c/live/a70e9220-de61-11f1-a701-fd 0.0 ms
+netphase 51710.134655 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.134738 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.134776 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.134850 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.134893 fetch https://ichef.bbci.co.uk/news/640/cpsprodpb/3774/live/60c41ee0-de7d-11f1-b88b-3f 0.0 ms
+netphase 51710.134948 request https://ichef.bbci.co.uk/news/640/cpsprodpb/3774/live/60c41ee0-de7d-11f1-b88b-3f 0.0 ms
+netphase 51710.134979 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/2a2c/live/a70e9220-de61-11f1-a701-fd 0.0 ms
+netphase 51710.135041 request https://ichef.bbci.co.uk/news/320/cpsprodpb/2a2c/live/a70e9220-de61-11f1-a701-fd 0.0 ms
+netphase 51710.135101 fetch https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/6d3b/live/08465440-de9b-11f1 0.0 ms
+netphase 51710.135158 request https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/6d3b/live/08465440-de9b-11f1 0.0 ms
+netphase 51710.135631 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.135698 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.135743 fetch https://ichef.bbci.co.uk/ace/standard/320/cpsprodpb/6d3b/live/08465440-de9b-11f1 0.0 ms
+netphase 51710.135793 request https://ichef.bbci.co.uk/ace/standard/320/cpsprodpb/6d3b/live/08465440-de9b-11f1 0.0 ms
+netphase 51710.136460 dns static.bbci.co.uk 21.1 ms
+netphase 51710.136520 dns-wait static.bbci.co.uk 21.8 ms
+netphase 51710.137706 dns+tcp 22.9 ms
+netphase 51710.138109 fetch https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/dcb2/live/fb3cd920-de8d-11f1 0.0 ms
+netphase 51710.138140 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138155 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138168 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/5218/live/acdfe640-de84-11f1-93e1-3b 0.0 ms
+netphase 51710.138191 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/884a/live/97210150-de3d-11f1-a9ed-65 0.0 ms
+netphase 51710.138211 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138224 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/0d9d/live/d11629a0-de95-11f1-93e1-3b 0.0 ms
+netphase 51710.138237 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/e530/live/10b39120-de8b-11f1-a701-fd 0.0 ms
+netphase 51710.138249 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138262 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138276 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/2300/live/b2e83010-de7f-11f1-a701-fd 0.0 ms
+netphase 51710.138289 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138304 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/bade/live/40e5bdc0-de89-11f1-a701-fd 0.0 ms
+netphase 51710.138320 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138334 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/f3dd/live/1dbdaeb0-de7b-11f1-b88b-3f 0.0 ms
+netphase 51710.138559 dns static.files.bbci.co.uk 27.5 ms
+netphase 51710.138672 request https://ichef.bbci.co.uk/news/480/cpsprodpb/884a/live/97210150-de3d-11f1-a9ed-65 0.0 ms
+netphase 51710.138704 request https://ichef.bbci.co.uk/news/480/cpsprodpb/e530/live/10b39120-de8b-11f1-a701-fd 0.0 ms
+netphase 51710.138716 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138740 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/b233/live/7e5aee10-de7e-11f1-b88b-3f 0.0 ms
+netphase 51710.138775 dns-wait static.files.bbci.co.uk 27.9 ms
+netphase 51710.138725 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138826 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138857 fetch https://ichef.bbci.co.uk/ace/standard/320/cpsprodpb/dcb2/live/fb3cd920-de8d-11f1 0.0 ms
+netphase 51710.138885 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/884a/live/97210150-de3d-11f1-a9ed-65 0.0 ms
+netphase 51710.138908 request https://ichef.bbci.co.uk/news/480/cpsprodpb/2300/live/b2e83010-de7f-11f1-a701-fd 0.0 ms
+netphase 51710.138926 request https://ichef.bbci.co.uk/news/480/cpsprodpb/bade/live/40e5bdc0-de89-11f1-a701-fd 0.0 ms
+netphase 51710.138947 request https://ichef.bbci.co.uk/news/480/cpsprodpb/f3dd/live/1dbdaeb0-de7b-11f1-b88b-3f 0.0 ms
+netphase 51710.138969 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.138980 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/bade/live/40e5bdc0-de89-11f1-a701-fd 0.0 ms
+netphase 51710.138948 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/5218/live/acdfe640-de84-11f1-93e1-3b 0.0 ms
+netphase 51710.139023 fetch https://ichef.bbci.co.uk/news/640/cpsprodpb/0d9d/live/d11629a0-de95-11f1-93e1-3b 0.0 ms
+netphase 51710.139042 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/2300/live/b2e83010-de7f-11f1-a701-fd 0.0 ms
+netphase 51710.139049 request https://ichef.bbci.co.uk/news/480/cpsprodpb/0d9d/live/d11629a0-de95-11f1-93e1-3b 0.0 ms
+netphase 51710.139090 request https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/dcb2/live/fb3cd920-de8d-11f1 0.0 ms
+netphase 51710.139114 request https://ichef.bbci.co.uk/news/480/cpsprodpb/b233/live/7e5aee10-de7e-11f1-b88b-3f 0.0 ms
+netphase 51710.139138 request https://ichef.bbci.co.uk/ace/standard/320/cpsprodpb/dcb2/live/fb3cd920-de8d-11f1 0.0 ms
+netphase 51710.138974 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/e530/live/10b39120-de8b-11f1-a701-fd 0.0 ms
+netphase 51710.139123 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/7574/live/b4ca5c60-de65-11f1-8771-47 0.0 ms
+netphase 51710.139166 request https://ichef.bbci.co.uk/news/320/cpsprodpb/884a/live/97210150-de3d-11f1-a9ed-65 0.0 ms
+netphase 51710.138984 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/f3dd/live/1dbdaeb0-de7b-11f1-b88b-3f 0.0 ms
+netphase 51710.139316 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.139334 request https://ichef.bbci.co.uk/news/480/cpsprodpb/5218/live/acdfe640-de84-11f1-93e1-3b 0.0 ms
+netphase 51710.139353 request https://ichef.bbci.co.uk/news/320/cpsprodpb/bade/live/40e5bdc0-de89-11f1-a701-fd 0.0 ms
+netphase 51710.139370 request https://ichef.bbci.co.uk/news/320/cpsprodpb/5218/live/acdfe640-de84-11f1-93e1-3b 0.0 ms
+netphase 51710.139401 request https://ichef.bbci.co.uk/news/640/cpsprodpb/0d9d/live/d11629a0-de95-11f1-93e1-3b 0.0 ms
+netphase 51710.139417 request https://ichef.bbci.co.uk/news/320/cpsprodpb/e530/live/10b39120-de8b-11f1-a701-fd 0.0 ms
+netphase 51710.139438 request https://ichef.bbci.co.uk/news/320/cpsprodpb/2300/live/b2e83010-de7f-11f1-a701-fd 0.0 ms
+netphase 51710.139454 request https://ichef.bbci.co.uk/news/480/cpsprodpb/7574/live/b4ca5c60-de65-11f1-8771-47 0.0 ms
+netphase 51710.139474 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.139496 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.139513 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.139535 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.139552 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.139570 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.139609 request https://ichef.bbci.co.uk/news/320/cpsprodpb/f3dd/live/1dbdaeb0-de7b-11f1-b88b-3f 0.0 ms
+netphase 51710.139621 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.139654 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/7574/live/b4ca5c60-de65-11f1-8771-47 0.0 ms
+netphase 51710.139704 request https://ichef.bbci.co.uk/news/320/cpsprodpb/7574/live/b4ca5c60-de65-11f1-8771-47 0.0 ms
+netphase 51710.139723 fetch https://ichef.bbci.co.uk/news/640/cpsprodpb/b233/live/7e5aee10-de7e-11f1-b88b-3f 0.0 ms
+netphase 51710.139764 request https://ichef.bbci.co.uk/news/640/cpsprodpb/b233/live/7e5aee10-de7e-11f1-b88b-3f 0.0 ms
+netphase 51710.139798 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.140109 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.140174 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.140188 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/5661/live/7c6e9130-ddeb-11f1-9204-cd 0.0 ms
+netphase 51710.140235 request https://ichef.bbci.co.uk/news/480/cpsprodpb/5661/live/7c6e9130-ddeb-11f1-9204-cd 0.0 ms
+netphase 51710.140247 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.140281 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.140293 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/65df/live/b2e69780-de81-11f1-b88b-3f 0.0 ms
+netphase 51710.140340 request https://ichef.bbci.co.uk/news/480/cpsprodpb/65df/live/b2e69780-de81-11f1-b88b-3f 0.0 ms
+netphase 51710.140356 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/b029/live/c4ae2930-de89-11f1-b441-2b 0.0 ms
+netphase 51710.140408 request https://ichef.bbci.co.uk/news/480/cpsprodpb/b029/live/c4ae2930-de89-11f1-b441-2b 0.0 ms
+netphase 51710.142322 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.142381 fetch https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/c040/live/4c838900-de98-11f1 0.0 ms
+netphase 51710.142413 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/73af/live/be720480-de96-11f1-9afe-1f 0.0 ms
+netphase 51710.142494 request https://ichef.bbci.co.uk/news/480/cpsprodpb/73af/live/be720480-de96-11f1-9afe-1f 0.0 ms
+netphase 51710.142513 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/b029/live/c4ae2930-de89-11f1-b441-2b 0.0 ms
+netphase 51710.142534 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/65df/live/b2e69780-de81-11f1-b88b-3f 0.0 ms
+netphase 51710.142558 fetch https://ichef.bbci.co.uk/ace/standard/640/cpsprodpb/c040/live/4c838900-de98-11f1 0.0 ms
+netphase 51710.142578 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.142600 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/5661/live/7c6e9130-ddeb-11f1-9204-cd 0.0 ms
+netphase 51710.143021 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.143056 request https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/c040/live/4c838900-de98-11f1 0.0 ms
+netphase 51710.143074 request https://ichef.bbci.co.uk/news/320/cpsprodpb/65df/live/b2e69780-de81-11f1-b88b-3f 0.0 ms
+netphase 51710.143093 request https://ichef.bbci.co.uk/ace/standard/640/cpsprodpb/c040/live/4c838900-de98-11f1 0.0 ms
+netphase 51710.143114 request https://ichef.bbci.co.uk/news/320/cpsprodpb/5661/live/7c6e9130-ddeb-11f1-9204-cd 0.0 ms
+netphase 51710.143135 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.143378 request https://ichef.bbci.co.uk/news/320/cpsprodpb/b029/live/c4ae2930-de89-11f1-b441-2b 0.0 ms
+netphase 51710.145096 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.145169 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/e373/live/dbd80f70-de86-11f1-b88b-3f 0.0 ms
+netphase 51710.145270 request https://ichef.bbci.co.uk/news/480/cpsprodpb/e373/live/dbd80f70-de86-11f1-b88b-3f 0.0 ms
+netphase 51710.145288 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.145334 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.145346 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.145375 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/8329/live/f32a3f30-de78-11f1-93e1-3b 0.0 ms
+netphase 51710.145430 request https://ichef.bbci.co.uk/news/480/cpsprodpb/8329/live/f32a3f30-de78-11f1-93e1-3b 0.0 ms
+netphase 51710.145446 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.145485 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.145499 fetch https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/4234/live/ccb11760-566c-11f0 0.0 ms
+netphase 51710.145538 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.145550 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/73af/live/be720480-de96-11f1-9afe-1f 0.0 ms
+netphase 51710.145586 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/4274/live/de53bba0-de77-11f1-9115-cf 0.0 ms
+netphase 51710.145605 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/8329/live/f32a3f30-de78-11f1-93e1-3b 0.0 ms
+netphase 51710.145621 fetch https://ichef.bbci.co.uk/ace/standard/640/cpsprodpb/4234/live/ccb11760-566c-11f0 0.0 ms
+netphase 51710.145640 fetch https://ichef.bbci.co.uk/news/480/cpsprodpb/4274/live/de53bba0-de77-11f1-9115-cf 0.0 ms
+netphase 51710.145851 certificate verification 0.6 ms
+netphase 51710.145862 request https://ichef.bbci.co.uk/news/320/cpsprodpb/4274/live/de53bba0-de77-11f1-9115-cf 0.0 ms
+netphase 51710.145893 request https://ichef.bbci.co.uk/news/320/cpsprodpb/8329/live/f32a3f30-de78-11f1-93e1-3b 0.0 ms
+netphase 51710.145928 request https://ichef.bbci.co.uk/ace/standard/640/cpsprodpb/4234/live/ccb11760-566c-11f0 0.0 ms
+netphase 51710.145956 request https://ichef.bbci.co.uk/news/480/cpsprodpb/4274/live/de53bba0-de77-11f1-9115-cf 0.0 ms
+netphase 51710.145985 connected https://cdn.tinypass.com/ (dns+tcp+tls) 31.2 ms
+netphase 51710.146013 request https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/4234/live/ccb11760-566c-11f0 0.0 ms
+netphase 51710.146059 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.146103 request https://ichef.bbci.co.uk/news/320/cpsprodpb/73af/live/be720480-de96-11f1-9afe-1f 0.0 ms
+netphase 51710.145985 fetch https://ichef.bbci.co.uk/news/320/cpsprodpb/e373/live/dbd80f70-de86-11f1-b88b-3f 0.0 ms
+netphase 51710.146187 request https://ichef.bbci.co.uk/news/320/cpsprodpb/e373/live/dbd80f70-de86-11f1-b88b-3f 0.0 ms
+netphase 51710.148420 dns emp.bbci.co.uk 29.4 ms
+netphase 51710.148474 dns-wait emp.bbci.co.uk 33.4 ms
+netphase 51710.151310 fetch https://www.bbc.com/https://static.files.bbci.co.uk/bbcdotcom/web/20261110-13383 0.0 ms
+netphase 51710.151358 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_ExBdIt.woff2 0.0 ms
+netphase 51710.151373 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_BdIt.woff2 0.0 ms
+netphase 51710.151393 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_MdIt.woff2 0.0 ms
+netphase 51710.151407 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_It.woff2 0.0 ms
+netphase 51710.151422 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_LtIt.woff2 0.0 ms
+netphase 51710.151436 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_ExBd.woff2 0.0 ms
+netphase 51710.151454 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Bd.woff2 0.0 ms
+netphase 51710.151474 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Md.woff2 0.0 ms
+netphase 51710.151492 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Rg.woff2 0.0 ms
+netphase 51710.151506 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Lt.woff2 0.0 ms
+netphase 51710.151534 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_ExBd.woff2 0.0 ms
+netphase 51710.151549 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Bd.woff2 0.0 ms
+netphase 51710.151567 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Md.woff2 0.0 ms
+netphase 51710.151581 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Rg.woff2 0.0 ms
+netphase 51710.151598 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_ExBdIt.woff2 0.0 ms
+netphase 51710.151613 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Lt.woff2 0.0 ms
+netphase 51710.151634 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_BdIt.woff2 0.0 ms
+netphase 51710.151650 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_MdIt.woff2 0.0 ms
+netphase 51710.151668 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_It.woff2 0.0 ms
+netphase 51710.151683 fetch https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_LtIt.woff2 0.0 ms
+netphase 51710.152516 request https://www.bbc.com/https://static.files.bbci.co.uk/bbcdotcom/web/20261110-13383 0.0 ms
+netphase 51710.152628 dns+tcp 37.9 ms
+netphase 51710.152877 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_ExBdIt.woff2 0.0 ms
+netphase 51710.152916 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_LtIt.woff2 0.0 ms
+netphase 51710.152948 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_BdIt.woff2 0.0 ms
+netphase 51710.152982 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_MdIt.woff2 0.0 ms
+netphase 51710.153050 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_It.woff2 0.0 ms
+netphase 51710.153086 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_ExBd.woff2 0.0 ms
+netphase 51710.153124 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Bd.woff2 0.0 ms
+netphase 51710.153155 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Md.woff2 0.0 ms
+netphase 51710.153204 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Rg.woff2 0.0 ms
+netphase 51710.153235 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Lt.woff2 0.0 ms
+netphase 51710.153271 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_ExBd.woff2 0.0 ms
+netphase 51710.153302 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Bd.woff2 0.0 ms
+netphase 51710.154496 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Md.woff2 0.0 ms
+netphase 51710.154549 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_ExBdIt.woff2 0.0 ms
+netphase 51710.154600 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Rg.woff2 0.0 ms
+netphase 51710.154623 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Lt.woff2 0.0 ms
+netphase 51710.154661 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_BdIt.woff2 0.0 ms
+netphase 51710.154696 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_MdIt.woff2 0.0 ms
+netphase 51710.154729 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_It.woff2 0.0 ms
+netphase 51710.154757 request https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_LtIt.woff2 0.0 ms
+netphase 51710.154791 dns+tcp 44.0 ms
+netphase 51710.154662 dns ichef.bbci.co.uk 21.9 ms
+netphase 51710.155066 dns-wait ichef.bbci.co.uk 22.3 ms
+netphase 51710.155090 dns gn-web-assets.api.bbc.com 38.9 ms
+netphase 51710.155142 dns-wait gn-web-assets.api.bbc.com 40.2 ms
+netphase 51710.160217 dns+tcp 45.2 ms
+netphase 51710.169058 dns+tcp 36.3 ms
+netphase 51710.169298 dns+tcp 54.4 ms
+netphase 51710.175634 response headers https://cdn.tinypass.com/api/tinypass.min.js 60.8 ms
+netphase 51710.179520 certificate verification 0.8 ms
+netphase 51710.179742 connected https://static.bbci.co.uk/ (dns+tcp+tls) 65.1 ms
+netphase 51710.185371 certificate verification 0.8 ms
+netphase 51710.185621 connected https://emp.bbci.co.uk/ (dns+tcp+tls) 70.6 ms
+netphase 51710.187063 certificate verification 0.1 ms
+netphase 51710.187219 connected https://gn-web-assets.api.bbc.com/ (dns+tcp+tls) 72.3 ms
+netphase 51710.187303 dns-wait gn-web-assets.api.bbc.com 0.0 ms
+netphase 51710.188275 certificate verification 3.9 ms
+netphase 51710.188474 connected https://static.files.bbci.co.uk/ (dns+tcp+tls) 77.7 ms
+netphase 51710.195821 certificate verification 0.7 ms
+netphase 51710.196065 connected https://ichef.bbci.co.uk/ (dns+tcp+tls) 63.3 ms
+netphase 51710.196640 response headers https://cdn.tinypass.com/api/tinypass.min.js 75.4 ms
+netphase 51710.197891 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.197935 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.197954 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.197970 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.197985 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198011 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198027 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198042 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198064 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198087 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198104 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198118 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198149 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198164 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198183 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198198 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198212 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198225 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198243 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198258 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198274 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198298 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198317 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198331 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.198345 fetch data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIH 0.0 ms
+netphase 51710.200908 dns+tcp 13.6 ms
+netphase 51710.215064 response headers https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js 100.2 ms
+netphase 51710.215701 certificate verification 0.1 ms
+netphase 51710.215767 connected https://gn-web-assets.api.bbc.com/ (dns+tcp+tls) 28.5 ms
+netphase 51710.230020 response headers https://gn-web-assets.api.bbc.com/ngas/latest/dotcom-bootstrap.js 108.8 ms
+netphase 51710.235047 response headers https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js 120.4 ms
+netphase 51710.237611 response headers https://emp.bbci.co.uk/emp/bump-4/bump-4.js 122.6 ms
+netphase 51710.244390 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 133.7 ms
+netphase 51710.256949 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/3774/live/60c41ee0-de7d-11f1-b88b-3f 124.3 ms
+netphase 51710.262664 response headers https://emp.bbci.co.uk/emp/bump-4/bump-4.js 141.4 ms
+netphase 51710.271424 response headers https://www.bbc.com/https://static.files.bbci.co.uk/bbcdotcom/web/20261110-13383 118.9 ms
+netphase 51710.284792 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/2a2c/live/a70e9220-de61-11f1-a701-fd 150.9 ms
+netphase 51710.289390 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/8329/live/f32a3f30-de78-11f1-93e1-3b 144.0 ms
+netphase 51710.290383 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/b029/live/c4ae2930-de89-11f1-b441-2b 147.0 ms
+netphase 51710.293210 response headers https://ichef.bbci.co.uk/ace/standard/320/cpsprodpb/dcb2/live/fb3cd920-de8d-11f1 154.1 ms
+netphase 51710.295948 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/e530/live/10b39120-de8b-11f1-a701-fd 157.2 ms
+netphase 51710.296847 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/0d9d/live/d11629a0-de95-11f1-93e1-3b 157.8 ms
+netphase 51710.300951 response headers https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/c040/live/4c838900-de98-11f1 157.9 ms
+netphase 51710.303096 response headers https://static.bbci.co.uk/frameworks/requirejs/0.13.0/sharedmodules/require.js 183.0 ms
+netphase 51710.305691 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/f3dd/live/1dbdaeb0-de7b-11f1-b88b-3f 166.7 ms
+netphase 51710.309928 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/7574/live/b4ca5c60-de65-11f1-8771-47 170.5 ms
+netphase 51710.312796 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/5661/live/7c6e9130-ddeb-11f1-9204-cd 172.6 ms
+netphase 51710.314030 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/e530/live/10b39120-de8b-11f1-a701-fd 174.6 ms
+netphase 51710.314459 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/2a2c/live/a70e9220-de61-11f1-a701-fd 179.4 ms
+netphase 51710.315895 response headers https://ichef.bbci.co.uk/news/640/cpsprodpb/0d9d/live/d11629a0-de95-11f1-93e1-3b 176.5 ms
+netphase 51710.316370 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 197.7 ms
+netphase 51710.317474 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 195.3 ms
+netphase 51710.317748 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/73af/live/be720480-de96-11f1-9afe-1f 171.6 ms
+netphase 51710.317827 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/8329/live/f32a3f30-de78-11f1-93e1-3b 171.9 ms
+netphase 51710.317887 response headers https://ichef.bbci.co.uk/ace/standard/320/cpsprodpb/6d3b/live/08465440-de9b-11f1 182.1 ms
+netphase 51710.318701 fetch https://www.bbc.co.uk/userinfo 0.0 ms
+netphase 51710.318832 request https://www.bbc.co.uk/userinfo 0.0 ms
+netphase 51710.319742 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/65df/live/b2e69780-de81-11f1-b88b-3f 176.7 ms
+netphase 51710.321100 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/65df/live/b2e69780-de81-11f1-b88b-3f 180.8 ms
+netphase 51710.322407 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/884a/live/97210150-de3d-11f1-a9ed-65 183.2 ms
+netphase 51710.323913 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/bade/live/40e5bdc0-de89-11f1-a701-fd 184.6 ms
+netphase 51710.324025 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/5661/live/7c6e9130-ddeb-11f1-9204-cd 180.9 ms
+netphase 51710.324602 response headers https://ichef.bbci.co.uk/news/640/cpsprodpb/3774/live/60c41ee0-de7d-11f1-b88b-3f 189.7 ms
+netphase 51710.324717 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/e373/live/dbd80f70-de86-11f1-b88b-3f 178.5 ms
+netphase 51710.326641 response headers https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/4234/live/ccb11760-566c-11f0 180.6 ms
+netphase 51710.326752 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/f3dd/live/1dbdaeb0-de7b-11f1-b88b-3f 187.1 ms
+netphase 51710.328456 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/884a/live/97210150-de3d-11f1-a9ed-65 189.8 ms
+netphase 51710.329727 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/2300/live/b2e83010-de7f-11f1-a701-fd 190.3 ms
+netphase 51710.329882 response headers https://ichef.bbci.co.uk/news/640/cpsprodpb/b233/live/7e5aee10-de7e-11f1-b88b-3f 190.1 ms
+netphase 51710.330355 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/2300/live/b2e83010-de7f-11f1-a701-fd 191.4 ms
+netphase 51710.332641 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/5218/live/acdfe640-de84-11f1-93e1-3b 193.3 ms
+netphase 51710.332799 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/73af/live/be720480-de96-11f1-9afe-1f 190.3 ms
+netphase 51710.332896 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/e373/live/dbd80f70-de86-11f1-b88b-3f 187.6 ms
+netphase 51710.332966 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/b233/live/7e5aee10-de7e-11f1-b88b-3f 193.9 ms
+netphase 51710.333096 response headers https://ichef.bbci.co.uk/ace/standard/640/cpsprodpb/c040/live/4c838900-de98-11f1 190.0 ms
+netphase 51710.333265 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/7574/live/b4ca5c60-de65-11f1-8771-47 193.6 ms
+netphase 51710.334583 response headers https://ichef.bbci.co.uk/ace/standard/640/cpsprodpb/4234/live/ccb11760-566c-11f0 188.7 ms
+netphase 51710.336426 response headers https://ichef.bbci.co.uk/news/320/cpsprodpb/4274/live/de53bba0-de77-11f1-9115-cf 190.6 ms
+netphase 51710.337108 response headers https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/dcb2/live/fb3cd920-de8d-11f1 198.0 ms
+netphase 51710.337291 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/5218/live/acdfe640-de84-11f1-93e1-3b 198.0 ms
+netphase 51710.337361 dns www.bbc.co.uk 18.3 ms
+netphase 51710.338392 dns-wait www.bbc.co.uk 19.5 ms
+netphase 51710.338615 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/4274/live/de53bba0-de77-11f1-9115-cf 192.7 ms
+netphase 51710.338741 response headers https://ichef.bbci.co.uk/ace/standard/480/cpsprodpb/6d3b/live/08465440-de9b-11f1 203.6 ms
+netphase 51710.338807 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/bade/live/40e5bdc0-de89-11f1-a701-fd 199.9 ms
+netphase 51710.340136 response headers https://ichef.bbci.co.uk/news/480/cpsprodpb/b029/live/c4ae2930-de89-11f1-b441-2b 199.7 ms
+netphase 51710.342315 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 227.0 ms
+netphase 51710.342555 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 224.4 ms
+netphase 51710.344845 dns+tcp 26.0 ms
+phase 51710.345864 load complete
+netphase 51710.351445 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 227.1 ms
+netphase 51710.352065 certificate verification 0.2 ms
+netphase 51710.352171 connected https://www.bbc.co.uk/ (dns+tcp+tls) 33.3 ms
+netphase 51710.352443 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 234.4 ms
+netphase 51710.353250 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_MdIt.woff2 200.3 ms
+netphase 51710.365779 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 248.9 ms
+netphase 51710.366794 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 244.8 ms
+netphase 51710.365864 response headers https://www.bbc.co.uk/userinfo 47.0 ms
+netphase 51710.369437 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 251.0 ms
+netphase 51710.371607 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 247.1 ms
+netphase 51710.372275 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Rg.woff2 219.1 ms
+netphase 51710.378302 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 256.8 ms
+netphase 51710.378318 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 256.3 ms
+netphase 51710.387790 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_MdIt.woff2 233.1 ms
+netphase 51710.388074 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 263.3 ms
+netphase 51710.388156 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_It.woff2 233.4 ms
+netphase 51710.388222 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 253.4 ms
+netphase 51710.388270 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 242.9 ms
+netphase 51710.378360 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 245.8 ms
+netphase 51710.378377 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 257.0 ms
+netphase 51710.378402 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 266.3 ms
+netphase 51710.378409 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 254.0 ms
+phase navigation Ok(String("[[\"https://www.bbc.com/news\",0,0,0,6.25,0,0,0,96.27,132.82,0,0,0,0],[\"first-paint\",null,null,null,null,null,null,null,null,null,null,null,null,204.8],[\"first-contentful-paint\",null,null,null,null,null,null,null,null,null,null,null,null,204.8]]"))
+netphase 51710.388309 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 277.4 ms
+netphase 51710.395993 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 271.8 ms
+netphase 51710.396841 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 253.7 ms
+netphase 51710.396920 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_BdIt.woff2 244.0 ms
+netphase 51710.400098 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Md.woff2 245.6 ms
+netphase 51710.400297 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_LtIt.woff2 245.5 ms
+netphase 51710.400389 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 281.8 ms
+netphase 51710.400598 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 279.1 ms
+netphase 51710.400884 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 276.5 ms
+netphase 51710.401336 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 261.8 ms
+netphase 51710.401412 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_ExBd.woff2 248.3 ms
+netphase 51710.401511 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 284.6 ms
+netphase 51710.401683 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 283.3 ms
+netphase 51710.401822 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 283.3 ms
+netphase 51710.401968 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 277.4 ms
+netphase 51710.402277 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 262.7 ms
+netphase 51710.403086 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 262.8 ms
+netphase 51710.409693 dns securepubads.g.doubleclick.net 15.7 ms
+netphase 51710.410944 dns api.permutive.app 15.4 ms
+netphase 51710.410947 dns-wait securepubads.g.doubleclick.net 17.5 ms
+netphase 51710.411852 dns cdn.permutive.app 16.6 ms
+netphase 51710.412475 dns-wait api.permutive.app 18.6 ms
+netphase 51710.412552 dns-wait cdn.permutive.app 18.9 ms
+netphase 51710.413566 dns elb.the-ozone-project.com 19.0 ms
+netphase 51710.415350 dns-wait elb.the-ozone-project.com 21.8 ms
+netphase 51710.416590 dns pagead2.googlesyndication.com 22.5 ms
+netphase 51710.416916 dns static.adsafeprotected.com 19.6 ms
+netphase 51710.416938 dns-wait pagead2.googlesyndication.com 23.4 ms
+netphase 51710.418214 dns-wait static.adsafeprotected.com 24.2 ms
+netphase 51710.419066 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 294.9 ms
+netphase 51710.419106 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_ExBdIt.woff2 266.2 ms
+netphase 51710.419221 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 300.9 ms
+netphase 51710.419502 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 294.8 ms
+netphase 51710.419569 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 292.5 ms
+netphase 51710.418264 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 299.6 ms
+netphase 51710.418291 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 301.5 ms
+netphase 51710.420647 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 305.4 ms
+netphase 51710.420794 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 296.6 ms
+netphase 51710.420840 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 305.7 ms
+netphase 51710.420973 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 304.2 ms
+netphase 51710.418370 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Md.woff2 265.2 ms
+netphase 51710.418692 dns prebid.the-ozone-project.com 24.1 ms
+netphase 51710.422034 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 307.4 ms
+netphase 51710.422484 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 300.2 ms
+netphase 51710.418304 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 282.6 ms
+netphase 51710.424336 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 309.0 ms
+netphase 51710.423109 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 283.8 ms
+netphase 51710.420988 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 296.4 ms
+netphase 51710.425346 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 308.4 ms
+netphase 51710.422806 dns-wait prebid.the-ozone-project.com 29.3 ms
+netphase 51710.425826 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 307.5 ms
+netphase 51710.425915 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 301.3 ms
+netphase 51710.427054 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Rg.woff2 272.5 ms
+netphase 51710.427756 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 288.0 ms
+netphase 51710.427825 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 306.4 ms
+netphase 51710.428757 dns cdn.adsafeprotected.com 32.3 ms
+netphase 51710.428892 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 304.8 ms
+netphase 51710.429048 dns-wait cdn.adsafeprotected.com 35.1 ms
+netphase 51710.429146 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 304.9 ms
+netphase 51710.429239 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 310.6 ms
+netphase 51710.429318 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 305.0 ms
+netphase 51710.429467 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 311.3 ms
+netphase 51710.429647 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 305.5 ms
+netphase 51710.429839 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 307.7 ms
+netphase 51710.429993 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 314.8 ms
+netphase 51710.430086 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 313.3 ms
+netphase 51710.430294 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 315.1 ms
+netphase 51710.430435 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 305.8 ms
+netphase 51710.430555 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 291.8 ms
+netphase 51710.430609 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_ExBdIt.woff2 276.1 ms
+netphase 51710.428781 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 304.2 ms
+netphase 51710.431212 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 285.7 ms
+netphase 51710.431297 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 306.6 ms
+netphase 51710.431372 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 309.2 ms
+netphase 51710.431501 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 319.4 ms
+netphase 51710.431543 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 313.2 ms
+netphase 51710.431793 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 313.5 ms
+netphase 51710.432197 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 292.7 ms
+netphase 51710.432250 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 286.2 ms
+netphase 51710.432290 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 293.3 ms
+netphase 51710.432985 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 308.7 ms
+netphase 51710.434808 dns+tcp 41.3 ms
+netphase 51710.434962 dns+tcp 41.4 ms
+netphase 51710.435369 dns+tcp 41.6 ms
+netphase 51710.435463 dns+tcp 41.6 ms
+netphase 51710.434165 dns+tcp 40.6 ms
+netphase 51710.434275 dns+tcp 40.8 ms
+netphase 51710.438644 dns+tcp 45.1 ms
+netphase 51710.438866 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 320.6 ms
+netphase 51710.439260 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 322.3 ms
+netphase 51710.440081 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 319.0 ms
+netphase 51710.440306 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 316.0 ms
+netphase 51710.440665 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 316.2 ms
+netphase 51710.440791 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Bd.woff2 287.5 ms
+netphase 51710.440876 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 322.6 ms
+netphase 51710.443123 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 326.1 ms
+netphase 51710.443845 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 322.5 ms
+netphase 51710.443993 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 319.3 ms
+netphase 51710.447294 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 325.9 ms
+netphase 51710.447844 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 323.4 ms
+netphase 51710.447975 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 323.5 ms
+netphase 51710.448116 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 308.6 ms
+netphase 51710.448173 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 323.6 ms
+netphase 51710.448222 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_LtIt.woff2 295.3 ms
+netphase 51710.447326 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 301.8 ms
+netphase 51710.448291 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 308.8 ms
+netphase 51710.448329 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 330.0 ms
+netphase 51710.448347 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 331.4 ms
+netphase 51710.448459 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 313.7 ms
+netphase 51710.448499 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 330.3 ms
+netphase 51710.448573 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_BdIt.woff2 293.9 ms
+netphase 51710.448640 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 331.7 ms
+netphase 51710.448644 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 331.8 ms
+netphase 51710.448845 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 324.1 ms
+netphase 51710.448850 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 309.4 ms
+netphase 51710.449048 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_Lt.woff2 294.4 ms
+netphase 51710.449118 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 331.0 ms
+netphase 51710.447479 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 329.0 ms
+netphase 51710.449327 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 324.8 ms
+netphase 51710.449511 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 331.3 ms
+netphase 51710.449701 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 331.2 ms
+netphase 51710.449055 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 330.7 ms
+netphase 51710.450599 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 316.8 ms
+netphase 51710.450629 certificate verification 0.6 ms
+netphase 51710.450651 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 310.5 ms
+netphase 51710.450694 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Bd.woff2 297.6 ms
+netphase 51710.450776 preconnected https://prebid.the-ozone-project.com/ (made) 57.3 ms
+netphase 51710.450814 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 333.9 ms
+netphase 51710.450979 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 328.8 ms
+netphase 51710.451110 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_Lt.woff2 297.9 ms
+netphase 51710.451172 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 327.0 ms
+netphase 51710.451317 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 332.7 ms
+netphase 51710.451378 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 329.1 ms
+netphase 51710.451487 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 336.2 ms
+netphase 51710.451552 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 308.5 ms
+netphase 51710.451760 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 333.7 ms
+netphase 51710.451944 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSerif_W_It.woff2 298.9 ms
+netphase 51710.451993 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 333.6 ms
+netphase 51710.452256 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 334.0 ms
+netphase 51710.452416 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 328.0 ms
+netphase 51710.452445 certificate verification 0.7 ms
+netphase 51710.452581 preconnected https://cdn.permutive.app/ (made) 59.0 ms
+netphase 51710.452616 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 328.1 ms
+netphase 51710.450785 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 332.2 ms
+netphase 51710.452940 response headers https://static.files.bbci.co.uk/fonts/reith/2.512/BBCReithSans_W_ExBd.woff2 299.7 ms
+netphase 51710.453132 certificate verification 0.1 ms
+netphase 51710.453186 preconnected https://static.adsafeprotected.com/ (made) 59.3 ms
+netphase 51710.453305 certificate verification 0.4 ms
+netphase 51710.453419 preconnected https://elb.the-ozone-project.com/ (made) 59.9 ms
+netphase 51710.454548 certificate verification 0.3 ms
+netphase 51710.454635 preconnected https://securepubads.g.doubleclick.net/ (made) 61.2 ms
+netphase 51710.452582 dns+tcp 58.7 ms
+netphase 51710.456341 certificate verification 0.5 ms
+netphase 51710.456402 preconnected https://api.permutive.app/ (made) 62.8 ms
+netphase 51710.463714 certificate verification 0.6 ms
+netphase 51710.463847 preconnected https://pagead2.googlesyndication.com/ (made) 70.4 ms
+netphase 51710.466643 dns bbc.gscontxt.net 71.7 ms
+netphase 51710.466706 dns-wait bbc.gscontxt.net 73.1 ms
+netphase 51710.471855 certificate verification 0.1 ms
+netphase 51710.471948 preconnected https://cdn.adsafeprotected.com/ (made) 78.1 ms
+netphase 51710.502781 fetch https://cdn.privacy-mgmt.com/unified/wrapperMessagingWithoutDetection.js 0.0 ms
+netphase 51710.502984 request https://cdn.privacy-mgmt.com/unified/wrapperMessagingWithoutDetection.js 0.0 ms
+netphase 51710.516601 dns cdn.privacy-mgmt.com 13.5 ms
+netphase 51710.517612 dns-wait cdn.privacy-mgmt.com 14.6 ms
+netphase 51710.533119 dns+tcp 30.1 ms
+netphase 51710.548598 certificate verification 0.1 ms
+netphase 51710.548691 connected https://cdn.privacy-mgmt.com/ (dns+tcp+tls) 45.7 ms
+netphase 51710.580395 response headers https://cdn.privacy-mgmt.com/unified/wrapperMessagingWithoutDetection.js 77.4 ms
+netphase 51710.930040 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.930333 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.932296 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.932338 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.932364 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.932390 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.932581 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.932641 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.932752 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.932793 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.934154 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.934459 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.934633 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.934768 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51710.947680 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 17.3 ms
+netphase 51710.956309 fetch https://cdn.privacy-mgmt.com/unified/4.41.0/gdpr-tcf.e7290277d588e0de9bb9.bundle 0.0 ms
+netphase 51710.956477 request https://cdn.privacy-mgmt.com/unified/4.41.0/gdpr-tcf.e7290277d588e0de9bb9.bundle 0.0 ms
+netphase 51710.958012 fetch https://cdn.privacy-mgmt.com/unified/4.41.0/usnat-gpp.1af7b0a971740919848e.bundl 0.0 ms
+netphase 51710.958149 request https://cdn.privacy-mgmt.com/unified/4.41.0/usnat-gpp.1af7b0a971740919848e.bundl 0.0 ms
+netphase 51710.958225 fetch https://cdn.privacy-mgmt.com/mms/v2/get_site_data?hasCsp=true&href=https%3A%2F%2 0.0 ms
+netphase 51710.958301 request https://cdn.privacy-mgmt.com/mms/v2/get_site_data?hasCsp=true&href=https%3A%2F%2 0.0 ms
+netphase 51710.962471 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 29.9 ms
+netphase 51710.962874 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 30.2 ms
+netphase 51710.963105 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 30.4 ms
+netphase 51710.963255 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 30.5 ms
+netphase 51710.963439 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 29.0 ms
+netphase 51710.963567 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 28.8 ms
+netphase 51710.972424 response headers https://cdn.privacy-mgmt.com/unified/4.41.0/gdpr-tcf.e7290277d588e0de9bb9.bundle 15.9 ms
+netphase 51710.985886 response headers https://cdn.privacy-mgmt.com/unified/4.41.0/usnat-gpp.1af7b0a971740919848e.bundl 27.7 ms
+netphase 51710.988634 response headers https://cdn.privacy-mgmt.com/mms/v2/get_site_data?hasCsp=true&href=https%3A%2F%2 30.3 ms
+netphase 51711.124149 fetch https://cdn.privacy-mgmt.com/wrapper/v2/meta-data?hasCsp=true&accountId=1786&env 0.0 ms
+netphase 51711.124766 request https://cdn.privacy-mgmt.com/wrapper/v2/meta-data?hasCsp=true&accountId=1786&env 0.0 ms
+netphase 51711.139449 response headers https://cdn.privacy-mgmt.com/wrapper/v2/meta-data?hasCsp=true&accountId=1786&env 14.7 ms
+netphase 51711.180117 fetch https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51711.183239 request https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 0.0 ms
+netphase 51711.212611 response headers https://static.files.bbci.co.uk/bbcdotcom/web/20261110-133831-0053d0afea-web-3.2 29.4 ms
+netphase 51711.655360 fetch https://cdn.privacy-mgmt.com/wrapper/v2/messages?hasCsp=true&env=prod&body=%7B%2 0.0 ms
+netphase 51711.655548 request https://cdn.privacy-mgmt.com/wrapper/v2/messages?hasCsp=true&env=prod&body=%7B%2 0.0 ms
+netphase 51711.718218 response headers https://cdn.privacy-mgmt.com/wrapper/v2/messages?hasCsp=true&env=prod&body=%7B%2 62.7 ms
+netphase 51712.047084 fetch https://uk-script.dotmetrics.net/door.js?d=www.bbc.com&t=newsstudio 0.0 ms
+netphase 51712.047848 request https://uk-script.dotmetrics.net/door.js?d=www.bbc.com&t=newsstudio 0.0 ms
+netphase 51712.087109 dns uk-script.dotmetrics.net 39.2 ms
+netphase 51712.087634 dns-wait uk-script.dotmetrics.net 39.7 ms
+netphase 51712.101626 dns+tcp 53.7 ms
+netphase 51712.115527 certificate verification 0.2 ms
+netphase 51712.115653 connected https://uk-script.dotmetrics.net/ (dns+tcp+tls) 67.8 ms
+netphase 51712.172289 response headers https://uk-script.dotmetrics.net/door.js?d=www.bbc.com&t=newsstudio 124.4 ms
+netphase 51712.420092 fetch https://uk-script.dotmetrics.net/hit.gif?id=13934&url=https%3A%2F%2Fwww.bbc.com% 0.0 ms
+netphase 51712.420314 request https://uk-script.dotmetrics.net/hit.gif?id=13934&url=https%3A%2F%2Fwww.bbc.com% 0.0 ms
+netphase 51712.420521 fetch https://rm-script.dotmetrics.net/hit.gif?id=13934&url=https%3A%2F%2Fwww.bbc.com% 0.0 ms
+netphase 51712.420630 request https://rm-script.dotmetrics.net/hit.gif?id=13934&url=https%3A%2F%2Fwww.bbc.com% 0.0 ms
+netphase 51712.432209 dns rm-script.dotmetrics.net 11.5 ms
+netphase 51712.432282 dns-wait rm-script.dotmetrics.net 11.6 ms
+netphase 51712.447287 dns+tcp 26.6 ms
+netphase 51712.460038 fetch https://mybbc-analytics.files.bbci.co.uk/echo-client-js/echo-2.6.0-avi.min.js 0.0 ms
+netphase 51712.461048 response headers https://uk-script.dotmetrics.net/hit.gif?id=13934&url=https%3A%2F%2Fwww.bbc.com% 40.7 ms
+netphase 51712.462989 request https://mybbc-analytics.files.bbci.co.uk/echo-client-js/echo-2.6.0-avi.min.js 0.0 ms
+netphase 51712.463486 certificate verification 0.1 ms
+netphase 51712.463871 connected https://rm-script.dotmetrics.net/ (dns+tcp+tls) 43.2 ms
+netphase 51712.473470 fetch https://cdn.privacy-mgmt.com/index.html?hasCsp=true&message_id=1489022&consentUU 0.0 ms
+netphase 51712.482715 request https://cdn.privacy-mgmt.com/index.html?hasCsp=true&message_id=1489022&consentUU 0.0 ms
+netphase 51712.490875 dns mybbc-analytics.files.bbci.co.uk 27.8 ms
+netphase 51712.490946 dns-wait mybbc-analytics.files.bbci.co.uk 27.9 ms
+netphase 51712.492493 response headers https://rm-script.dotmetrics.net/hit.gif?id=13934&url=https%3A%2F%2Fwww.bbc.com% 71.9 ms
+netphase 51712.497201 response headers https://cdn.privacy-mgmt.com/index.html?hasCsp=true&message_id=1489022&consentUU 14.5 ms
+netphase 51712.502921 dns+tcp 39.9 ms
+netphase 51712.515647 certificate verification 0.1 ms
+netphase 51712.515725 connected https://mybbc-analytics.files.bbci.co.uk/ (dns+tcp+tls) 52.7 ms
+netphase 51712.540058 response headers https://mybbc-analytics.files.bbci.co.uk/echo-client-js/echo-2.6.0-avi.min.js 77.1 ms
+netphase 51712.824236 fetch https://cdn.privacy-mgmt.com/polyfills.01516.js 0.0 ms
+netphase 51712.824362 fetch https://cdn.privacy-mgmt.com/Notice.fcfb9.js 0.0 ms
+netphase 51712.824382 fetch https://cdn.privacy-mgmt.com/Notice.9cce2.css 0.0 ms
+netphase 51712.825701 request https://cdn.privacy-mgmt.com/Notice.fcfb9.js 0.0 ms
+netphase 51712.825858 request https://cdn.privacy-mgmt.com/Notice.9cce2.css 0.0 ms
+netphase 51712.825887 fetch https://cdn.privacy-mgmt.com/Notice.9cce2.css 0.0 ms
+netphase 51712.825937 fetch https://cdn.privacy-mgmt.com/polyfills.01516.js 0.0 ms
+netphase 51712.825989 request https://cdn.privacy-mgmt.com/Notice.9cce2.css 0.0 ms
+netphase 51712.826041 request https://cdn.privacy-mgmt.com/polyfills.01516.js 0.0 ms
+netphase 51712.826118 request https://cdn.privacy-mgmt.com/polyfills.01516.js 0.0 ms
+netphase 51712.841851 response headers https://cdn.privacy-mgmt.com/Notice.fcfb9.js 16.2 ms
+netphase 51712.856594 response headers https://cdn.privacy-mgmt.com/Notice.9cce2.css 30.7 ms
+netphase 51712.856979 response headers https://cdn.privacy-mgmt.com/Notice.9cce2.css 31.0 ms
+netphase 51712.857478 response headers https://cdn.privacy-mgmt.com/polyfills.01516.js 31.4 ms
+netphase 51712.858258 response headers https://cdn.privacy-mgmt.com/polyfills.01516.js 32.1 ms
+netphase 51712.859686 fetch https://cdn.privacy-mgmt.com/Notice.fcfb9.js 0.0 ms
+netphase 51712.912089 fetch https://cdn.privacy-mgmt.com/Notice.9cce2.css 0.0 ms
+lucinanet: js idle trim done, 0 KiB of parse trees kept
+netphase 51712.925848 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-HeavyItalic.woff2 0.0 ms
+netphase 51712.925896 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-BoldItalic.woff2 0.0 ms
+netphase 51712.925912 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Heavy.woff2 0.0 ms
+netphase 51712.925927 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Bold.woff2 0.0 ms
+netphase 51712.925947 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-MediumItalic.woff 0.0 ms
+netphase 51712.925966 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Medium.woff2 0.0 ms
+netphase 51712.926669 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Regular.woff2 0.0 ms
+netphase 51712.926689 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-LightItalic.woff2 0.0 ms
+netphase 51712.926706 fetch https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Light.woff2 0.0 ms
+netphase 51712.926915 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-HeavyItalic.woff2 0.0 ms
+netphase 51712.927077 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-BoldItalic.woff2 0.0 ms
+netphase 51712.927129 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Heavy.woff2 0.0 ms
+netphase 51712.927172 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Bold.woff2 0.0 ms
+netphase 51712.927218 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-MediumItalic.woff 0.0 ms
+netphase 51712.927256 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Medium.woff2 0.0 ms
+netphase 51712.927304 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Regular.woff2 0.0 ms
+netphase 51712.927345 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-LightItalic.woff2 0.0 ms
+netphase 51712.927389 request https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Light.woff2 0.0 ms
+netphase 51712.968332 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-HeavyItalic.woff2 41.4 ms
+netphase 51713.008362 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-BoldItalic.woff2 81.3 ms
+netphase 51713.010873 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-MediumItalic.woff 83.7 ms
+netphase 51713.013010 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Medium.woff2 85.8 ms
+netphase 51713.014548 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Heavy.woff2 87.4 ms
+netphase 51713.018889 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Light.woff2 91.5 ms
+netphase 51713.019136 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Regular.woff2 91.8 ms
+netphase 51713.020745 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-Bold.woff2 93.6 ms
+netphase 51713.021632 response headers https://cdn.privacy-mgmt.com/assets/fonts/woff2/NSIEverydayWeb-LightItalic.woff2 94.3 ms
+netphase 51713.104106 fetch https://mybbc-analytics.files.bbci.co.uk/analytics-remote-config/producers.json 0.0 ms
+netphase 51713.104278 fetch https://mybbc-analytics.files.bbci.co.uk/analytics-remote-config/masterbrands.js 0.0 ms
+netphase 51713.105150 request https://mybbc-analytics.files.bbci.co.uk/analytics-remote-config/producers.json 0.0 ms
+netphase 51713.105396 request https://mybbc-analytics.files.bbci.co.uk/analytics-remote-config/masterbrands.js 0.0 ms
+netphase 51713.116963 response headers https://mybbc-analytics.files.bbci.co.uk/analytics-remote-config/producers.json 11.8 ms
+netphase 51713.123150 fetch https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 0.0 ms
+netphase 51713.123487 request https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 0.0 ms
+netphase 51713.128660 response headers https://mybbc-analytics.files.bbci.co.uk/analytics-remote-config/masterbrands.js 23.3 ms
+netphase 51713.132150 fetch https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 0.0 ms
+netphase 51713.132783 request https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 0.0 ms
+netphase 51713.134657 fetch https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 0.0 ms
+netphase 51713.135052 request https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 0.0 ms
+netphase 51713.146566 fetch https://uk-script.dotmetrics.net/Scripts/ncs-script.js?v=374 0.0 ms
+netphase 51713.146738 request https://uk-script.dotmetrics.net/Scripts/ncs-script.js?v=374 0.0 ms
+netphase 51713.147567 dns a1.api.bbc.com 23.9 ms
+netphase 51713.147654 dns-wait a1.api.bbc.com 24.1 ms
+netphase 51713.165315 dns+tcp 41.8 ms
+netphase 51713.177821 certificate verification 0.1 ms
+netphase 51713.177917 connected https://a1.api.bbc.com/ (dns+tcp+tls) 54.4 ms
+netphase 51713.189220 response headers https://uk-script.dotmetrics.net/Scripts/ncs-script.js?v=374 42.5 ms
+netphase 51713.220169 response headers https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 96.7 ms
+netphase 51713.253649 response headers https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 118.6 ms
+netphase 51713.262585 response headers https://a1.api.bbc.com/event?s=638824&idclient=a0590fba-2da8-4ba4-bde0-43991e893 129.8 ms
+lucinanet: js idle trim done, 2047 KiB of parse trees kept
+netphase 51713.610321 fetch https://cdn.privacy-mgmt.com/consent/tcfv2/vendor-list/categories?siteId=26225 0.0 ms
+netphase 51713.610528 request https://cdn.privacy-mgmt.com/consent/tcfv2/vendor-list/categories?siteId=26225 0.0 ms
+netphase 51713.627190 response headers https://cdn.privacy-mgmt.com/consent/tcfv2/vendor-list/categories?siteId=26225 16.7 ms
+render: settled 12003 ms after load (801 frames, quiet 1500 ms, at most 12000 ms)
+render: complete true in 12392 ms, rss 310844 KiB
+rc=0

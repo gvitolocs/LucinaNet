@@ -1,0 +1,27 @@
+#!/bin/bash
+# Stub of macOS `ditto` for the two forms the release path uses, built on zip/unzip (both exist on macOS and here):
+#   ditto -c -k --keepParent SRC DEST   archive SRC with SRC's own directory name as the top entry
+#   ditto -x -k SRC.zip DEST            unpack into DEST
+# It is not bit-for-bit ditto (real ditto keeps resource forks and AppleDouble); it is enough to show that the
+# packager zips the bundle it just made, with the bundle inside a named directory and not loose.
+set -u
+case ${1-} in
+  -c)
+    [ "${2-}" = "-k" ] && [ "${3-}" = "--keepParent" ] || { echo "ditto(stub): only -c -k --keepParent" >&2; exit 1; }
+    src=${4-}; dst=${5-}
+    [ -d "$src" ] || { echo "ditto(stub): $src is not a directory" >&2; exit 1; }
+    top=${src%/}
+    case $top in */*) top=${top##*/};; esac
+    ( cd "$(dirname "${src%/}")" && zip -q -r -X "$dst" "$top" ) || exit 1
+    printf 'ditto(stub): %s -> %s (top level %s)\n' "$src" "$dst" "$top"
+    ;;
+  -x)
+    [ "${2-}" = "-k" ] || { echo "ditto(stub): only -x -k" >&2; exit 1; }
+    src=${3-}; dst=${4-}
+    [ -f "$src" ] || { echo "ditto(stub): no such archive $src" >&2; exit 1; }
+    mkdir -p "$dst" || exit 1
+    unzip -q -o "$src" -d "$dst" || exit 1
+    printf 'ditto(stub): %s -> %s\n' "$src" "$dst"
+    ;;
+  *) echo "ditto(stub): unsupported call: $*" >&2; exit 1;;
+esac

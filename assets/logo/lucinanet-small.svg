@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="t d">
+  <title id="t">LucinaNet</title>
+  <desc id="d">A ray of light bent inside a violet glass tile, passing a point of light above the bend.</desc>
+  <!-- The small icon, for 16 and 32 px. Same tile and the same bent ray as lucinanet.svg; three changes, all
+       measured at 16 and 32 px: the ghost beam is dropped (under one pixel at 16 px), the rim is dropped (half a
+       pixel wide at 16 px), and the ray stroke is enlarged from 5.4 to 7.2 units (133 %) with the point of light at
+       radius 8.0. At 16 px that is a 1.8 px ray, a 4 px point of light and a 1.5 px gap between them, so the bend
+       reads and the two stay separate pieces of ink. Clearances in units: point of light 6.09 clear of the ray,
+       3.6 inside the corner arc, 5.0 and 6.0 from the top and right edges; ray caps 4.91 and 3.82 inside the two
+       corner arcs and 5.4 from the straight edges. -->
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="#7f8fe0"/>
+  <path d="M13 19 L33 29 L51 47" fill="none" stroke="#f2f2f7" stroke-width="7.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="46" cy="17" r="8.0" fill="#f2f2f7"/>
+</svg>

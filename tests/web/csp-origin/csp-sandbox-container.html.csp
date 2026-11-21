@@ -1,0 +1,1 @@
+sandbox allow-scripts; script-src 'self'

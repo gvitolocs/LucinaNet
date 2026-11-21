@@ -1,0 +1,48 @@
+#!/bin/bash
+# Stub of macOS `sips`, covering only the two calls tools/release/package-macos.sh makes, with no Python and no image
+# library: it reads width and height out of the PNG IHDR and writes them back when asked to resize. A fixture whose
+# master PNG is not the size its file name claims therefore fails the same check it would fail on a Mac.
+set -u
+# printf needs one \x per byte: "\x00000400" would be one NUL byte followed by the text "00000400".
+hesc() { local h=$1 i out=""
+  for (( i = 0; i < ${#h}; i += 2 )); do out+="\\x${h:i:2}"; done
+  printf '%s' "$out"
+}
+be32() { printf '%02x%02x%02x%02x' $(( ($1 >> 24) & 255 )) $(( ($1 >> 16) & 255 )) $(( ($1 >> 8) & 255 )) $(( $1 & 255 )); }
+png_dims() { # <file> -> "WxH", from the IHDR data that starts at byte 17
+  local b
+  [ -f "$1" ] || { echo "sips(stub): no such file $1" >&2; return 1; }
+  [ "$(head -c 8 "$1" | od -An -tx1 | tr -d ' \n')" = 89504e470d0a1a0a ] \
+    || { echo "sips(stub): $1 is not a PNG" >&2; return 1; }
+  b=$(od -An -tu1 -j16 -N8 "$1" | tr '\n' ' ')
+  awk -v b="$b" 'BEGIN{ if (split(b, x, " ") < 8) exit 1
+    printf "%dx%d", x[1]*16777216 + x[2]*65536 + x[3]*256 + x[4], x[5]*16777216 + x[6]*65536 + x[7]*256 + x[8] }'
+}
+
+case ${1-} in
+  -g)
+    key=${2-}; f=${3-}
+    case $key in pixelWidth|pixelHeight) ;; *) echo "sips(stub): unsupported property $key" >&2; exit 1;; esac
+    dim=$(png_dims "$f") || exit 1
+    printf '%s\n' "$f"
+    if [ "$key" = pixelWidth ]; then
+      printf '  pixelWidth: %s\n' "${dim%x*}"
+    else
+      printf '  pixelHeight: %s\n' "${dim#*x}"
+    fi
+    ;;
+  -z)
+    h=${2-}; w=${3-}; inp=${4-}
+    [ "${5-}" = "--out" ] || { echo "sips(stub): expected --out" >&2; exit 1; }
+    out=${6-}
+    dim=$(png_dims "$inp") || exit 1
+    { head -c 16 "$inp"
+      printf "$(hesc "$(be32 "$w")$(be32 "$h")")"
+      tail -c +25 "$inp"; } > "$out" || exit 1
+    printf 'sips(stub): %s (%s) written to %s as %sx%s\n' "$inp" "$dim" "$out" "$w" "$h"
+    ;;
+  *)
+    echo "sips(stub): unsupported call: $*" >&2
+    exit 1
+    ;;
+esac

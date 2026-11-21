@@ -1,0 +1,12 @@
+[package]
+name = "lucinanet-permissions"
+version = "0.1.0"
+description = "Per-origin site permissions: stored answers, defaults, expiry and Chromium-style embargo after repeated dismissals"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+url = "2"

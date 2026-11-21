@@ -1,0 +1,110 @@
+<!doctype html>
+<meta charset=utf-8>
+<title>rewriting the text of a sheet whose @font-feature-values has already been read</title>
+<!--
+  Spec 07 (B15), the update path with no switch and no pref at all. Once a page has read a rule the
+  DOM object stays, and a later change to the sheet pushes the freshly parsed stylo rules into the
+  objects the page is holding: HTMLStyleElement::update_a_style_block ->
+  CSSStyleSheet::update_style_stylesheet -> CSSRuleList::update_rules -> CSSRule::update_rule.
+  @font-feature-values is parsed unconditionally, and before the patch that push panicked
+  `not implemented` at cssrule.rs:245.
+
+  The push only happens when the parsed contents are shared, because that is when the sheet has to
+  be copied before it is modified (StylesheetContentsCache, htmlstyleelement.rs:272
+  is_uniquely_owned), so this page keeps the same text in two <style> elements and then rewrites
+  one of them. insertRule does not reach update_rules at this pin: will_modify_stylesheet clears
+  the CSSOM link before it reads it.
+
+  The rewrite hands the document a new CSSStyleSheet object; the one the page was holding stays
+  alive with the rules it had, so the page checks both - the live sheet for the new text, the old
+  handle for an object that is still honest rather than a panic.
+-->
+<style id=s0>
+@font-feature-values Fancy { @styleset { ss01: 1 } }
+@media screen { h2 { color: blue } }
+p { color: rgb(0, 0, 255) }
+</style>
+<style id=s1>
+@font-feature-values Fancy { @styleset { ss01: 1 } }
+@media screen { h2 { color: blue } }
+p { color: rgb(0, 0, 255) }
+</style>
+<h1>sheet rewrite</h1>
+<pre id=out></pre>
+<script src="css-test.js"></script>
+<script>
+const log = cssTest.log;
+const held = document.styleSheets[0];
+let bad = 0;
+
+function readRules(where, rules) {
+  const seen = [];
+  for (let i = 0; i < rules.length; i++) {
+    const r = rules[i];
+    const why = cssTest.honest(r);
+    seen.push(cssTest.className(r) + " type=" + r.type + ":" + JSON.stringify(cssTest.cssTextOf(r)) + (why ? " FAIL " + why : ""));
+    if (why) bad++;
+  }
+  log(where + " [" + rules.length + "] " + seen.join(" | "));
+}
+readRules("before", held.cssRules);
+
+// The feature maps are snapshots of the rule they were read from, so they have to follow the push.
+function featureText(rule) {
+  const parts = [];
+  for (const name of ["styleset", "stylistic", "swash", "ornaments", "characterVariant", "annotation"]) {
+    const map = rule[name];
+    const keys = Array.from(map.keys()).sort();
+    parts.push(name + "{" + keys.map((k) => k + "=" + JSON.stringify(map.get(k))).join(",") + "} size=" + map.size);
+  }
+  return parts.join(" ");
+}
+log("before features " + featureText(held.cssRules[0]));
+
+// Rewrite the first style element: same @font-feature-values in the same place, different feature.
+document.getElementById("s0").textContent =
+  "@font-feature-values Fancy { @styleset { ss02: 2 } }\n@media screen { h2 { color: green } }\n";
+
+const live = document.styleSheets[0];
+log("live sheet is the held one " + (live === held));
+readRules("after-rewrite live", live.cssRules);
+readRules("after-rewrite held", held.cssRules);
+log("after features " + featureText(live.cssRules[0]));
+
+const liveText = Array.from(live.cssRules, (r) => r.cssText).join(" ");
+if (liveText.indexOf("ss02") < 0) { log("FAIL the rewritten @font-feature-values is not in the live sheet"); bad++; }
+if (liveText.indexOf("@font-feature-values") < 0) { log("FAIL the at-rule disappeared from the live sheet"); bad++; }
+
+// The twin element kept its own sheet and its own text.
+readRules("twin", document.styleSheets[1].cssRules);
+if (Array.from(document.styleSheets[1].cssRules, (r) => r.cssText).join(" ").indexOf("ss01") < 0) {
+  log("FAIL the twin sheet lost its @font-feature-values"); bad++;
+}
+
+// The ordinary mutation paths, on the sheet the document now holds: in at the front, out again.
+const beforeCount = live.cssRules.length;
+try {
+  live.insertRule("h1 { color: red }", 0);
+} catch (e) {
+  log("FAIL insertRule threw " + e.name + ": " + e.message);
+  bad++;
+}
+readRules("after-insert", live.cssRules);
+try {
+  live.deleteRule(0);
+} catch (e) {
+  log("FAIL deleteRule threw " + e.name + ": " + e.message);
+  bad++;
+}
+readRules("after-delete", live.cssRules);
+if (live.cssRules.length !== beforeCount) {
+  log("FAIL the sheet holds " + live.cssRules.length + " rules after insert+delete, expected " + beforeCount);
+  bad++;
+}
+
+const texts = Array.from(live.cssRules, (r) => r.cssText).join(" ");
+for (const name of ["@font-feature-values", "@media"]) {
+  if (texts.indexOf(name) < 0) { log("FAIL " + name + " disappeared from the sheet"); bad++; }
+}
+cssTest.finish("sheet-mutate", bad);
+</script>

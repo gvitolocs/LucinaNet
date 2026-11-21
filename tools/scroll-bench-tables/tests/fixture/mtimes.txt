@@ -1,0 +1,16 @@
+# The mtime of each fixture run's json, in whole seconds since the epoch, which is how the tool
+# matches a run to its block in matrix.log (see load_log and assign in the Rust). git carries no
+# mtimes, so tests/fixture.rs touches every json named here to this second before it runs the
+# binary; each second is inside the window of exactly one block, except the last, which is inside
+# none. Re-generate analyse.expected.txt by touching the same seconds (README.md) and running the
+# retired Python, or the Rust, over the same two arguments.
+m1/wiki-s2-rust-vsync-r1	1700003421	# 23:10:21, block at 23:10:05-23:10:20
+m1/wiki-s2-swgl-vsync-r1	1700003472	# 23:11:12
+m1/long-s2-swgl-vsync-r1	1700003530	# 23:12:10
+m1/long-s2-swgl-vsync-r2	1700003593	# 23:13:13
+m3/long-s1-rust-fast		1700003710	# 23:15:10
+m4/long-s1-rust-fast-r1		1700003770	# 23:16:10
+m3/wiki-s2-swgl-fast		1700004017	# 23:20:17
+m4/yt-s1-rust-vsync-r2		1700004336	# 23:25:36
+m4/yt-s2-swgl-vsync-r2		1700004661	# 23:31:01, the block whose name disagrees
+m1/wiki-s2-rust-vsync-r2	1700005500	# 23:45:00, no block: load and wall read "-"

@@ -1,0 +1,15 @@
+[package]
+name = "gen-jsapi"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+description = "Turns mozjs_sys's bindgen output into Rust: real types, and a stub or engine re-export for every C++ function"
+
+[workspace]
+
+[dependencies]
+syn = { version = "2", features = ["full", "visit-mut", "extra-traits"] }
+quote = "1"
+proc-macro2 = "1"
+prettyplease = "0.2"

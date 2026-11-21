@@ -1,0 +1,23 @@
+[package]
+name = "lucinanet-raster"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "MPL-2.0"
+description = "swgl's rasterizer in Rust: the GLSL runtime (vector_type.h, glsl.h, program.h) and, later, the rest of swgl"
+
+[dependencies]
+lucinanet-raster-rules = { path = "../rules" }
+
+[build-dependencies]
+glsl-to-rust = { path = "../glsl-to-rust" }
+
+[dev-dependencies]
+lucinanet-raster-oracle = { path = "oracle" }
+
+[workspace]
+members = ["oracle"]
+
+[profile.release]
+opt-level = 3
+debug = false

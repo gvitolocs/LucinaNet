@@ -1,0 +1,26 @@
+[package]
+name = "jit-probe"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+description = "What Juno gives a JIT: executable memory, cache maintenance from EL0, and what Cranelift costs on each core"
+
+[workspace]
+
+[features]
+default = ["cranelift"]
+# Off, to measure how much Cranelift adds to a binary.
+cranelift = ["dep:cranelift-codegen", "dep:cranelift-frontend", "dep:target-lexicon"]
+
+[dependencies]
+libc = "0.2"
+cranelift-codegen = { version = "0.137", optional = true, default-features = false, features = ["std", "host-arch", "unwind"] }
+cranelift-frontend = { version = "0.137", optional = true }
+target-lexicon = { version = "0.13", optional = true }
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+strip = true
+panic = "abort"

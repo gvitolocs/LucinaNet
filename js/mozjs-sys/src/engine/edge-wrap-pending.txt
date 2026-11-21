@@ -1,0 +1,2 @@
+# The ratchet of the engine edge wrap (docs/edge-wrap.md): engine extern "C" fns not wrapped yet, file<TAB>name, sorted.
+# Lines are only ever DELETED (a slice deletes the lines of what it wrapped); adding one is refused in review.

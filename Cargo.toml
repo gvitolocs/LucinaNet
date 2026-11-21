@@ -1,0 +1,76 @@
+# Copyright 2026 LucinaNet contributors. Licensed under the Mozilla Public License, v. 2.0 (see LICENSE and NOTICE).
+[workspace]
+resolver = "2"
+members = ["crates/lucinanet-ui", "crates/lucinanet-servo", "crates/lucinanet-ax", "crates/lucinanet-media", "crates/lucinanet-history", "crates/lucinanet-find", "crates/lucinanet-zoom", "crates/lucinanet-historydb", "crates/lucinanet-bookmarks", "crates/lucinanet-blocklist", "crates/lucinanet-omnibox", "crates/lucinanet-permissions", "crates/lucinanet-shortcuts", "crates/lucinanet-settings", "crates/lucinanet-errlog"]
+exclude = ["blitz", "swgl", "raster/core", "third_party/servo", "third_party/brimstone", "third_party/stylo", "third_party/rav1d", "third_party/indexmap-allocator-api", "third_party/blitz", "js", "lucinaos/third_party"]
+
+[workspace.package]
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+authors = ["LucinaNet contributors"]
+
+# Servo is built from third_party/servo as a path dependency; its workspace settings are copied into this workspace.
+[profile.dev]
+opt-level = 1
+
+# For building while learning: fast enough to run, no LTO.
+[profile.probe]
+inherits = "release"
+opt-level = 2
+debug = false
+lto = false
+codegen-units = 16
+incremental = false
+
+# The binary that ships. Servo catches panics in its threads, so unwinding stays.
+[profile.juno]
+inherits = "release"
+opt-level = 2
+debug = false
+lto = "thin"
+codegen-units = 16
+strip = true
+
+[patch.crates-io]
+webrender = { path = "third_party/webrender" }
+
+swgl = { path = "swgl" }
+# WebRender's glyph rasterizer on skrifa outlines and zeno coverage instead of FreeType.
+wr_glyph_rasterizer = { path = "third_party/wr-glyph-rasterizer" }
+
+# LucinaJS: the Rust JavaScript engine (third_party/brimstone, js/docs/brimstone-backend.md) behind the mozjs host API (js/).
+# Brimstone needs its author's indexmap with the allocator API, vendored under third_party/.
+mozjs = { path = "js/mozjs" }
+
+mozjs_sys = { path = "js/mozjs-sys" }
+
+indexmap-allocator-api = { path = "third_party/indexmap-allocator-api" }
+
+
+# The pixel loops: size matters far less here than one frame's time on this CPU.
+[profile.juno.package.swgl]
+opt-level = 3
+
+# The Rust rasterizer (the default; LUCINANET_RASTER=swgl is the C++ oracle): opt-level 3 as swgl, and one codegen unit so the lane ops, samplers
+# and blend code inline into the shaders (raster/PERF.md); the profile's thin LTO does the cross-crate part.
+[profile.juno.package.lucinanet-raster]
+opt-level = 3
+codegen-units = 1
+
+[profile.juno.package.lucinanet-raster-rules]
+opt-level = 3
+
+[profile.juno.package.webrender]
+opt-level = 3
+
+[profile.juno.package.wr_glyph_rasterizer]
+opt-level = 3
+
+
+# The JS engine at opt-level 3 (A/B against 2; tsrs/Oxc review, docs/research/rust-performance-techniques.md item 2).
+[profile.juno.package.brimstone_core]
+opt-level = 3
+
+[profile.juno.package.mozjs_sys]
+opt-level = 3

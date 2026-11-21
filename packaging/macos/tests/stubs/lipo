@@ -1,0 +1,12 @@
+#!/bin/bash
+# Stub of macOS `lipo -archs`. Reads the thin/fat magic of the fixture, the same bytes the real lipo reads.
+[ "${1-}" = "-archs" ] || exit 2
+f=${2-}
+[ -f "$f" ] || exit 1
+m=$(head -c 8 "$f" | od -An -tx1 | tr -d ' \n')
+case $m in
+  cffaedbe0c000001|cffaedbe1200000c) echo "arm64";;
+  cffaedbe04000001) echo "x86_64";;
+  cafebabe*) echo "x86_64 arm64";;
+  *) echo "lipo(stub): $f is not a Mach-O binary" >&2; exit 1;;
+esac

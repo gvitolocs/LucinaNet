@@ -1,0 +1,30 @@
+[package]
+name = "glsl-to-rust"
+version = "0.70.0"
+edition = "2021"
+license = "MPL-2.0"
+description = "A translator from WebRender's GLSL to vectorized Rust, forked from glsl-to-cxx 0.70."
+publish = false
+build = "build.rs"
+
+# Its own workspace: raster/core uses it as a build-dependency, and the root workspace stays out of it.
+[workspace]
+
+[lib]
+name = "glsl_to_rust"
+path = "src/lib.rs"
+
+[[bin]]
+name = "glsl-to-rust"
+path = "src/main.rs"
+
+[dependencies]
+glsl = "6.0"
+# For `glsl_to_rust::build` (swgl's preprocessing).
+cc = "1.0.46"
+webrender_build = "0.70"
+
+[dev-dependencies]
+syn = { version = "2", features = ["full", "visit"] }
+# Line and column of parse errors.
+proc-macro2 = { version = "1", features = ["span-locations"] }

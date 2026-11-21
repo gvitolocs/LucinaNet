@@ -1,0 +1,5 @@
+1794528000123	missing	glue::NewExternalArrayBuffer
+1794528000188	error	ReferenceError: `Intl` is not defined	https://example.org/static/app.2f1b9c0a4d7e5f60.js:105:14
+1794528000240	error	TypeError: IntersectionObserver is not a constructor	https://example.org/static/app.2f1b9c0a4d7e5f60.js:88:2
+1794528000241	error	TypeError: this.chart.render is not a function
+1794528000900	missing	JS_DefineDebuggerObject

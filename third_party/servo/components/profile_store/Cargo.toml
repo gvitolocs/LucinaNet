@@ -1,0 +1,20 @@
+[package]
+name = "servo-profile-store"
+version = "0.8.0"
+authors = ["The Servo Project Developers"]
+license = "MPL-2.0"
+edition = "2024"
+publish = false
+rust-version = "1.88.0"
+description = "LucinaNet: the profile's on-disk store (redb), replacing SQLite in storage and net."
+
+[lib]
+name = "profile_store"
+path = "lib.rs"
+
+[dependencies]
+log = { workspace = true }
+redb = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

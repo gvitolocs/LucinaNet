@@ -1,0 +1,29 @@
+{
+  "meta": {"url": "https://en.wikipedia.org/wiki/Rust_(programming_language)", "steps": 60, "delta_css_px": 120.000, "scale": 2.000, "device_px": [3480, 2180], "css_px": [1740, 1090], "paced": true, "raster": "swgl", "raster_threads": "default", "nominal_ms": 16.7, "step_timeout_ms": 2000, "log": "/dev/stderr"},
+  "steps_without_frame": 58,
+  "summary": {"frames": 2, "display_lists": 1, "stepped_frames": 2, "window_device_px": 7586400, "tiles_redrawn_pct": 16.345, "colour_dirty_pct": 0.461, "full_paint_frames": 2, "layout_diag": true, "async_evidence": "1 of the 2 frames that followed a step rebuilt a display list: the scroll went through layout", "swgl_ms": -0.0, "swgl_window_ms": -0},
+  "stats": {
+    "frame interval: ms": {"unit": "ms", "n": 1, "p50": 538.182, "p90": 538.182, "p99": 538.182, "max": 538.182, "mean": 538.182, "over_16_7": 1, "over_33_3": 1},
+    "scroll to present: ms": {"unit": "ms", "n": 2, "p50": 7.088, "p90": 12.700, "p99": 13.962, "max": 14.102, "mean": 7.088, "over_16_7": 0, "over_33_3": 0},
+    "paint: wr update+render: ms": {"unit": "ms", "n": 2, "p50": 114.650, "p90": 127.497, "p99": 130.388, "max": 130.709, "mean": 114.650, "over_16_7": 2, "over_33_3": 2},
+    "present: swgl flush: ms": {"unit": "ms", "n": 2, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "copy into page: ms": {"unit": "ms", "n": 2, "p50": 45.969, "p90": 79.683, "p99": 87.268, "max": 88.111, "mean": 45.968, "over_16_7": 1, "over_33_3": 1},
+    "wr update (stats): ms": {"unit": "ms", "n": 2, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "wr render (stats): ms": {"unit": "ms", "n": 2, "p50": 114.000, "p90": 126.800, "p99": 129.680, "max": 130.000, "mean": 114.000, "over_16_7": 2, "over_33_3": 2},
+    "cache: tiles redrawn: count": {"unit": "count", "n": 2, "p50": 4.000, "p90": 7.200, "p99": 7.920, "max": 8.000, "mean": 4.000, "over_16_7": 0, "over_33_3": 0},
+    "cache: tiles time: ms": {"unit": "ms", "n": 2, "p50": 33.500, "p90": 60.300, "p99": 66.330, "max": 67.000, "mean": 33.500, "over_16_7": 1, "over_33_3": 1},
+    "cache: tiles area: kpx": {"unit": "kpx", "n": 2, "p50": 1240.000, "p90": 2232.000, "p99": 2455.200, "max": 2480.000, "mean": 1240.000, "over_16_7": 1, "over_33_3": 1},
+    "cache: alpha targets: ms": {"unit": "ms", "n": 2, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "cache: colour pass: ms": {"unit": "ms", "n": 2, "p50": 0.350, "p90": 0.630, "p99": 0.693, "max": 0.700, "mean": 0.350, "over_16_7": 0, "over_33_3": 0},
+    "cache: colour area: kpx": {"unit": "kpx", "n": 2, "p50": 35.000, "p90": 63.000, "p99": 69.300, "max": 70.000, "mean": 35.000, "over_16_7": 1, "over_33_3": 1},
+    "cache: texture cache: ms": {"unit": "ms", "n": 2, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "wr composite: ms": {"unit": "ms", "n": 2, "p50": 0.000, "p90": 0.000, "p99": 0.000, "max": 0.000, "mean": 0.000, "over_16_7": 0, "over_33_3": 0},
+    "draw calls: count": {"unit": "count", "n": 2, "p50": 24.000, "p90": 43.200, "p99": 47.520, "max": 48.000, "mean": 24.000, "over_16_7": 1, "over_33_3": 1},
+    "layout: restyle+trees: ms": {"unit": "ms", "n": 2, "p50": 256.870, "p90": 401.678, "p99": 434.260, "max": 437.880, "mean": 256.870, "over_16_7": 2, "over_33_3": 2},
+    "layout: list build: ms": {"unit": "ms", "n": 2, "p50": 222.080, "p90": 367.096, "p99": 399.725, "max": 403.350, "mean": 222.080, "over_16_7": 2, "over_33_3": 2}
+  },
+  "frames": [
+    {"step": 22, "interval_ms": 0.000, "latency_ms": 14.102, "paint_ms": 130.709, "present_ms": 0.000, "copy_ms": 3.826, "wr_update_ms": 0.000, "wr_render_ms": 130.000, "wr_draws": 48, "wr_full_paint": true, "wr_cache_ms": 0.000, "wr_tiles": 8, "wr_tiles_ms": 67.000, "wr_tiles_kpx": 2480, "wr_alpha_ms": 0.000, "wr_color_ms": 0.700, "wr_color_kpx": 70, "wr_composite_ms": 0.000, "layout_restyle_ms": 75.860, "layout_list_ms": 403.350, "display_list": true},
+    {"step": 53, "interval_ms": 538.182, "latency_ms": 0.074, "paint_ms": 98.591, "present_ms": 0.000, "copy_ms": 88.111, "wr_update_ms": 0.000, "wr_render_ms": 98.000, "wr_draws": 0, "wr_full_paint": true, "wr_cache_ms": 0.000, "wr_tiles": 0, "wr_tiles_ms": 0.000, "wr_tiles_kpx": 0, "wr_alpha_ms": 0.000, "wr_color_ms": 0.000, "wr_color_kpx": 0, "wr_composite_ms": 0.000, "layout_restyle_ms": 437.880, "layout_list_ms": 40.810, "display_list": false}
+  ]
+}

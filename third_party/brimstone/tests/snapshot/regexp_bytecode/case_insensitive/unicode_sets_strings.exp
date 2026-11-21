@@ -1,0 +1,30 @@
+[CompiledRegExp: /[\q{AB|Ab|aB|ab}]/] {
+  Flags: "iv"
+  Match Start: Code Points("A", "a")
+     0: Branch(4, 10)
+     3: Accept
+     4: CodePointSet("A", "a")
+     6: CodePointSet("B", "b")
+     8: Jump(3)
+    10: CodePointSet()
+    12: Jump(3)
+}
+
+[CompiledRegExp: /[\q{AB}&&\q{ab}]/] {
+  Flags: "iv"
+  Match Start: Code Points("A", "a")
+     0: Branch(4, 10)
+     3: Accept
+     4: CodePointSet("A", "a")
+     6: CodePointSet("B", "b")
+     8: Jump(3)
+    10: CodePointSet()
+    12: Jump(3)
+}
+
+[CompiledRegExp: /[\q{AB}--\q{ab}]/] {
+  Flags: "iv"
+  Match Start: Unknown
+     0: CodePointSet()
+     2: Accept
+}

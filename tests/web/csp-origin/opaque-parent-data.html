@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<meta charset=utf-8>
+<title>opaque parent: data: frame</title>
+<h1 style="font: 20px sans-serif">data: URL frame</h1>
+<p style="font: 13px sans-serif">A <code>data:</code> document has an opaque origin. The frame
+nested inside it is loaded over http with its own CSP.</p>
+<iframe id="f" width="420" height="140" title="data container"></iframe>
+<script>
+  var child = new URL("child-csp.html", location.href).href;
+  document.getElementById("f").src = "data:text/html," + encodeURIComponent(
+    "<!DOCTYPE html><meta charset=utf-8><iframe src='" + child + "' width='400' height='120'></iframe>"
+  );
+</script>

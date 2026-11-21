@@ -1,0 +1,17 @@
+[package]
+name = "lucina-fontsan"
+version = "0.1.0"
+description = "Pure-Rust replacement for fontsan (OTS) in LucinaNet's Servo: WOFF/WOFF2 decoding, OTS accept/reject decisions and table whitelist, bounded work"
+edition.workspace = true
+publish.workspace = true
+license = "MPL-2.0 AND BSD-3-Clause"
+
+[dependencies]
+wuff = "0.2.9"
+read-fonts = "0.46"
+
+[dev-dependencies]
+fontsan = { version = "0.7", default-features = false, features = ["libz-sys", "wuff"] }
+skrifa = "0.49"
+harfrust = "0.15"
+flate2 = "1"

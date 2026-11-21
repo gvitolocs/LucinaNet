@@ -1,0 +1,26 @@
+LucinaNet fonts (lucina-ftcompat, lucina-fontface, lucina-fontsan)
+
+This repository is licensed under the Mozilla Public License, v. 2.0 (see LICENSE), except that two of its
+crates are derived from other projects and also carry those projects licences, which are in LICENSES/.
+
+lucina-ftcompat  (MPL-2.0 AND FTL)
+  Derived from FreeType 2.13.2. src/embolden.rs is a translation of the logic of FT_Outline_Embolden in
+  FreeType C source ftoutln.c (with the helpers of ftcalc.c); the rest of src/lib.rs reproduces FreeType size,
+  metric and fixed-point arithmetic. FreeType is licensed under the FreeType License (FTL), see LICENSES/FTL.TXT.
+
+  Portions of this software are copyright © 1996-2023 The FreeType Project (www.freetype.org).  All rights reserved.
+
+lucina-fontsan  (MPL-2.0 AND BSD-3-Clause)
+  Derived by behaviour from OTS, the OpenType Sanitizer (Chromium, https://github.com/khaledhosny/ots, as shipped
+  in the fontsan crate 0.7.0): its accept/reject decisions, table whitelist, limits and error strings are
+  reproduced. OTS is licensed under the BSD 3-Clause licence, see LICENSES/BSD-3-Clause-OTS.txt
+  (Copyright (c) 2009-2017 The OTS Authors. All rights reserved.).
+  WOFF and WOFF2 decoding uses the wuff crate (https://github.com/nicoburns/wuff), licensed under the MIT licence,
+  which is a dependency and is not copied into this repository.
+
+lucina-fontface  (MPL-2.0)
+  Original code written to replace the FreeType-backed font code of Servo (Mozilla Public License 2.0). It
+  uses lucina-ftcompat for its FreeType-compatible numbers and the read-fonts and skrifa crates for font parsing.
+
+Third-party crates are used as dependencies under their own licences (see Cargo.lock; checked with cargo deny,
+policy in deny.toml).

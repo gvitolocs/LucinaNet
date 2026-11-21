@@ -1,0 +1,61 @@
+<!doctype html>
+<meta charset=utf-8>
+<title>insertRule with at-rules that have no interface</title>
+<!--
+  Spec 07 (B15), the insert path: insertRule of one of these at-rules must either keep the rule
+  properly or throw SyntaxError. A Rust panic is neither, and so is an empty cssText.
+-->
+<style id=s0>
+p { color: rgb(0, 0, 255) }
+</style>
+<h1>insertRule</h1>
+<pre id=out></pre>
+<script src="css-test.js"></script>
+<script>
+const log = cssTest.log;
+const sheet = document.styleSheets[0];
+const CASES = [
+  ["counter-style", "@counter-style bulbs { system: additive; additive-symbols: 3 10; range: 1 3; }"],
+  ["container", "@container (min-width: 20ch) { p { color: green } }"],
+  ["document", "@-moz-document url-prefix() { p { color: green } }"],
+  ["font-palette", "@font-palette-values --cool { font-family: Fancy; base-palette: 1; }"],
+  ["position-try", "@position-try --anchor { left: anchor(center) }"],
+  ["font-feature-values", "@font-feature-values Fancy { @styleset { ss01: 1 } }"],
+  ["scope", "@scope (:scope) to (div) { p { color: green } }"],
+  ["custom-media", "@custom-media --narrow (max-width: 30em);"],
+  ["page", "@page { margin: 1cm }"],
+  ["not-a-real-rule", "@not-a-real-rule { p { color: green } }"],
+  ["keyframes", "@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }"],
+  ["layer", "@layer base { p { color: green } }"],
+  ["property", "@property --w { syntax: \"<length>\"; inherits: false; initial-value: 0px }"],
+];
+let bad = 0;
+for (const [name, rule] of CASES) {
+  let kept;
+  try {
+    kept = sheet.insertRule(rule, 0);
+  } catch (e) {
+    // SyntaxError is the honest answer of an engine that cannot parse the rule.
+    if (e.name === "SyntaxError") { log("insert " + name + " -> SyntaxError"); continue; }
+    log("FAIL insert " + name + " threw " + e.name + ": " + e.message);
+    bad++;
+    continue;
+  }
+  let r = null;
+  let why = "";
+  try {
+    r = sheet.cssRules[kept];
+    why = cssTest.honest(r);
+  } catch (e) {
+    why = "reading it back threw " + e.name;
+  }
+  // The rule is where it said it was, and the sheet grew by one.
+  if (!why && !sheet.cssRules.length) why = "the list is empty after insertRule";
+  log("insert " + name + " -> index " + kept + " class=" + cssTest.className(r) +
+      " type=" + (r ? r.type : "?") + " cssText=" + JSON.stringify(r ? cssTest.cssTextOf(r) : null) +
+      (why ? " -> FAIL " + why : ""));
+  if (why) bad++;
+}
+log("insert length=" + sheet.cssRules.length);
+cssTest.finish("insert-rule", bad);
+</script>

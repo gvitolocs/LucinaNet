@@ -1,0 +1,65 @@
+=== matrix start 2026-11-17 23:09:58 on x86_64 ===
+# Fixture job log for scroll-bench-tables. The lines are an excerpt of the real matrix job logs
+# (run-matrix.log, run-matrix3.log, run-matrix4.log) with the clock rewritten: the blocks run in the
+# same order and carry the real loads, wall times and names, but the times are the ones the mtimes
+# below are set to, so a fresh checkout matches the same way. tests/fixture.rs touches each run's json
+# to the epoch named in README.md beside the clock, because git does not carry mtimes and the tool
+# matches a run to its block by the clock alone.
+### RUN page=wiki scale=2 raster=rust pace=vsync run=1 23:10:01
+scroll-bench: wrote <work-dir>/lucinanet/scroll-bench/m1/wiki-s2-rust-vsync-r1/pages/long.html (194307 bytes, 200 sections)
+=== wiki-s2-r1  https://en.wikipedia.org/wiki/Rust_(programming_language)  3480x2180 device px at scale 2  [rust raster]
+scroll-bench page https://en.wikipedia.org/wiki/Rust_(programming_language) rasterizer rust (threads default)
+    before: 23:10:05 up 1 day, 22:03, 166 users,  load average: 66.86, 65.92, 68.28  free 84G
+    15000 ms wall, exit 0; after: 23:10:20 up 1 day, 22:04, 169 users,  load average: 73.83, 67.51, 68.76  free 84G
+| long-s2-r1 | 12 frames | interval p50 77.4 ms |
+### RUN page=wiki scale=2 raster=swgl pace=vsync run=1 23:11:00
+=== wiki-s2-r1  https://en.wikipedia.org/wiki/Rust_(programming_language)  3480x2180 device px at scale 2  [swgl raster]
+    before: 23:11:04 up 1 day, 22:11, 167 users,  load average: 87.00, 230.74, 172.39  free 84G
+    7000 ms wall, exit 0; after: 23:11:11 up 1 day, 22:11, 167 users,  load average: 84.05, 227.77, 171.74  free 84G
+### RUN page=long scale=2 raster=swgl pace=vsync run=1 23:12:00
+=== long-s2-r1  file://<work-dir>/lucinanet/scroll-bench/m1/long-s2-swgl-vsync-r1/pages/long.html  3480x2180 device px at scale 2  [swgl raster]
+    before: 23:12:03 up 1 day, 22:10, 170 users,  load average: 94.53, 244.53, 175.11  free 84G
+    6000 ms wall, exit 0; after: 23:12:09 up 1 day, 22:10, 169 users,  load average: 92.64, 241.65, 174.55  free 84G
+### RUN page=long scale=2 raster=swgl pace=vsync run=2 23:13:00
+=== long-s2-r1  file://<work-dir>/lucinanet/scroll-bench/m1/long-s2-swgl-vsync-r2/pages/long.html  3480x2180 device px at scale 2  [swgl raster]
+    before: 23:13:06 up 1 day, 22:11, 167 users,  load average: 91.65, 236.55, 173.61  free 84G
+    6000 ms wall, exit 0; after: 23:13:12 up 1 day, 22:11, 167 users,  load average: 88.40, 233.47, 172.95  free 84G
+### RUN page=long scale=1 raster=rust pace=fast steps=60 23:15:00
+scroll-bench: wrote <work-dir>/lucinanet/scroll-bench/m3/long-s1-rust-fast/pages/long.html (194307 bytes, 200 sections)
+=== long-s1-rust-free-r1  file://<work-dir>/lucinanet/scroll-bench/m3/long-s1-rust-fast/pages/long.html  1740x1090 device px at scale 1  [rust raster]
+    before: 23:15:02 up 4 days, 17:06, 53 users,  load average: 68.63, 59.65, 51.90  free 166G
+    7000 ms wall, exit 0; after: 23:15:09 up 4 days, 17:06, 53 users,  load average: 67.54, 59.57, 51.92  free 166G
+### RUN page=long scale=1 raster=rust pace=fast run=1 23:16:00
+=== long-s1-rust-free-r1  file://<work-dir>/lucinanet/scroll-bench/m4/long-s1-rust-fast-r1/pages/long.html  1740x1090 device px at scale 1  [rust raster]
+    before: 23:16:02 up 4 days, 17:31, 65 users,  load average: 66.91, 62.28, 63.21  free 168G
+    7000 ms wall, exit 0; after: 23:16:09 up 4 days, 17:31, 65 users,  load average: 67.08, 62.39, 63.24  free 168G
+### RUN page=wiki scale=2 raster=swgl pace=fast steps=60 23:20:00
+=== wiki-s2-swgl-free-r1  https://en.wikipedia.org/wiki/Rust_(programming_language)  3480x2180 device px at scale 2  [swgl raster]
+    before: 23:20:03 up 4 days, 17:07, 54 users,  load average: 81.76, 66.03, 54.76  free 165G
+    13000 ms wall, exit 0; after: 23:20:16 up 4 days, 17:07, 55 users,  load average: 80.54, 66.28, 54.96  free 165G
+### RUN page=yt scale=1 raster=rust pace=vsync run=2 23:25:00
+=== yt-s1-rust-vsync-r1  https://www.youtube.com/results?search_query=rust+programming  1740x1090 device px at scale 1  [rust raster]
+    before: 23:25:03 up 4 days, 17:36, 62 users,  load average: 61.96, 63.82, 63.84  free 164G
+    32000 ms wall, exit 0; after: 23:25:35 up 4 days, 17:36, 62 users,  load average: 64.18, 64.19, 63.96  free 164G
+### RUN page=yt scale=2 raster=swgl pace=vsync run=2 23:30:00
+=== yt-s2-swgl-vsync-r1  https://www.youtube.com/results?search_query=rust+programming  3480x2180 device px at scale 2  [swgl raster]
+    before: 23:30:13 up 4 days, 17:41, 58 users,  load average: 35.98, 52.03, 59.23  free 161G
+    34000 ms wall, exit 0; after: 23:30:47 up 4 days, 17:42, 58 users,  load average: 40.57, 51.41, 58.75  free 161G
+# A block with no `### RUN` line of its own, so the name on its header is what names it - and here
+# the name is another cell's. Its clock window holds the yt run's mtime and its `after` is nearer than
+# the yt block's, so the tool must refuse it rather than attribute its load to the yt run.
+=== long-s2-swgl-free-r9  file://<work-dir>/lucinanet/scroll-bench/m4/long-s2-swgl-fast-r9/pages/long.html  3480x2180 device px at scale 2  [swgl raster]
+    before: 23:30:56 up 4 days, 17:42, 58 users,  load average: 39.00, 52.03, 59.23  free 161G
+    5000 ms wall, exit 0; after: 23:31:02 up 4 days, 17:42, 58 users,  load average: 39.10, 51.03, 58.99  free 161G
+# A run the job was still waiting on when the log ends: no wall line, so no window and nothing to
+# attribute, and a block with a name and nothing else. Both are dropped.
+### RUN page=yt scale=2 raster=swgl pace=vsync run=3 23:35:00
+    before: 23:35:03 up 4 days, 17:45, 58 users,  load average: 30.00, 45.00, 55.00  free 161G
+### RUN page=yt scale=2 raster=swgl pace=vsync run=4 23:40:00
+== machine load around each run (from the job log) ==
+### RUN page=wiki scale=2 raster=rust pace=vsync
+ before: 23:10:20 up 1 day, 22:03, 166 users, load average: 99.99, 65.92, 68.28
+ 1000 ms wall, exit 0; after: 23:10:21 up 1 day, 22:04, 169 users, load average: 99.99, 67.51, 68.76
+### RUN page=yt scale=2 raster=swgl pace=vsync
+ before: 23:31:00 up 4 days, 17:42, 58 users, load average: 99.98, 52.03, 59.23
+ 2000 ms wall, exit 0; after: 23:31:01 up 4 days, 17:42, 58 users, load average: 99.98, 51.41, 58.75

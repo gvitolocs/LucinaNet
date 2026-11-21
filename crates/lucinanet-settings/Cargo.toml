@@ -1,0 +1,10 @@
+[package]
+name = "lucinanet-settings"
+version = "0.1.0"
+description = "typed settings schema, shipped defaults, versioned file format and migration chain"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[dependencies]
+serde_json = "1"

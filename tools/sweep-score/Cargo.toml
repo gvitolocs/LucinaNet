@@ -1,0 +1,28 @@
+# The scorer and diff tool of the headless site sweep (tests/sweep/sweep.sh). Its own workspace, like
+# tools/scroll-bench-tables: it links no engine, reads the files a sweep wrote, and needs only the standard
+# library and `png`, which is already in the repo lock (Cargo.lock: png 0.18.1) and so resolves offline.
+[workspace]
+
+[package]
+name = "sweep-score"
+version = "0.1.0"
+description = "Scores a site sweep run (loaded / broken / walled) and diffs two runs"
+edition = "2021"
+publish = false
+license = "MPL-2.0"
+
+[lib]
+name = "sweep_score"
+path = "src/lib.rs"
+
+[[bin]]
+name = "sweep-score"
+path = "src/main.rs"
+
+[dependencies]
+png = "0.18.1"
+
+[profile.release]
+debug = false
+lto = "thin"
+codegen-units = 1

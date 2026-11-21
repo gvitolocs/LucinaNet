@@ -1,0 +1,43 @@
+<!doctype html>
+<!-- Paint-only page for the rasterizer choice: every box is absolutely placed, so any engine lays it out the same and
+     a pixel difference is the painter's. The same scene is drawn by raster/bench/vello-bench (see its README). -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; }
+  body { background: linear-gradient(180deg, #e8eef7 0%, #c9d6ea 100%); }
+  div { position: absolute; box-sizing: border-box; }
+  .card { width: 200px; height: 110px; background: #fff; border: 1px solid #c8c8c8; border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); }
+  .dot { width: 48px; height: 48px; border-radius: 50%;
+         background: radial-gradient(circle closest-side, #ffcc33 0%, #ff6600 100%); }
+  .bar { width: 100px; height: 12px; background: #3366cc; border-radius: 6px; }
+  #header { left: 0; top: 0; width: 1920px; height: 100px; background: linear-gradient(90deg, #7b2ff7, #f107a3); }
+  #blob { left: 200px; top: 10px; width: 600px; height: 80px; background: rgba(255, 255, 255, 0.6);
+          border-radius: 40px; filter: blur(8px); }
+  #group { left: 1500px; top: 20px; width: 360px; height: 60px; opacity: 0.7; }
+  #a { left: 0; top: 0; width: 200px; height: 60px; background: #00aa88; }
+  #b { left: 120px; top: 0; width: 240px; height: 60px; background: #aa0088; }
+</style>
+</head>
+<body>
+<div id="header"></div>
+<div id="blob"></div>
+<div id="group"><div id="a"></div><div id="b"></div></div>
+<script>
+  // Cards: 6 rows of 8, each with a dot and a bar placed on the page, not inside the card.
+  for (let r = 0; r < 6; r++) {
+    for (let c = 0; c < 8; c++) {
+      const x = 40 + c * 230, y = 140 + r * 150;
+      const add = (cls, dx, dy) => {
+        const d = document.createElement('div');
+        d.className = cls; d.style.left = (x + dx) + 'px'; d.style.top = (y + dy) + 'px';
+        document.body.appendChild(d);
+      };
+      add('card', 0, 0); add('dot', 16, 31); add('bar', 80, 49);
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+[package]
+name = "lucinanet-servo"
+version = "0.1.0"
+description = "LucinaNet on Servo, painted in software by swgl"
+edition.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[features]
+# Media through crates/lucinanet-media (Servo patch 0037, set_media_backend). Off by default until it is proven on the laptop:
+# a build without it is the same as before.
+media = ["dep:lucinanet-media"]
+# The desktop window (`--desktop`), for the build host.
+desktop = ["lucinanet-ui/desktop"]
+
+[dependencies]
+dpi = "0.1"
+euclid = "0.22"
+gleam = "0.15.1"
+glow = "0.17"
+image = { version = "0.25", default-features = false, features = ["png"] }
+lucinanet-ui = { path = "../lucinanet-ui" }
+lucinanet-ax = { path = "../lucinanet-ax" }
+lucinanet-bookmarks = { path = "../lucinanet-bookmarks" }
+lucinanet-errlog = { path = "../lucinanet-errlog" }
+lucinanet-history = { path = "../lucinanet-history" }
+lucinanet-historydb = { path = "../lucinanet-historydb" }
+lucinanet-omnibox = { path = "../lucinanet-omnibox" }
+# The profile's prefs.json, read for one field at start: `privacy.error_log` (`errlog_glue.rs`).
+lucinanet-settings = { path = "../lucinanet-settings" }
+lucinanet-zoom = { path = "../lucinanet-zoom" }
+lucinanet-media = { path = "../lucinanet-media", optional = true }
+
+log = "0.4"
+rustls = { version = "0.23", default-features = false }
+rustls-graviola = "0.4"
+webpki-root-certs = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "net", "io-util", "time"] }
+# The engine: our Servo fork (LucinaEngine) under third_party/servo. Known open: inside a sandboxed opaque-origin parent,
+# `script-src 'self'` still blocks the child's script, because this engine matches 'self' against the document origin where
+# CSP3 matches the resource's URL origin. tests/web/csp-origin/ holds the pages.
+servo = { path = "../../third_party/servo/components/servo", default-features = false, features = ["bundled", "js_jit", "brimstone"] }
+
+# The engine's own Public Suffix List, for the registrable domain the address field emphasises (`src/domains.rs`). Same tree
+# as `servo` above; the list itself comes with `bundled`.
+servo-net-traits = { path = "../../third_party/servo/components/shared/net" }
+
+stylo_static_prefs = { path = "../../third_party/stylo/stylo_static_prefs" }
+
+surfman = "0.14.0"
+swgl = "0.70"
+url = "2"
+webrender = { version = "0.70.1", features = ["sw_compositor"] }
+servo-allocator = { path = "../../third_party/servo/components/allocator", features = ["use-jemalloc"] }
+
+tikv-jemalloc-sys = { version = "0.6.1", features = ["unprefixed_malloc_on_supported_platforms"] }
+webrender_api = "0.70"
+
+# Juno's semantic event hub (already in this tree through lucinanet-ui -> lucina-app): every error the
+# log records is also one `browser.*` line, so Lucina learns what broke without opening a file. Linux
+# only, and `LUCINANET_ERRLOG_JUNO=0` skips even the call.
+[target.'cfg(target_os = "linux")'.dependencies]
+lucina-events = { path = "../../lucinaos/crates/lucina-events" }
+

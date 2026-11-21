@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# scripts/check-tier <tier>: the heavier checks, on request (not with the checks). Tiers:
+#   test262   the full ECMAScript conformance run of the Rust JavaScript engine against the known-failure baseline
+#             (tools/lucinanet-test262/baseline-failures.txt): fails on any non-pass that is not in the baseline.
+# test262 needs: git, a C toolchain (clang) for the engine's dependencies, network for the first fetch of the corpus, ~4 GB of memory,
+# about 3 minutes to build and 4 to run. The corpus is tc39/test262 at the commit in tools/lucinanet-test262/test262.sha, cached in
+# $TEST262_DIR (default ~/.cache/lucinanet-test262/<sha>); the build goes to $CARGO_TARGET_DIR (default ~/.cache/lucina-check-target).
+# On a shared machine the run waits until the load is below 24 and 12 GB are free (QUIET=0 skips the wait).
+set -euo pipefail
+repo=$(cd "$(dirname "$0")/.." && pwd)
+tier=${1:-}
+case "$tier" in
+test262)
+    tool=$repo/tools/lucinanet-test262
+    sha=$(tr -d '[:space:]' < "$tool/test262.sha")
+    dir=${TEST262_DIR:-$HOME/.cache/lucinanet-test262/$sha}
+    if [ ! -d "$dir/harness" ]; then
+        mkdir -p "$dir"
+        git -C "$dir" init -q
+        git -C "$dir" remote add origin https://github.com/tc39/test262.git 2>/dev/null || true
+        git -C "$dir" fetch -q --depth 1 origin "$sha"
+        git -C "$dir" checkout -q FETCH_HEAD
+    fi
+    if [ "${QUIET:-1}" != 0 ] && [ -r /proc/loadavg ]; then
+        until awk -v a="$(awk '/MemAvailable/{print $2}' /proc/meminfo)" -v l="$(cut -d' ' -f1 /proc/loadavg)" 'BEGIN{exit !(a>=12000000 && l<24)}'; do
+            echo "check-tier: waiting for a quiet machine (MemAvailable >= 12 GB, load1 < 24)"; sleep 60
+        done
+    fi
+    export CARGO_TARGET_DIR=${CARGO_TARGET_DIR:-$HOME/.cache/lucina-check-target}
+    cap=()
+    if command -v systemd-run >/dev/null 2>&1; then cap=(systemd-run --user --scope -q -p CPUQuota=400% -p MemoryMax=8G); fi
+    "${cap[@]}" cargo build --release --manifest-path "$tool/Cargo.toml" -j 4
+    out=${OUT_DIR:-$(mktemp -d)}
+    echo "check-tier: test262 at $sha, results in $out"
+    "${cap[@]}" "$CARGO_TARGET_DIR/release/lucinanet-test262" --test262 "$dir" --jobs 2 --timeout-ms 30000 \
+        --baseline "$tool/baseline-failures.txt" --out "$out/t262.jsonl" --summary "$out/t262-summary.json" > "$out/t262.log"
+    tail -n 12 "$out/t262.log" | grep -E '^(baseline|NEW|"pass"|"fail")' || true
+    ;;
+*)
+    echo "usage: scripts/check-tier test262" >&2
+    exit 2
+    ;;
+esac

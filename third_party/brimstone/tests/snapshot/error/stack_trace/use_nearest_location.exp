@@ -1,0 +1,10 @@
+TypeError: %IteratorHelperPrototype%.next generator is already executing
+  ┌ stack_trace/use_nearest_location.js:3:23
+  |
+3 | var i = { next() { ii.next() } };
+  |                       ^
+Stack trace:
+  at next (<native>)
+  at next (stack_trace/use_nearest_location.js:3:23)
+  at next (<native>)
+  at <global> (stack_trace/use_nearest_location.js:5:4)

@@ -1,0 +1,2055 @@
+use std::cmp::Ordering;
+
+use crate::{
+    common::numeric::MAX_SAFE_INTEGER_U64,
+    intrinsic_methods, must, must_a,
+    runtime::{
+        Arguments, Context, EvalResult, Handle, PropertyFlags, Value,
+        abstract_operations::{
+            call, call_object, create_data_property_or_throw, delete_property_or_throw,
+            has_property, invoke, length_of_array_like, set,
+        },
+        alloc_error::AllocResult,
+        array_object::{
+            ArrayCreateShape, array_create, array_create_in_realm, array_species_create,
+            create_dense_data_property, is_fast_dense_array,
+        },
+        array_properties::MAX_DENSE_ARRAY_LENGTH,
+        error::{range_error, type_error},
+        get,
+        intrinsic_builder::IntrinsicBuilder,
+        intrinsics::{
+            array_iterator_object::{ArrayIteratorKind, ArrayIteratorObject},
+            intrinsics::Intrinsic,
+            typed_array_prototype::compare_typed_array_elements,
+        },
+        object_value::ObjectValue,
+        ordinary_object::ordinary_object_create_without_proto,
+        property::Property,
+        property_key::PropertyKey,
+        realm::Realm,
+        string_value::StringValue,
+        to_string,
+        type_utilities::{
+            is_array, is_callable, is_less_than, is_strictly_equal,
+            resolve_relative_index_argument, same_value_zero, to_boolean, to_integer_or_infinity,
+            to_number, to_object,
+        },
+    },
+    runtime_fn,
+};
+
+pub struct ArrayPrototype;
+
+impl ArrayPrototype {
+    /// Properties of the Array Prototype Object (https://tc39.es/ecma262/#sec-properties-of-the-array-prototype-object)
+    pub fn new(cx: Context, realm: Handle<Realm>) -> AllocResult<Handle<ObjectValue>> {
+        let object_proto = realm.get_intrinsic(Intrinsic::ObjectPrototype);
+        let array = must_a!(array_create_in_realm(
+            cx,
+            realm,
+            /* length */ 0,
+            ArrayCreateShape::Proto(Some(object_proto))
+        ))
+        .as_object();
+
+        let mut builder = IntrinsicBuilder::ordinary(cx, realm, array);
+
+        // Constructor property is added once ArrayConstructor has been created
+        intrinsic_methods!(cx, builder, {
+            at               ArrayPrototype_at               (1),
+            concat           ArrayPrototype_concat           (1),
+            copy_within      ArrayPrototype_copy_within      (2),
+            entries          ArrayPrototype_entries          (0),
+            every            ArrayPrototype_every            (1),
+            fill             ArrayPrototype_fill             (1),
+            filter           ArrayPrototype_filter           (1),
+            find             ArrayPrototype_find             (1),
+            find_index       ArrayPrototype_find_index       (1),
+            find_last        ArrayPrototype_find_last        (1),
+            find_last_index  ArrayPrototype_find_last_index  (1),
+            flat             ArrayPrototype_flat             (0),
+            flat_map         ArrayPrototype_flat_map         (1),
+            for_each         ArrayPrototype_for_each         (1),
+            includes         ArrayPrototype_includes         (1),
+            index_of         ArrayPrototype_index_of         (1),
+            join             ArrayPrototype_join             (1),
+            keys             ArrayPrototype_keys             (0),
+            last_index_of    ArrayPrototype_last_index_of    (1),
+            map_             ArrayPrototype_map              (1),
+            pop              ArrayPrototype_pop              (0),
+            push             ArrayPrototype_push             (1),
+            reduce           ArrayPrototype_reduce           (1),
+            reduce_right     ArrayPrototype_reduce_right     (1),
+            reverse          ArrayPrototype_reverse          (0),
+            shift            ArrayPrototype_shift            (0),
+            slice            ArrayPrototype_slice            (2),
+            some             ArrayPrototype_some             (1),
+            sort             ArrayPrototype_sort             (1),
+            splice           ArrayPrototype_splice           (2),
+            to_locale_string ArrayPrototype_to_locale_string (0),
+            to_reversed      ArrayPrototype_to_reversed      (0),
+            to_sorted        ArrayPrototype_to_sorted        (1),
+            to_spliced       ArrayPrototype_to_spliced       (2),
+            to_string        ArrayPrototype_to_string        (0),
+            unshift          ArrayPrototype_unshift          (1),
+            values           ArrayPrototype_values           (0),
+            with             ArrayPrototype_with             (2),
+        });
+
+        // Array.prototype [ @@iterator ] (https://tc39.es/ecma262/#sec-array.prototype-%symbol.iterator%)
+        builder.alias(cx.names.values(), cx.symbols.iterator())?;
+
+        // Array.prototype [ @@unscopables ] (https://tc39.es/ecma262/#sec-array.prototype-%symbol.unscopables%)
+        let unscopables_property = Property::data(
+            Self::create_unscopables(cx)?.into(),
+            PropertyFlags::empty().configurable(),
+        );
+        builder.property(cx.symbols.unscopables(), unscopables_property)?;
+
+        builder.build()
+    }
+
+    runtime_fn! {
+    /// Array.prototype.at (https://tc39.es/ecma262/#sec-array.prototype.at)
+    fn at(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let index_arg = arguments.get(cx, 0);
+        let relative_index = to_integer_or_infinity(cx, index_arg)?;
+
+        let key = if relative_index >= 0.0 {
+            if relative_index >= length as f64 {
+                return Ok(cx.undefined());
+            }
+
+            PropertyKey::from_u64_handle(cx, relative_index as u64)?
+        } else {
+            if -relative_index > length as f64 {
+                return Ok(cx.undefined());
+            }
+
+            PropertyKey::from_u64_handle(cx, (length as i64 + relative_index as i64) as u64)?
+        };
+
+        get(cx, object, key)
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.concat (https://tc39.es/ecma262/#sec-array.prototype.concat)
+    fn concat(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let array = array_species_create(cx, object, 0)?;
+
+        let mut n = 0;
+
+        Self::apply_concat_to_element(cx, object.into(), array, &mut n)?;
+
+        // Shared between iterations
+        let mut argument_handle = Value::uninit().to_handle(cx);
+
+        for argument in arguments.iter() {
+            argument_handle.replace(*argument);
+            Self::apply_concat_to_element(cx, argument_handle, array, &mut n)?;
+        }
+
+        let new_length_value = cx.number(n);
+        set(cx, array, cx.names.length(), new_length_value, true)?;
+
+        Ok(array.as_value())
+    }}
+
+    /// IsConcatSpreadable (https://tc39.es/ecma262/#sec-isconcatspreadable)
+    pub fn is_concat_spreadable(cx: Context, object: Handle<Value>) -> EvalResult<bool> {
+        if !object.is_object() {
+            return Ok(false);
+        }
+
+        let is_spreadable = get(cx, object.as_object(), cx.symbols.is_concat_spreadable())?;
+
+        if !is_spreadable.is_undefined() {
+            return Ok(to_boolean(*is_spreadable));
+        }
+
+        is_array(cx, object)
+    }
+
+    #[inline]
+    fn apply_concat_to_element(
+        cx: Context,
+        element: Handle<Value>,
+        array: Handle<ObjectValue>,
+        n: &mut u64,
+    ) -> EvalResult<()> {
+        if Self::is_concat_spreadable(cx, element)? {
+            let element = element.as_object();
+            let length = length_of_array_like(cx, element)?;
+
+            if *n + length > MAX_SAFE_INTEGER_U64 {
+                return type_error(cx, "Array.prototype.concat array is too large");
+            }
+
+            // Property key is shared between iterations
+            let mut element_index_key = PropertyKey::uninit().to_handle(cx);
+
+            for i in 0..length {
+                element_index_key.replace(PropertyKey::from_u64(cx, i)?);
+
+                if has_property(cx, element, element_index_key)? {
+                    let sub_element = get(cx, element, element_index_key)?;
+
+                    // Share property key, since element_index_key is no longer used
+                    let mut array_index_key = element_index_key;
+                    array_index_key.replace(PropertyKey::from_u64(cx, *n)?);
+
+                    create_data_property_or_throw(cx, array, array_index_key, sub_element)?
+                }
+
+                *n += 1;
+            }
+        } else {
+            if *n >= MAX_SAFE_INTEGER_U64 {
+                return type_error(cx, "Array.prototype.concat array is too large");
+            }
+
+            let index_key = PropertyKey::from_u64_handle(cx, *n)?;
+            create_data_property_or_throw(cx, array, index_key, element)?;
+
+            *n += 1;
+        }
+
+        Ok(())
+    }
+
+    runtime_fn! {
+    /// Array.prototype.copyWithin (https://tc39.es/ecma262/#sec-array.prototype.copywithin)
+    fn copy_within(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let target_arg = arguments.get(cx, 0);
+        let mut to_index = resolve_relative_index_argument(cx, target_arg, length)?;
+
+        let start_arg = arguments.get(cx, 1);
+        let mut from_index = resolve_relative_index_argument(cx, start_arg, length)?;
+
+        let end_argument = arguments.get(cx, 2);
+        let from_end_index = if !end_argument.is_undefined() {
+            resolve_relative_index_argument(cx, end_argument, length)?
+        } else {
+            length
+        };
+
+        let count =
+            i64::min(from_end_index as i64 - from_index as i64, length as i64 - to_index as i64);
+
+        if count <= 0 {
+            return Ok(object.as_value());
+        }
+
+        let mut count = count as u64;
+
+        // Property keys are shared between iterations
+        let mut from_key = PropertyKey::uninit().to_handle(cx);
+        let mut to_key = PropertyKey::uninit().to_handle(cx);
+
+        if from_index < to_index && to_index < from_index + count {
+            // Treat as i64 due to potential subtraction below 0. Guaranteed to not need number
+            // out of i64 range since these are array indices.
+            let mut from_index = (from_index + count - 1) as i64;
+            let mut to_index = (to_index + count - 1) as i64;
+
+            while count > 0 {
+                from_key.replace(PropertyKey::from_u64(cx, from_index as u64)?);
+                to_key.replace(PropertyKey::from_u64(cx, to_index as u64)?);
+
+                if has_property(cx, object, from_key)? {
+                    let from_value = get(cx, object, from_key)?;
+                    set(cx, object, to_key, from_value, true)?;
+                } else {
+                    delete_property_or_throw(cx, object, to_key)?;
+                }
+
+                from_index -= 1;
+                to_index -= 1;
+                count -= 1;
+            }
+        } else {
+            while count > 0 {
+                from_key.replace(PropertyKey::from_u64(cx, from_index)?);
+                to_key.replace(PropertyKey::from_u64(cx, to_index)?);
+
+                if has_property(cx, object, from_key)? {
+                    let from_value = get(cx, object, from_key)?;
+                    set(cx, object, to_key, from_value, true)?;
+                } else {
+                    delete_property_or_throw(cx, object, to_key)?;
+                }
+
+                from_index += 1;
+                to_index += 1;
+                count -= 1;
+            }
+        }
+
+        Ok(object.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.entries (https://tc39.es/ecma262/#sec-array.prototype.entries)
+    fn entries(cx, this_value, _) {
+        let object = to_object(cx, this_value)?;
+        Ok(ArrayIteratorObject::new(cx, object, ArrayIteratorKind::KeyAndValue)?.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.every (https://tc39.es/ecma262/#sec-array.prototype.every)
+    fn every(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let callback_function = arguments.get(cx, 0);
+        if !is_callable(callback_function) {
+            return type_error(cx, "Array.prototype.every callback must be a function");
+        }
+
+        let callback_function = callback_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        // Shared between iterations
+        let mut index_key = PropertyKey::uninit().to_handle(cx);
+        let mut index_value = Value::uninit().to_handle(cx);
+
+        for i in 0..length {
+            index_key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, index_key)? {
+                let value = get(cx, object, index_key)?;
+
+                index_value.replace(Value::number(i));
+                let arguments = [value, index_value, object.into()];
+
+                let test_result = call_object(cx, callback_function, this_arg, &arguments)?;
+                if !to_boolean(*test_result) {
+                    return Ok(cx.bool(false));
+                }
+            }
+        }
+
+        Ok(cx.bool(true))
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.fill (https://tc39.es/ecma262/#sec-array.prototype.fill)
+    fn fill(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let value = arguments.get(cx, 0);
+
+        let start_arg = arguments.get(cx, 1);
+        let start_index = resolve_relative_index_argument(cx, start_arg, length)?;
+
+        let end_argument = arguments.get(cx, 2);
+        let end_index = if !end_argument.is_undefined() {
+            resolve_relative_index_argument(cx, end_argument, length)?
+        } else {
+            length
+        };
+
+        // Property key is shared between iterations
+        let mut key = PropertyKey::uninit().to_handle(cx);
+
+        for i in start_index..end_index {
+            key.replace(PropertyKey::from_u64(cx, i)?);
+            set(cx, object, key, value, true)?;
+        }
+
+        Ok(object.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.filter (https://tc39.es/ecma262/#sec-array.prototype.filter)
+    fn filter(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let callback_function = arguments.get(cx, 0);
+        if !is_callable(callback_function) {
+            return type_error(cx, "Array.prototype.filter callback must be a function");
+        }
+
+        let callback_function = callback_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        let array = array_species_create(cx, object, 0)?;
+
+        let mut result_index = 0;
+
+        // Shared between iterations
+        let mut index_key = PropertyKey::uninit().to_handle(cx);
+        let mut index_value = Value::uninit().to_handle(cx);
+
+        for i in 0..length {
+            index_key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, index_key)? {
+                let value = get(cx, object, index_key)?;
+
+                index_value.replace(Value::number(i));
+                let arguments = [value, index_value, object.into()];
+
+                let is_selected = call_object(cx, callback_function, this_arg, &arguments)?;
+
+                if to_boolean(*is_selected) {
+                    // Reuse index_key handle as it is never referenced again
+                    let mut result_index_key = index_key;
+
+                    result_index_key.replace(PropertyKey::from_u64(cx, result_index)?);
+                    create_data_property_or_throw(cx, array, result_index_key, value)?;
+
+                    result_index += 1;
+                }
+            }
+        }
+
+        Ok(array.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.find (https://tc39.es/ecma262/#sec-array.prototype.find)
+    fn find(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let predicate_function = arguments.get(cx, 0);
+        if !is_callable(predicate_function) {
+            return type_error(cx, "Array.prototype.find callback must be a function");
+        }
+
+        let predicate_function = predicate_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        let find_result = find_via_predicate(cx, object, 0..length, predicate_function, this_arg)?;
+
+        match find_result {
+            Some((value, _)) => Ok(value),
+            None => Ok(cx.undefined()),
+        }
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.findIndex (https://tc39.es/ecma262/#sec-array.prototype.findindex)
+    fn find_index(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let predicate_function = arguments.get(cx, 0);
+        if !is_callable(predicate_function) {
+            return type_error(cx, "Array.prototype.findIndex callback must be a function");
+        }
+
+        let predicate_function = predicate_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        let find_result = find_via_predicate(cx, object, 0..length, predicate_function, this_arg)?;
+
+        match find_result {
+            Some((_, index_value)) => Ok(index_value),
+            None => Ok(cx.negative_one()),
+        }
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.findLast (https://tc39.es/ecma262/#sec-array.prototype.findlast)
+    fn find_last(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let predicate_function = arguments.get(cx, 0);
+        if !is_callable(predicate_function) {
+            return type_error(cx, "Array.prototype.findLast callback must be a function");
+        }
+
+        let predicate_function = predicate_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        let find_result =
+            find_via_predicate(cx, object, (0..length).rev(), predicate_function, this_arg)?;
+
+        match find_result {
+            Some((value, _)) => Ok(value),
+            None => Ok(cx.undefined()),
+        }
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.findLastIndex (https://tc39.es/ecma262/#sec-array.prototype.findlastindex)
+    fn find_last_index(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let predicate_function = arguments.get(cx, 0);
+        if !is_callable(predicate_function) {
+            return type_error(cx, "Array.prototype.findLastIndex callback must be a function");
+        }
+
+        let predicate_function = predicate_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        let find_result =
+            find_via_predicate(cx, object, (0..length).rev(), predicate_function, this_arg)?;
+
+        match find_result {
+            Some((_, index_value)) => Ok(index_value),
+            None => Ok(cx.negative_one()),
+        }
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.flat (https://tc39.es/ecma262/#sec-array.prototype.flat)
+    fn flat(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let depth = arguments.get(cx, 0);
+        let depth = if depth.is_undefined() {
+            1.0
+        } else {
+            let depth = to_integer_or_infinity(cx, depth)?;
+            f64::max(depth, 0.0)
+        };
+
+        let array = array_species_create(cx, object, 0)?;
+
+        Self::flatten_into_array(
+            cx,
+            array,
+            object,
+            length,
+            0,
+            depth,
+            None,
+            cx.undefined(),
+            "flat",
+        )?;
+
+        Ok(array.as_value())
+    }}
+
+    /// FlattenIntoArray (https://tc39.es/ecma262/#sec-flattenintoarray)
+    pub fn flatten_into_array(
+        cx: Context,
+        target: Handle<ObjectValue>,
+        source: Handle<ObjectValue>,
+        source_length: u64,
+        start: u64,
+        depth: f64,
+        mapper_function: Option<Handle<Value>>,
+        this_arg: Handle<Value>,
+        method_name: &str,
+    ) -> EvalResult<u64> {
+        let mut target_index = start;
+
+        // Property key is shared between iterations
+        let mut source_key = PropertyKey::uninit().to_handle(cx);
+        let mut target_key = PropertyKey::uninit().to_handle(cx);
+
+        for i in 0..source_length {
+            source_key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, source, source_key)? {
+                let mut element = get(cx, source, source_key)?;
+
+                if let Some(mapper_function) = mapper_function {
+                    let index_value = cx.number(i);
+                    let arguments = [element, index_value, source.into()];
+                    element = call(cx, mapper_function, this_arg, &arguments)?;
+                }
+
+                let should_flatten = if depth > 0.0 {
+                    is_array(cx, element)?
+                } else {
+                    false
+                };
+
+                if should_flatten {
+                    let new_depth = if depth == f64::INFINITY {
+                        depth
+                    } else {
+                        depth - 1.0
+                    };
+
+                    let element_object = element.as_object();
+                    let element_length = length_of_array_like(cx, element_object)?;
+
+                    target_index = Self::flatten_into_array(
+                        cx,
+                        target,
+                        element_object,
+                        element_length,
+                        target_index,
+                        new_depth,
+                        None,
+                        this_arg,
+                        method_name,
+                    )?;
+                } else {
+                    if target_index >= MAX_SAFE_INTEGER_U64 {
+                        return type_error(
+                            cx,
+                            &format!("Array.prototype.{method_name} array is too large"),
+                        );
+                    }
+
+                    target_key.replace(PropertyKey::from_u64(cx, target_index)?);
+                    create_data_property_or_throw(cx, target, target_key, element)?;
+
+                    target_index += 1;
+                }
+            }
+        }
+
+        Ok(target_index)
+    }
+
+    runtime_fn! {
+    /// Array.prototype.flatMap (https://tc39.es/ecma262/#sec-array.prototype.flatmap)
+    fn flat_map(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let mapper_function = arguments.get(cx, 0);
+        let this_arg = arguments.get(cx, 1);
+
+        if !is_callable(mapper_function) {
+            return type_error(cx, "Array.prototype.flatMap mapper must be a function");
+        }
+
+        let array = array_species_create(cx, object, 0)?;
+
+        Self::flatten_into_array(
+            cx,
+            array,
+            object,
+            length,
+            0,
+            1.0,
+            Some(mapper_function),
+            this_arg,
+            "flatMap",
+        )?;
+
+        Ok(array.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.forEach (https://tc39.es/ecma262/#sec-array.prototype.foreach)
+    fn for_each(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let callback_function = arguments.get(cx, 0);
+        if !is_callable(callback_function) {
+            return type_error(cx, "Array.prototype.forEach callback must be a function");
+        }
+
+        let callback_function = callback_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        // Shared between iterations
+        let mut index_key = PropertyKey::uninit().to_handle(cx);
+        let mut index_value = Value::uninit().to_handle(cx);
+
+        for i in 0..length {
+            index_key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, index_key)? {
+                let value = get(cx, object, index_key)?;
+
+                index_value.replace(Value::number(i));
+                let arguments = [value, index_value, object.into()];
+
+                call_object(cx, callback_function, this_arg, &arguments)?;
+            }
+        }
+
+        Ok(cx.undefined())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.includes (https://tc39.es/ecma262/#sec-array.prototype.includes)
+    fn includes(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        if length == 0 {
+            return Ok(cx.bool(false));
+        }
+
+        let search_element = arguments.get(cx, 0);
+
+        let n_arg = arguments.get(cx, 1);
+        let start_index = resolve_relative_index_argument(cx, n_arg, length)?;
+
+        // Property key is shared between iterations
+        let mut key = PropertyKey::uninit().to_handle(cx);
+
+        for i in start_index..length {
+            key.replace(PropertyKey::from_u64(cx, i)?);
+            let element = get(cx, object, key)?;
+
+            if same_value_zero(search_element, element)? {
+                return Ok(cx.bool(true));
+            }
+        }
+
+        Ok(cx.bool(false))
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.indexOf (https://tc39.es/ecma262/#sec-array.prototype.indexof)
+    fn index_of(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        if length == 0 {
+            return Ok(cx.negative_one());
+        }
+
+        let search_element = arguments.get(cx, 0);
+
+        let n_arg = arguments.get(cx, 1);
+        let start_index = resolve_relative_index_argument(cx, n_arg, length)?;
+
+        // Property key is shared between iterations
+        let mut key = PropertyKey::uninit().to_handle(cx);
+
+        for i in start_index..length {
+            key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, key)? {
+                let element = get(cx, object, key)?;
+                if is_strictly_equal(cx, search_element, element)? {
+                    return Ok(cx.number(i));
+                }
+            }
+        }
+
+        Ok(cx.negative_one())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.join (https://tc39.es/ecma262/#sec-array.prototype.join)
+    fn join(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let separator = arguments.get(cx, 0);
+        let separator = if separator.is_undefined() {
+            cx.names.comma().as_string()
+        } else {
+            to_string(cx, separator)?
+        };
+
+        let mut joined = cx.names.empty_string().as_string();
+
+        // Property key is shared between iterations
+        let mut key = PropertyKey::uninit().to_handle(cx);
+
+        for i in 0..length {
+            if i > 0 {
+                joined = StringValue::concat(cx, joined, separator)?;
+            }
+
+            key.replace(PropertyKey::from_u64(cx, i)?);
+            let element = get(cx, object, key)?;
+
+            if !element.is_nullish() {
+                let next = to_string(cx, element)?;
+                joined = StringValue::concat(cx, joined, next)?;
+            }
+        }
+
+        Ok(joined.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.keys (https://tc39.es/ecma262/#sec-array.prototype.keys)
+    fn keys(cx, this_value, _) {
+        let object = to_object(cx, this_value)?;
+        Ok(ArrayIteratorObject::new(cx, object, ArrayIteratorKind::Key)?.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.lastIndexOf (https://tc39.es/ecma262/#sec-array.prototype.lastindexof)
+    fn last_index_of(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        if length == 0 {
+            return Ok(cx.negative_one());
+        }
+
+        let search_element = arguments.get(cx, 0);
+
+        let start_index = if arguments.len() >= 2 {
+            let start_arg = arguments.get(cx, 1);
+            let n = to_integer_or_infinity(cx, start_arg)?;
+            if n == f64::NEG_INFINITY {
+                return Ok(cx.negative_one());
+            }
+
+            if n >= 0.0 {
+                u64::min(n as u64, length - 1)
+            } else {
+                let start_index = length as i64 + n as i64;
+
+                if start_index < 0 {
+                    return Ok(cx.negative_one());
+                }
+
+                start_index as u64
+            }
+        } else {
+            length - 1
+        };
+
+        // Property key is shared between iterations
+        let mut key = PropertyKey::uninit().to_handle(cx);
+
+        for i in (0..=start_index).rev() {
+            key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, key)? {
+                let element = get(cx, object, key)?;
+                if is_strictly_equal(cx, search_element, element)? {
+                    return Ok(cx.number(i));
+                }
+            }
+        }
+
+        Ok(cx.negative_one())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.map (https://tc39.es/ecma262/#sec-array.prototype.map)
+    fn map(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let callback_function = arguments.get(cx, 0);
+        if !is_callable(callback_function) {
+            return type_error(cx, "Array.prototype.map mapper must be a function");
+        }
+
+        let callback_function = callback_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        let array = array_species_create(cx, object, length)?;
+
+        // Shared between iterations
+        let mut index_key = PropertyKey::uninit().to_handle(cx);
+        let mut index_value = Value::uninit().to_handle(cx);
+
+        for i in 0..length {
+            index_key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, index_key)? {
+                let value = get(cx, object, index_key)?;
+
+                index_value.replace(Value::number(i));
+                let arguments = [value, index_value, object.into()];
+
+                let mapped_value = call_object(cx, callback_function, this_arg, &arguments)?;
+                create_data_property_or_throw(cx, array, index_key, mapped_value)?;
+            }
+        }
+
+        Ok(array.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.pop (https://tc39.es/ecma262/#sec-array.prototype.pop)
+    fn pop(cx, this_value, _) {
+        let object = to_object(cx, this_value)?;
+
+        if let Some(result) = Self::try_pop_fast(cx, object)? {
+            Ok(result)
+        } else {
+            Self::pop_slow(cx, object)
+        }
+    }}
+
+    /// Array.prototype.pop fast path which directly modifies dense array properties. Returns None
+    /// if the fast path cannot be taken.
+    #[inline]
+    fn try_pop_fast(
+        cx: Context,
+        mut object: Handle<ObjectValue>,
+    ) -> EvalResult<Option<Handle<Value>>> {
+        if !is_fast_dense_array(*object) {
+            return Ok(None);
+        }
+
+        let old_length = object.array_properties_length();
+        if old_length == 0 {
+            return Ok(Some(cx.undefined()));
+        }
+
+        let element = object
+            .array_properties()
+            .as_dense()
+            .get_unchecked(old_length - 1);
+
+        // Check if last element was actually a hole
+        let element = if element.is_empty() {
+            cx.undefined()
+        } else {
+            element.to_handle(cx)
+        };
+
+        object.set_array_properties_length(cx, old_length - 1)?;
+
+        Ok(Some(element))
+    }
+
+    /// Array.prototype.pop which uses the generic spec algorithm for array-like objects.
+    fn pop_slow(cx: Context, object: Handle<ObjectValue>) -> EvalResult<Handle<Value>> {
+        let length = length_of_array_like(cx, object)?;
+
+        if length == 0 {
+            let length_zero = cx.zero();
+            set(cx, object, cx.names.length(), length_zero, true)?;
+            return Ok(cx.undefined());
+        }
+
+        let new_length = length - 1;
+        let index_key = PropertyKey::from_u64_handle(cx, new_length)?;
+
+        let element = get(cx, object, index_key)?;
+        delete_property_or_throw(cx, object, index_key)?;
+
+        let new_length_value = cx.number(new_length);
+        set(cx, object, cx.names.length(), new_length_value, true)?;
+
+        Ok(element)
+    }
+
+    runtime_fn! {
+    /// Array.prototype.push (https://tc39.es/ecma262/#sec-array.prototype.push)
+    fn push(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+
+        if let Some(result) = Self::try_push_fast(cx, object, arguments)? {
+            Ok(result)
+        } else {
+            Self::push_slow(cx, object, arguments)
+        }
+    }}
+
+    /// Array.prototype.push fast path which directly modifies dense array properties. Returns None
+    /// if the fast path cannot be taken.
+    #[inline]
+    fn try_push_fast(
+        cx: Context,
+        mut object: Handle<ObjectValue>,
+        arguments: Arguments,
+    ) -> EvalResult<Option<Handle<Value>>> {
+        if !is_fast_dense_array(*object) {
+            return Ok(None);
+        }
+
+        let old_length = object.array_properties_length();
+        let new_length = old_length as u64 + arguments.len() as u64;
+
+        if new_length > MAX_DENSE_ARRAY_LENGTH as u64 {
+            return Ok(None);
+        }
+
+        object.set_array_properties_length(cx, new_length as u32)?;
+
+        let mut dense_properties = object.array_properties().as_dense();
+        for (i, argument) in arguments.iter().enumerate() {
+            dense_properties.set_unchecked(old_length + i as u32, *argument);
+        }
+
+        Ok(Some(cx.number(new_length)))
+    }
+
+    /// Array.prototype.push slow path which uses the generic spec algorithm for array-like objects.
+    fn push_slow(
+        cx: Context,
+        object: Handle<ObjectValue>,
+        arguments: Arguments,
+    ) -> EvalResult<Handle<Value>> {
+        let length = length_of_array_like(cx, object)?;
+
+        let new_length = length + arguments.len() as u64;
+        if new_length > MAX_SAFE_INTEGER_U64 {
+            return type_error(cx, "Array.prototype.push array is too large");
+        }
+
+        // Shared between iterations
+        let mut key = PropertyKey::uninit().to_handle(cx);
+        let mut argument_handle = Value::uninit().to_handle(cx);
+
+        for (i, argument) in arguments.iter().enumerate() {
+            key.replace(PropertyKey::from_u64(cx, length + i as u64)?);
+            argument_handle.replace(*argument);
+
+            set(cx, object, key, argument_handle, true)?;
+        }
+
+        let new_length_value = cx.number(new_length);
+        set(cx, object, cx.names.length(), new_length_value, true)?;
+
+        Ok(new_length_value)
+    }
+
+    runtime_fn! {
+    /// Array.prototype.reduce (https://tc39.es/ecma262/#sec-array.prototype.reduce)
+    fn reduce(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let callback_function = arguments.get(cx, 0);
+        if !is_callable(callback_function) {
+            return type_error(cx, "Array.prototype.reduce callback must be a function");
+        }
+
+        let callback_function = callback_function.as_object();
+        let mut initial_index = 0;
+
+        let mut accumulator = if arguments.len() >= 2 {
+            arguments.get(cx, 1)
+        } else if length == 0 {
+            return type_error(cx, "Array.prototype.reduce does not have an initial value");
+        } else {
+            // Property key is shared between iterations
+            let mut index_key = PropertyKey::uninit().to_handle(cx);
+
+            // Find the first value in the array if an initial value was not specified
+            loop {
+                if initial_index >= length {
+                    return type_error(
+                        cx,
+                        "Array.prototype.reduce of empty array with no initial value",
+                    );
+                }
+
+                index_key.replace(PropertyKey::from_u64(cx, initial_index)?);
+                initial_index += 1;
+
+                if has_property(cx, object, index_key)? {
+                    break get(cx, object, index_key)?;
+                }
+            }
+        };
+
+        // Shared between iterations
+        let mut index_key = PropertyKey::uninit().to_handle(cx);
+        let mut index_value = Value::uninit().to_handle(cx);
+
+        for i in initial_index..length {
+            index_key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, index_key)? {
+                let value = get(cx, object, index_key)?;
+
+                index_value.replace(Value::number(i));
+                let arguments = [accumulator, value, index_value, object.into()];
+
+                accumulator = call_object(cx, callback_function, cx.undefined(), &arguments)?;
+            }
+        }
+
+        Ok(accumulator)
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.reduceRight (https://tc39.es/ecma262/#sec-array.prototype.reduceright)
+    fn reduce_right(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let callback_function = arguments.get(cx, 0);
+        if !is_callable(callback_function) {
+            return type_error(cx, "Array.prototype.reduceRight callback must be a function");
+        }
+
+        let callback_function = callback_function.as_object();
+        let mut initial_index = length as i64 - 1;
+
+        let mut accumulator = if arguments.len() >= 2 {
+            arguments.get(cx, 1)
+        } else if length == 0 {
+            return type_error(cx, "Array.prototype.reduceRight does not have an initial value");
+        } else {
+            let mut index_key = PropertyKey::uninit().to_handle(cx);
+
+            // Find the first value in the array if an initial value was not specified
+            loop {
+                if initial_index < 0 {
+                    return type_error(
+                        cx,
+                        "Array.prototype.reduceRight of empty array with no initial value",
+                    );
+                }
+
+                index_key.replace(PropertyKey::from_u64(cx, initial_index as u64)?);
+                initial_index -= 1;
+
+                if has_property(cx, object, index_key)? {
+                    break get(cx, object, index_key)?;
+                }
+            }
+        };
+
+        // Shared between iterations
+        let mut index_key = PropertyKey::uninit().to_handle(cx);
+        let mut index_value = Value::uninit().to_handle(cx);
+
+        for i in (0..=initial_index).rev() {
+            index_key.replace(PropertyKey::from_u64(cx, i as u64)?);
+            if has_property(cx, object, index_key)? {
+                let value = get(cx, object, index_key)?;
+
+                index_value.replace(Value::number(i));
+                let arguments = [accumulator, value, index_value, object.into()];
+
+                accumulator = call_object(cx, callback_function, cx.undefined(), &arguments)?;
+            }
+        }
+
+        Ok(accumulator)
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.reverse (https://tc39.es/ecma262/#sec-array.prototype.reverse)
+    fn reverse(cx, this_value, _) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let middle = length / 2;
+        let mut lower = 0;
+        // Safe to wrap as this only occurs when length is 0 and loop will be skipped
+        let mut upper = length.wrapping_sub(1);
+
+        // Shared between iterations
+        let mut lower_key = PropertyKey::uninit().to_handle(cx);
+        let mut upper_key = PropertyKey::uninit().to_handle(cx);
+
+        while lower != middle {
+            lower_key.replace(PropertyKey::from_u64(cx, lower)?);
+            upper_key.replace(PropertyKey::from_u64(cx, upper)?);
+
+            let lower_value = if has_property(cx, object, lower_key)? {
+                Some(get(cx, object, lower_key)?)
+            } else {
+                None
+            };
+
+            let upper_value = if has_property(cx, object, upper_key)? {
+                Some(get(cx, object, upper_key)?)
+            } else {
+                None
+            };
+
+            match (lower_value, upper_value) {
+                (Some(lower_value), Some(upper_value)) => {
+                    set(cx, object, lower_key, upper_value, true)?;
+                    set(cx, object, upper_key, lower_value, true)?;
+                }
+                (Some(lower_value), None) => {
+                    delete_property_or_throw(cx, object, lower_key)?;
+                    set(cx, object, upper_key, lower_value, true)?;
+                }
+                (None, Some(upper_value)) => {
+                    set(cx, object, lower_key, upper_value, true)?;
+                    delete_property_or_throw(cx, object, upper_key)?;
+                }
+                (None, None) => {}
+            }
+
+            lower += 1;
+            upper -= 1;
+        }
+
+        Ok(object.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.shift (https://tc39.es/ecma262/#sec-array.prototype.shift)
+    fn shift(cx, this_value, _) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        if length == 0 {
+            let zero_value = cx.zero();
+            set(cx, object, cx.names.length(), zero_value, true)?;
+            return Ok(cx.undefined());
+        }
+
+        let first_key = PropertyKey::array_index_handle(cx, 0)?;
+        let first = get(cx, object, first_key)?;
+
+        // Shared between iterations
+        let mut from_key = PropertyKey::uninit().to_handle(cx);
+        let mut to_key = PropertyKey::uninit().to_handle(cx);
+
+        for i in 1..length {
+            from_key.replace(PropertyKey::from_u64(cx, i)?);
+            to_key.replace(PropertyKey::from_u64(cx, i - 1)?);
+
+            if has_property(cx, object, from_key)? {
+                let from_value = get(cx, object, from_key)?;
+                set(cx, object, to_key, from_value, true)?;
+            } else {
+                delete_property_or_throw(cx, object, to_key)?;
+            }
+        }
+
+        let last_key = PropertyKey::from_u64_handle(cx, length - 1)?;
+        delete_property_or_throw(cx, object, last_key)?;
+
+        let new_length_value = cx.number(length - 1);
+        set(cx, object, cx.names.length(), new_length_value, true)?;
+
+        Ok(first)
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.slice (https://tc39.es/ecma262/#sec-array.prototype.slice)
+    fn slice(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let start_arg = arguments.get(cx, 0);
+        let start_index = resolve_relative_index_argument(cx, start_arg, length)?;
+
+        let end_argument = arguments.get(cx, 1);
+        let end_index = if !end_argument.is_undefined() {
+            resolve_relative_index_argument(cx, end_argument, length)?
+        } else {
+            length
+        };
+
+        let count = end_index.saturating_sub(start_index);
+
+        // Create result array which will contain the sliced elements
+        let result_array = array_species_create(cx, object, count)?;
+
+        if let Some(result_array) =
+            Self::try_slice_fast(object, length, start_index, count, result_array)
+        {
+            Ok(result_array)
+        } else {
+            Self::slice_slow(cx, object, start_index, end_index, result_array)
+        }
+    }}
+
+    /// Array.prototype.slice fast path which directly copies between dense array properties.
+    /// Returns None if the fast path cannot be taken.
+    fn try_slice_fast(
+        source: Handle<ObjectValue>,
+        length: u64,
+        start_index: u64,
+        count: u64,
+        result_array: Handle<ObjectValue>,
+    ) -> Option<Handle<Value>> {
+        // Fast path requires that the array has dense properties. Array length also must not have
+        // changed since it was originally read, which could occur due to argument conversion or a
+        // custom species constructor.
+        if !is_fast_dense_array(*source) || source.array_properties_length() as u64 != length {
+            return None;
+        }
+
+        // Fast path requires that the result array have dense properties. Result array also must
+        // have the requested length and be different than the source array, either of which could
+        // be false due to a custom species constructor.
+        if !is_fast_dense_array(*result_array)
+            || result_array.array_properties_length() as u64 != count
+            || result_array.ptr_eq(&source)
+        {
+            return None;
+        }
+
+        // Guaranteed since all dense array lengths are u32s
+        let start_index = start_index as u32;
+        let count = count as u32;
+
+        // Copy the sliced elements to the result array, excluding holes
+        let source_properties = source.array_properties().as_dense();
+        let mut result_properties = result_array.array_properties().as_dense();
+        for i in 0..count {
+            let value = source_properties.get_unchecked(start_index + i);
+            if !value.is_empty() {
+                result_properties.set_unchecked(i, value);
+            }
+        }
+
+        Some(result_array.as_value())
+    }
+
+    /// Array.prototype.slice slow path which uses the generic spec algorithm for array-like objects
+    fn slice_slow(
+        cx: Context,
+        object: Handle<ObjectValue>,
+        start_index: u64,
+        end_index: u64,
+        result_array: Handle<ObjectValue>,
+    ) -> EvalResult<Handle<Value>> {
+        let mut to_index = 0;
+
+        // Shared between iterations
+        let mut from_key = PropertyKey::uninit().to_handle(cx);
+
+        for i in start_index..end_index {
+            from_key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, from_key)? {
+                let value = get(cx, object, from_key)?;
+
+                // Reuse from_key handle since it is no longer referenced
+                let mut to_key = from_key;
+                to_key.replace(PropertyKey::from_u64(cx, to_index)?);
+
+                create_data_property_or_throw(cx, result_array, to_key, value)?;
+            }
+
+            to_index += 1;
+        }
+
+        let to_index_value = cx.number(to_index);
+        set(cx, result_array, cx.names.length(), to_index_value, true)?;
+
+        Ok(result_array.as_value())
+    }
+
+    runtime_fn! {
+    /// Array.prototype.some (https://tc39.es/ecma262/#sec-array.prototype.some)
+    fn some(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let callback_function = arguments.get(cx, 0);
+        if !is_callable(callback_function) {
+            return type_error(cx, "Array.prototype.some callback must be a function");
+        }
+
+        let callback_function = callback_function.as_object();
+        let this_arg = arguments.get(cx, 1);
+
+        // Shared between iterations
+        let mut index_key = PropertyKey::uninit().to_handle(cx);
+        let mut index_value = Value::uninit().to_handle(cx);
+
+        for i in 0..length {
+            index_key.replace(PropertyKey::from_u64(cx, i)?);
+            if has_property(cx, object, index_key)? {
+                let value = get(cx, object, index_key)?;
+
+                index_value.replace(Value::number(i));
+                let arguments = [value, index_value, object.into()];
+
+                let test_result = call_object(cx, callback_function, this_arg, &arguments)?;
+                if to_boolean(*test_result) {
+                    return Ok(cx.bool(true));
+                }
+            }
+        }
+
+        Ok(cx.bool(false))
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.sort (https://tc39.es/ecma262/#sec-array.prototype.sort)
+    fn sort(cx, this_value, arguments) {
+        let compare_function_arg = arguments.get(cx, 0);
+        if !compare_function_arg.is_undefined() && !is_callable(compare_function_arg) {
+            return type_error(cx, "Array.prototype.sort expects a function");
+        };
+
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let sorted_values = sort_indexed_properties::<IGNORE_HOLES, REGULAR_ARRAY>(
+            cx,
+            object,
+            length,
+            compare_function_arg,
+        )?;
+
+        // Reuse handle between iterations
+        let mut index_key = PropertyKey::uninit().to_handle(cx);
+
+        // Copy sorted values into start of array
+        for (i, value) in sorted_values.iter().enumerate() {
+            index_key.replace(PropertyKey::from_u64(cx, i as u64)?);
+            set(cx, object, index_key, *value, true)?;
+        }
+
+        // If there were holes then delete that number of holes from the end of the array
+        for i in (sorted_values.len() as u64)..length {
+            index_key.replace(PropertyKey::from_u64(cx, i)?);
+            delete_property_or_throw(cx, object, index_key)?;
+        }
+
+        Ok(object.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.splice (https://tc39.es/ecma262/#sec-array.prototype.splice)
+    fn splice(cx, this_value, arguments) {
+        let splice_arguments =
+            Self::prepare_splice_arguments(cx, this_value, arguments, "Array.prototype.splice")?;
+
+        // Create result array which will contain the deleted elements
+        let result_array =
+            array_species_create(cx, splice_arguments.object, splice_arguments.delete_count)?;
+
+        if let Some(result_array) =
+            Self::try_splice_fast(cx, arguments, splice_arguments, result_array)?
+        {
+            Ok(result_array)
+        } else {
+            Self::splice_slow(cx, arguments, splice_arguments, result_array)
+        }
+    }}
+
+    fn prepare_splice_arguments(
+        cx: Context,
+        this_value: Handle<Value>,
+        arguments: Arguments,
+        method_name: &str,
+    ) -> EvalResult<SpliceArguments> {
+        let object = to_object(cx, this_value)?;
+        let old_length = length_of_array_like(cx, object)?;
+
+        let start_arg = arguments.get(cx, 0);
+        let start_index = resolve_relative_index_argument(cx, start_arg, old_length)?;
+
+        let insert_count = (arguments.len() as u64).saturating_sub(2);
+
+        let delete_count = if arguments.is_empty() {
+            0
+        } else if arguments.len() == 1 {
+            old_length - start_index
+        } else {
+            let delete_count_arg = arguments.get(cx, 1);
+            let delete_count = to_integer_or_infinity(cx, delete_count_arg)?;
+            f64::min(f64::max(delete_count, 0.0), (old_length - start_index) as f64) as u64
+        };
+
+        let new_length = old_length + insert_count - delete_count;
+        if new_length > MAX_SAFE_INTEGER_U64 {
+            return type_error(cx, &format!("{} array is too large", method_name));
+        }
+
+        Ok(SpliceArguments {
+            object,
+            old_length,
+            new_length,
+            start_index,
+            insert_count,
+            delete_count,
+        })
+    }
+
+    /// Array.prototype.splice fast path which directly modifies dense array properties. Returns
+    /// None if the fast path cannot be taken.
+    fn try_splice_fast(
+        cx: Context,
+        arguments: Arguments,
+        splice_arguments: SpliceArguments,
+        result_array: Handle<ObjectValue>,
+    ) -> EvalResult<Option<Handle<Value>>> {
+        let SpliceArguments { mut object, old_length, new_length, delete_count, .. } =
+            splice_arguments;
+
+        // Fast path requires that the array has dense properties before and after the splice. Array
+        // length also must not have changed since it was originally read, which could occur due to
+        // argument conversion or a custom species constructor.
+        if !is_fast_dense_array(*object)
+            || object.array_properties_length() as u64 != old_length
+            || new_length > MAX_DENSE_ARRAY_LENGTH as u64
+        {
+            return Ok(None);
+        }
+
+        // Fast path requires that the result array have dense properties. Result array also must
+        // have the requested length and be different than the source array, either of which could
+        // be false due to a custom species constructor.
+        if !is_fast_dense_array(*result_array)
+            || result_array.array_properties_length() as u64 != delete_count
+            || result_array.ptr_eq(&object)
+        {
+            return Ok(None);
+        }
+
+        // Guaranteed since all dense array lengths are u32s
+        let old_length = old_length as u32;
+        let new_length = new_length as u32;
+        let start_index = splice_arguments.start_index as u32;
+        let insert_count = splice_arguments.insert_count as u32;
+        let delete_count = delete_count as u32;
+
+        // Move deleted elements to the result array, excluding holes
+        let source_properties = object.array_properties().as_dense();
+        let mut result_properties = result_array.array_properties().as_dense();
+        for i in 0..delete_count {
+            let value = source_properties.get_unchecked(start_index + i);
+            if !value.is_empty() {
+                result_properties.set_unchecked(i, value);
+            }
+        }
+
+        // Move all elements after the deleted elements to their new location
+        let copy_start_index = start_index + delete_count;
+        let copy_dest_index = start_index + insert_count;
+        let copy_count = old_length - copy_start_index;
+        if insert_count > delete_count {
+            object.set_array_properties_length(cx, new_length)?;
+            object.array_properties().as_dense().copy_within(
+                copy_start_index,
+                copy_dest_index,
+                copy_count,
+            );
+        } else if insert_count < delete_count {
+            object.array_properties().as_dense().copy_within(
+                copy_start_index,
+                copy_dest_index,
+                copy_count,
+            );
+            object.set_array_properties_length(cx, new_length)?;
+        }
+
+        // Insert new items into array
+        let mut dense_properties = object.array_properties().as_dense();
+        for (i, argument) in arguments.iter().skip(2).enumerate() {
+            dense_properties.set_unchecked(start_index + i as u32, *argument);
+        }
+
+        Ok(Some(result_array.as_value()))
+    }
+
+    /// Array.prototype.splice slow path which uses generic spec algorithm for array-like objects
+    fn splice_slow(
+        cx: Context,
+        arguments: Arguments,
+        splice_arguments: SpliceArguments,
+        result_array: Handle<ObjectValue>,
+    ) -> EvalResult<Handle<Value>> {
+        let SpliceArguments {
+            object,
+            old_length,
+            new_length,
+            start_index,
+            insert_count,
+            delete_count,
+        } = splice_arguments;
+
+        // Shared between iterations
+        let mut from_key = PropertyKey::uninit().to_handle(cx);
+        let mut to_key = PropertyKey::uninit().to_handle(cx);
+        let mut argument_handle = Value::uninit().to_handle(cx);
+
+        // Move deleted elements to the result array, excluding holes
+        for i in 0..delete_count {
+            from_key.replace(PropertyKey::from_u64(cx, start_index + i)?);
+            if has_property(cx, object, from_key)? {
+                let from_value = get(cx, object, from_key)?;
+                to_key.replace(PropertyKey::from_u64(cx, i)?);
+                create_data_property_or_throw(cx, result_array, to_key, from_value)?;
+            }
+        }
+
+        let delete_count_value = cx.number(delete_count);
+        set(cx, result_array, cx.names.length(), delete_count_value, true)?;
+
+        // Move existing items in array to make space for inserted items
+        if insert_count < delete_count {
+            for i in start_index..(old_length - delete_count) {
+                from_key.replace(PropertyKey::from_u64(cx, i + delete_count)?);
+                to_key.replace(PropertyKey::from_u64(cx, i + insert_count)?);
+
+                if has_property(cx, object, from_key)? {
+                    let from_value = get(cx, object, from_key)?;
+                    set(cx, object, to_key, from_value, true)?;
+                } else {
+                    delete_property_or_throw(cx, object, to_key)?;
+                }
+            }
+
+            for i in (new_length..old_length).rev() {
+                from_key.replace(PropertyKey::from_u64(cx, i)?);
+                delete_property_or_throw(cx, object, from_key)?;
+            }
+        } else if insert_count > delete_count {
+            for i in (start_index..(old_length - delete_count)).rev() {
+                from_key.replace(PropertyKey::from_u64(cx, i + delete_count)?);
+                to_key.replace(PropertyKey::from_u64(cx, i + insert_count)?);
+
+                if has_property(cx, object, from_key)? {
+                    let from_value = get(cx, object, from_key)?;
+                    set(cx, object, to_key, from_value, true)?;
+                } else {
+                    delete_property_or_throw(cx, object, to_key)?;
+                }
+            }
+        }
+
+        // Insert new items into array
+        for (i, argument) in arguments.iter().skip(2).enumerate() {
+            to_key.replace(PropertyKey::from_u64(cx, start_index + i as u64)?);
+            argument_handle.replace(*argument);
+
+            set(cx, object, to_key, argument_handle, true)?;
+        }
+
+        let new_length_value = cx.number(new_length);
+        set(cx, object, cx.names.length(), new_length_value, true)?;
+
+        Ok(result_array.as_value())
+    }
+
+    runtime_fn! {
+    /// Array.prototype.toLocaleString ( https://tc39.es/ecma402/#sup-array.prototype.tolocalestring ), 20.5.1,
+    /// which supersedes the ECMA-262 definition of the same name.
+    fn to_locale_string(cx, this_value, arguments) {
+        // Steps 1 and 2.
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let mut result = cx.names.empty_string().as_string();
+        let separator = cx.names.comma().as_string();
+
+        // Step 3: JoinIndexedProperties (array, length, LocalizedListSeparator (), "toLocaleString",
+        // « locales, options »). The separator is the implementation-defined one ECMA-262 names, and
+        // this build answers the comma it has always used: a locale's own list separator belongs to
+        // `Intl.ListFormat`, which is not built. The argument list is what the superseding definition
+        // adds, and it is what makes an element format in the locale the array call asked for.
+
+        // Shared between iterations
+        let mut key = PropertyKey::uninit().to_handle(cx);
+
+        for i in 0..length {
+            if i > 0 {
+                result = StringValue::concat(cx, result, separator)?;
+            }
+
+            key.replace(PropertyKey::from_u64(cx, i)?);
+            let next_element = get(cx, object, key)?;
+
+            if !next_element.is_nullish() {
+                let string_result = invoke(
+                    cx,
+                    next_element,
+                    cx.names.to_locale_string(),
+                    &[arguments.get(cx, 0), arguments.get(cx, 1)],
+                )?;
+                let string_result = to_string(cx, string_result)?;
+
+                result = StringValue::concat(cx, result, string_result)?;
+            }
+        }
+
+        Ok(result.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.toReversed (https://tc39.es/ecma262/#sec-array.prototype.toreversed)
+    fn to_reversed(cx, this_value, _) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let array = array_create(cx, length, None)?;
+
+        // Key is shared between iterations
+        let mut from_key = PropertyKey::uninit().to_handle(cx);
+
+        for i in 0..length {
+            from_key.replace(PropertyKey::from_u64(cx, length - i - 1)?);
+
+            let value = get(cx, object, from_key)?;
+            create_dense_data_property(cx, array.into(), i, value)?;
+        }
+
+        Ok(array.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.toSorted (https://tc39.es/ecma262/#sec-array.prototype.tosorted)
+    fn to_sorted(cx, this_value, arguments) {
+        let compare_function_arg = arguments.get(cx, 0);
+        if !compare_function_arg.is_undefined() && !is_callable(compare_function_arg) {
+            return type_error(cx, "Array.prototype.toSorted expects a function");
+        };
+
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let sorted_array = array_create(cx, length, None)?;
+
+        let sorted_values = sort_indexed_properties::<INCLUDE_HOLES, REGULAR_ARRAY>(
+            cx,
+            object,
+            length,
+            compare_function_arg,
+        )?;
+
+        // Copy sorted values into array
+        for (i, value) in sorted_values.iter().enumerate() {
+            create_dense_data_property(cx, sorted_array.into(), i as u64, *value)?;
+        }
+
+        Ok(sorted_array.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.toSpliced (https://tc39.es/ecma262/#sec-array.prototype.tospliced)
+    fn to_spliced(cx, this_value, arguments) {
+        let SpliceArguments {
+            object, new_length, start_index, insert_count, delete_count, ..
+        } = Self::prepare_splice_arguments(cx, this_value, arguments, "Array.prototype.toSpliced")?;
+
+        let array = array_create(cx, new_length, None)?;
+
+        // Shared between iterations
+        let mut from_key = PropertyKey::uninit().to_handle(cx);
+        let mut argument_handle = Value::uninit().to_handle(cx);
+
+        // Elements before the start index are unchanged and can be copied
+        for i in 0..start_index {
+            from_key.replace(PropertyKey::from_u64(cx, i)?);
+            let value = get(cx, object, from_key)?;
+            create_dense_data_property(cx, array.into(), i, value)?;
+        }
+
+        // Insert every element of provided items
+        for (i, argument) in arguments.iter().skip(2).enumerate() {
+            argument_handle.replace(*argument);
+
+            let index = start_index + i as u64;
+            create_dense_data_property(cx, array.into(), index, argument_handle)?;
+        }
+
+        // All remaining elements after the skip/delete count are copied
+        for i in (start_index + insert_count)..new_length {
+            from_key.replace(PropertyKey::from_u64(cx, i - insert_count + delete_count)?);
+
+            let value = get(cx, object, from_key)?;
+            create_dense_data_property(cx, array.into(), i, value)?;
+        }
+
+        Ok(array.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.toString (https://tc39.es/ecma262/#sec-array.prototype.tostring)
+    fn to_string(cx, this_value, _) {
+        let array = to_object(cx, this_value)?;
+        let func = get(cx, array, cx.names.join())?;
+
+        let func = if is_callable(func) {
+            func.as_object()
+        } else {
+            cx.get_intrinsic(Intrinsic::ObjectPrototypeToString)
+        };
+
+        call_object(cx, func, array.into(), &[])
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.unshift (https://tc39.es/ecma262/#sec-array.prototype.unshift)
+    fn unshift(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let num_arguments = arguments.len() as u64;
+        if num_arguments > 0 {
+            if length + num_arguments > MAX_SAFE_INTEGER_U64 {
+                return type_error(cx, "Array.prototype.unshift array is too large");
+            }
+
+            // Shared between iterations
+            let mut from_key = PropertyKey::uninit().to_handle(cx);
+            let mut to_key = PropertyKey::uninit().to_handle(cx);
+            let mut argument_handle = Value::empty().to_handle(cx);
+
+            for i in (0..length).rev() {
+                from_key.replace(PropertyKey::from_u64(cx, i)?);
+                to_key.replace(PropertyKey::from_u64(cx, i + num_arguments)?);
+
+                if has_property(cx, object, from_key)? {
+                    let from_value = get(cx, object, from_key)?;
+                    set(cx, object, to_key, from_value, true)?;
+                } else {
+                    delete_property_or_throw(cx, object, to_key)?;
+                }
+            }
+
+            for (i, argument) in arguments.iter().enumerate() {
+                to_key.replace(PropertyKey::from_u64(cx, i as u64)?);
+                argument_handle.replace(*argument);
+
+                set(cx, object, to_key, argument_handle, true)?;
+            }
+        }
+
+        let new_length = cx.number(length + num_arguments);
+        set(cx, object, cx.names.length(), new_length, true)?;
+
+        Ok(new_length)
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.values (https://tc39.es/ecma262/#sec-array.prototype.values)
+    fn values(cx, this_value, _) {
+        let object = to_object(cx, this_value)?;
+        Ok(ArrayIteratorObject::new(cx, object, ArrayIteratorKind::Value)?.as_value())
+    }}
+
+    runtime_fn! {
+    /// Array.prototype.with (https://tc39.es/ecma262/#sec-array.prototype.with)
+    fn with(cx, this_value, arguments) {
+        let object = to_object(cx, this_value)?;
+        let length = length_of_array_like(cx, object)?;
+
+        let index_arg = arguments.get(cx, 0);
+        let relative_index = to_integer_or_infinity(cx, index_arg)?;
+
+        // Convert from relative to actual index, making sure index is in range
+        let actual_index = if relative_index >= 0.0 {
+            if relative_index >= length as f64 {
+                return range_error(cx, "Array.prototype.with index is out of range");
+            }
+
+            relative_index as u64
+        } else {
+            let actual_index = relative_index + length as f64;
+            if actual_index < 0.0 {
+                return range_error(cx, "Array.prototype.with index is out of range");
+            }
+
+            actual_index as u64
+        };
+
+        let array = array_create(cx, length, None)?;
+        let new_value = arguments.get(cx, 1);
+
+        // Key is shared between iterations
+        let mut key = PropertyKey::uninit().to_handle(cx);
+
+        for i in 0..length {
+            key.replace(PropertyKey::from_u64(cx, i)?);
+
+            // Replace the i'th value with the new value
+            let value = if i == actual_index {
+                new_value
+            } else {
+                get(cx, object, key)?
+            };
+
+            create_dense_data_property(cx, array.into(), i, value)?;
+        }
+
+        Ok(array.as_value())
+    }}
+
+    /// Array.prototype [ @@unscopables ] (https://tc39.es/ecma262/#sec-array.prototype-%symbol.unscopables%)
+    fn create_unscopables(cx: Context) -> AllocResult<Handle<ObjectValue>> {
+        let list = ordinary_object_create_without_proto(cx)?;
+
+        let true_value = cx.bool(true);
+
+        must_a!(create_data_property_or_throw(cx, list, cx.names.at(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.copy_within(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.entries(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.fill(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.find(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.find_index(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.find_last(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.find_last_index(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.flat(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.flat_map(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.includes(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.keys(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.to_reversed(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.to_sorted(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.to_spliced(), true_value));
+        must_a!(create_data_property_or_throw(cx, list, cx.names.values(), true_value));
+
+        Ok(list)
+    }
+}
+
+/// FindViaPredicate (https://tc39.es/ecma262/#sec-findviapredicate)
+#[inline]
+pub fn find_via_predicate(
+    cx: Context,
+    object: Handle<ObjectValue>,
+    indices_iter: impl Iterator<Item = u64>,
+    predicate: Handle<ObjectValue>,
+    this_arg: Handle<Value>,
+) -> EvalResult<Option<(Handle<Value>, Handle<Value>)>> {
+    // Shared between iterations
+    let mut index_key = PropertyKey::uninit().to_handle(cx);
+    let mut index_value = Value::uninit().to_handle(cx);
+
+    for i in indices_iter {
+        index_key.replace(PropertyKey::from_u64(cx, i)?);
+        let value = get(cx, object, index_key)?;
+
+        index_value.replace(Value::number(i));
+        let arguments = [value, index_value, object.into()];
+
+        let test_result = call_object(cx, predicate, this_arg, &arguments)?;
+        if to_boolean(*test_result) {
+            return Ok(Some((value, index_value)));
+        }
+    }
+
+    Ok(None)
+}
+
+// Whether to exclude holes from the sorted output or not
+pub const IGNORE_HOLES: bool = true;
+pub const INCLUDE_HOLES: bool = false;
+
+// Whether the object is a typed array or not
+pub const TYPED_ARRAY: bool = true;
+pub const REGULAR_ARRAY: bool = false;
+
+/// SortIndexedProperties (https://tc39.es/ecma262/#sec-sortindexedproperties)
+pub fn sort_indexed_properties<const IGNORE_HOLES: bool, const IS_TYPED_ARRAY: bool>(
+    cx: Context,
+    object: Handle<ObjectValue>,
+    length: u64,
+    compare_function: Handle<Value>,
+) -> EvalResult<Vec<Handle<Value>>> {
+    // Reuse handle between iterations
+    let mut index_key = PropertyKey::uninit().to_handle(cx);
+
+    // Gather all non-empty values
+    let mut values = vec![];
+
+    for i in 0..length {
+        index_key.replace(PropertyKey::from_u64(cx, i)?);
+        if !IGNORE_HOLES || has_property(cx, object, index_key)? {
+            let value = get(cx, object, index_key)?;
+            values.push(value);
+        }
+    }
+
+    merge_sort(cx, &values, &mut |cx, v1, v2| {
+        if IS_TYPED_ARRAY {
+            compare_typed_array_elements(cx, v1, v2, compare_function)
+        } else {
+            compare_array_elements(cx, v1, v2, compare_function)
+        }
+    })
+}
+
+/// CompareArrayElements (https://tc39.es/ecma262/#sec-comparearrayelements)
+fn compare_array_elements(
+    cx: Context,
+    v1: Handle<Value>,
+    v2: Handle<Value>,
+    compare_function: Handle<Value>,
+) -> EvalResult<Ordering> {
+    let v1_is_undefined = v1.is_undefined();
+    let v2_is_undefined = v2.is_undefined();
+    if v1_is_undefined && v2_is_undefined {
+        return Ok(Ordering::Equal);
+    } else if v1_is_undefined {
+        return Ok(Ordering::Greater);
+    } else if v2_is_undefined {
+        return Ok(Ordering::Less);
+    }
+
+    // Use the compare function if provided
+    if !compare_function.is_undefined() {
+        let result_value =
+            call_object(cx, compare_function.as_object(), cx.undefined(), &[v1, v2])?;
+        if result_value.is_nan() {
+            return Ok(Ordering::Equal);
+        }
+
+        let result_number = to_number(cx, result_value)?;
+        let result_number = result_number.as_number();
+
+        // Convert from positive/negative/equal number result to Ordering
+        return if result_number == 0.0 {
+            Ok(Ordering::Equal)
+        } else if result_number < 0.0 {
+            Ok(Ordering::Less)
+        } else {
+            Ok(Ordering::Greater)
+        };
+    }
+
+    // Otherwise convert to strings and compare
+    let v1_string = to_string(cx, v1)?;
+    let v2_string = to_string(cx, v2)?;
+
+    if must!(is_less_than(cx, v1_string.into(), v2_string.into())).is_true() {
+        Ok(Ordering::Less)
+    } else if must!(is_less_than(cx, v2_string.into(), v1_string.into())).is_true() {
+        Ok(Ordering::Greater)
+    } else {
+        Ok(Ordering::Equal)
+    }
+}
+
+/// Naive merge sort where comparator function may have an abrupt completion.
+///
+/// Much room for optimization.
+fn merge_sort<F>(cx: Context, items: &[Handle<Value>], f: &mut F) -> EvalResult<Vec<Handle<Value>>>
+where
+    F: FnMut(Context, Handle<Value>, Handle<Value>) -> EvalResult<Ordering>,
+{
+    if items.len() <= 1 {
+        return Ok(items.to_vec());
+    }
+
+    let (first_half, second_half) = items.split_at(items.len() / 2);
+    let merged_first_half = merge_sort(cx, first_half, f)?;
+    let merged_second_half = merge_sort(cx, second_half, f)?;
+
+    let mut result = vec![];
+    result.reserve_exact(merged_first_half.len() + merged_second_half.len());
+
+    let mut i = 0;
+    let mut j = 0;
+
+    while i < merged_first_half.len() && j < merged_second_half.len() {
+        let v1 = merged_first_half[i];
+        let v2 = merged_second_half[j];
+
+        let ordering = f(cx, v1, v2)?;
+
+        if ordering.is_gt() {
+            result.push(v2);
+            j += 1;
+        } else {
+            result.push(v1);
+            i += 1;
+        }
+    }
+
+    while i < merged_first_half.len() {
+        result.push(merged_first_half[i]);
+        i += 1;
+    }
+
+    while j < merged_second_half.len() {
+        result.push(merged_second_half[j]);
+        j += 1;
+    }
+
+    Ok(result)
+}
+
+#[derive(Clone, Copy)]
+struct SpliceArguments {
+    object: Handle<ObjectValue>,
+    old_length: u64,
+    new_length: u64,
+    start_index: u64,
+    insert_count: u64,
+    delete_count: u64,
+}

@@ -1,0 +1,42 @@
+This crate's history score, bookmark relevance and search-suggestion relevance follow constants and formulas
+from the Chromium omnibox (components/omnibox/browser/scored_history_match.cc, omnibox_field_trial.cc,
+history_url_provider.cc, bookmark_provider.cc, scoring_functor.cc, search_provider.cc, search_suggestion_parser.cc,
+url_prefix.cc, autocomplete_result.cc), read at chromium/chromium e9a46735de970a8e31217f2233efa3a47a1c337d.
+The code is written anew in Rust; the numbers and formulas are Chromium's.
+
+The unfocused address display in src/display.rs follows the elision rules and flag behaviour of the same Chromium revision
+(components/omnibox/browser/location_bar_model_impl.cc, components/url_formatter/url_formatter.h and .cc,
+components/url_formatter/elide_url.cc, chrome/browser/ui/views/omnibox/omnibox_view_views.cc), read at that same revision.
+Behaviour, layout order and comments-as-specification only: no code and no table of numbers was copied from these files.
+
+Chromium licence (LICENSE at that revision):
+
+Copyright 2015 The Chromium Authors
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google LLC nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Firefox parts (URL fix-up rules, scheme typos, autofill rules) are MPL-2.0, the same licence as this crate.

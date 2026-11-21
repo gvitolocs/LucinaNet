@@ -1,0 +1,47 @@
+<!doctype html>
+<meta charset=utf-8>
+<title>the register's recipe: the four at-rules B15 names, read by index</title>
+<!--
+  Spec 07 (B15), exactly what the register says to do: a <style> sheet holding @counter-style,
+  @container, @document and @font-palette-values, then document.styleSheets[0].cssRules.length and
+  an indexed read of each entry. Nothing else is in the sheet, so nothing can steal the crash.
+  On the current binary the four rules are not in cssRules at all: stylo 890aa12 drops them while
+  parsing (rule_parser.rs:282 counter-style, :285 container and :292 -moz-document are
+  cfg!(feature = "gecko"); :281 font-palette-values wants layout.css.font-palette.enabled, which
+  LucinaNet's switch table (crates/lucinanet-servo/src/css_prefs.rs) does not even name), so this
+  page passes before the patch and after it, and the indexed read it describes cannot panic.
+  layout.css.counters.enabled is on by default here and does not change that: it gates the
+  counter() and counters() functions, not the at-rule. It stays in the gate as the evidence.
+-->
+<style>
+@counter-style ticks { system: additive; additive-symbols: 5 "V", 1 "I"; }
+@container (width > 10px) { p { color: green } }
+@-moz-document url-prefix() { p { color: orange } }
+@font-palette-values --cool { font-family: Fancy; base-palette: 1; }
+p { color: rgb(0, 0, 255) }
+</style>
+<h1>the register's four</h1>
+<pre id=out></pre>
+<script src="css-test.js"></script>
+<script>
+const log = cssTest.log;
+let bad = 0;
+for (const [n, sheet] of Array.from(document.styleSheets).entries()) {
+  const rules = sheet.cssRules;
+  log("sheet " + n + " length=" + rules.length);
+  const seen = [];
+  for (let i = 0; i < rules.length; i++) {
+    const r = rules[i];
+    const why = cssTest.honest(r);
+    seen.push(cssTest.className(r) + " type=" + r.type + ":" + JSON.stringify(cssTest.cssTextOf(r)));
+    if (why) { seen.push("FAIL " + why); bad++; }
+  }
+  log("sheet " + n + " read " + seen.join(" | "));
+  const text = Array.from(rules, (r) => r.cssText).join(" ");
+  for (const name of ["@counter-style", "@container", "@-moz-document", "@font-palette-values"]) {
+    log("present " + name + " " + (text.indexOf(name) >= 0 ? "yes" : "no"));
+  }
+}
+log("style elements " + document.querySelectorAll("style").length);
+cssTest.finish("register-four", bad);
+</script>

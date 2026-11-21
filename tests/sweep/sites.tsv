@@ -1,0 +1,107 @@
+# The fixed site list of the headless sweep (tests/sweep/sweep.sh). Columns, tab separated:
+#   id <TAB> category <TAB> url <TAB> note
+# Fixed means committed: adding, removing or changing a row is a reviewed change, and an id is never reused.
+# Public landing pages only: no login, no credentials, no trading, no playback needed.
+# `prev=1` in the note marks the 33 pages of the 2026-11-13 owner sweep (docs/missing/sites-owner-30.txt),
+# kept in their old order inside their category; the word after it is their old name.
+# `script=` names a non-Latin script the page exercises; a note is free text after that.
+S001	search	https://www.google.com/search?q=rust	prev=1 google-search
+S002	search	https://www.bing.com/search?q=rust
+S003	search	https://duckduckgo.com/?q=rust
+S004	search	https://yandex.ru/	script=cyrillic
+S005	search	https://www.baidu.com/	script=cjk (zh)
+S006	search	https://www.naver.com/	script=cjk (ko)
+S007	search	https://www.yahoo.co.jp/	script=cjk (ja)
+S008	social	https://www.reddit.com/r/rust/	prev=1 reddit-new
+S009	social	https://old.reddit.com/r/rust/	prev=1 reddit-old
+S010	social	https://x.com/	prev=1 x-home
+S011	social	https://discord.com/login	prev=1 discord-login (public login page, never signed in)
+S012	social	https://mastodon.social/
+S013	social	https://bsky.app/
+S014	social	https://www.linkedin.com/	public landing only
+S015	social	https://vk.com/	script=cyrillic
+S016	video	https://www.youtube.com/	prev=1 youtube-home
+S017	video	https://www.youtube.com/results?search_query=rust+programming	prev=1 youtube-search
+S018	video	https://www.youtube.com/watch?v=jNQXAC9IVRw	prev=1 youtube-watch (landing, no playback needed)
+S019	video	https://www.twitch.tv/	prev=1 twitch
+S020	video	https://vimeo.com/	prev=1 vimeo
+S021	video	https://open.spotify.com/	prev=1 spotify
+S022	video	https://www.netflix.com/	prev=1 netflix
+S023	video	https://www.dailymotion.com/
+S024	video	https://www.bilibili.com/	script=cjk (zh)
+S025	video	https://www.nicovideo.jp/	script=cjk (ja)
+S026	news	https://www.bbc.com/news	prev=1 bbc-news
+S027	news	https://www.theguardian.com/international	prev=1 guardian
+S028	news	https://www.nytimes.com/	prev=1 nytimes
+S029	news	https://news.ycombinator.com/	prev=1 hacker-news
+S030	news	https://edition.cnn.com/
+S031	news	https://www.aljazeera.net/	script=arabic
+S032	news	https://apnews.com/
+S033	news	https://www.lemonde.fr/
+S034	news	https://www.dr.dk/
+S035	news	https://lenta.ru/	script=cyrillic
+S036	shopping	https://www.amazon.com/	prev=1 amazon
+S037	shopping	https://www.ebay.com/	prev=1 ebay
+S038	shopping	https://www.cardmarket.com/en/Pokemon	prev=1 cardmarket
+S039	shopping	https://www.cardtrader.com/	prev=1 cardtrader
+S040	shopping	https://example-site.com/marketplace	prev=1 example-site-marketplace
+S041	shopping	https://example-site.com/	prev=1 example-site-home
+S042	shopping	https://www.aliexpress.com/
+S043	shopping	https://www.etsy.com/
+S044	shopping	https://www.rakuten.co.jp/	script=cjk (ja)
+S045	shopping	https://www.flipkart.com/
+S046	reference	https://en.wikipedia.org/wiki/JavaScript	prev=1 wikipedia-article
+S047	reference	https://www.wikipedia.org/	prev=1 wikipedia-main (the portal)
+S048	reference	https://ja.wikipedia.org/	script=cjk (ja) main page
+S049	reference	https://ar.wikipedia.org/	script=arabic main page
+S050	reference	https://ru.wikipedia.org/	script=cyrillic main page
+S051	reference	https://hi.wikipedia.org/	script=devanagari main page
+S052	reference	https://zh.wikipedia.org/	script=cjk (zh) main page
+S053	reference	https://www.britannica.com/
+S054	developer	https://github.com/servo/servo	prev=1 github-repo
+S055	developer	https://github.com/	prev=1 github-home
+S056	developer	https://developer.mozilla.org/en-US/docs/Web/JavaScript	prev=1 mdn-javascript
+S057	developer	https://stackoverflow.com/questions/2354259/map-reduce-in-python	prev=1 stackoverflow
+S058	developer	https://www.npmjs.com/package/react
+S059	developer	https://crates.io/
+S060	developer	https://pypi.org/project/requests/
+S061	developer	https://docs.rs/serde/latest/serde/
+S062	developer	https://gitlab.com/gitlab-org/gitlab
+S063	developer	https://www.rust-lang.org/
+S064	finance	https://coinmarketcap.com/	public page, no login, no trading
+S065	finance	https://www.coingecko.com/	public page, no login, no trading
+S066	finance	https://finance.yahoo.com/	public page, no login, no trading
+S067	finance	https://www.tradingview.com/	public landing, no login, no trading
+S068	finance	https://www.investing.com/	public page, no login, no trading
+S069	finance	https://www.xe.com/	public page, no login, no trading
+S070	gov-edu-health	https://www.who.int/
+S071	gov-edu-health	https://www.nih.gov/
+S072	gov-edu-health	https://www.nhs.uk/
+S073	gov-edu-health	https://www.gov.uk/
+S074	gov-edu-health	https://www.usa.gov/
+S075	gov-edu-health	https://www.mit.edu/
+S076	gov-edu-health	https://au.dk/
+S077	gov-edu-health	https://www.tsinghua.edu.cn/	script=cjk (zh)
+S078	travel-maps	https://www.google.com/maps	prev=1 google-maps
+S079	travel-maps	https://www.openstreetmap.org/
+S080	travel-maps	https://www.booking.com/
+S081	travel-maps	https://www.tripadvisor.com/
+S082	travel-maps	https://www.airbnb.com/
+S083	travel-maps	https://www.craigslist.org/	classifieds
+S084	travel-maps	https://www.dba.dk/	classifieds
+S085	vendor-docs	https://support.google.com/youtube	prev=1 youtube-support
+S086	vendor-docs	https://docs.google.com/	prev=1 google-docs (signed-out redirect to sign-in, by design)
+S087	vendor-docs	https://mail.google.com/	prev=1 gmail (signed-out redirect to sign-in, by design)
+S088	vendor-docs	https://accounts.google.com/	prev=1 google-accounts (public sign-in page, never signed in)
+S089	vendor-docs	https://learn.microsoft.com/en-us/
+S090	vendor-docs	https://developer.apple.com/
+S091	vendor-docs	https://cloud.google.com/docs
+S092	vendor-docs	https://docs.aws.amazon.com/
+S093	vendor-docs	https://developer.android.com/
+S094	vendor-docs	https://docs.github.com/
+S095	forums-blogs	https://lobste.rs/
+S096	forums-blogs	https://dev.to/
+S097	forums-blogs	https://medium.com/
+S098	forums-blogs	https://habr.com/	script=cyrillic
+S099	forums-blogs	https://www.v2ex.com/	script=cjk (zh)
+S100	forums-blogs	https://slashdot.org/

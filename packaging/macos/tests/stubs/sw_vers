@@ -1,0 +1,4 @@
+#!/bin/sh
+# Stub of macOS `sw_vers`. A fixed string, so two manifest runs on the same host compare equal.
+[ "${1-}" = "-productVersion" ] || [ "${1-}" = "-productversion" ] || exit 2
+echo 14.6-stub

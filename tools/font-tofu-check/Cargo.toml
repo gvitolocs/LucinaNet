@@ -1,0 +1,26 @@
+# The headless tofu check of reads the PNG the engine rendered of tests/fonts/cjk-emoji.html and says which cells drew
+# as the .notdef box. Its own workspace, like tools/wpt-reftest and tools/scroll-bench-tables: it links no engine. The PNG
+# decoder is the `image` crate with only its png feature, and serde_json prints the --json form; both are already locked
+# (tools/wpt-reftest/Cargo.lock, tools/sitecheck/Cargo.lock), so this adds nothing to the dependency set.
+[workspace]
+
+[package]
+name = "font-tofu-check"
+version = "0.1.0"
+description = "Counts the cells of the font test page that a headless render drew as tofu or left blank"
+edition = "2024"
+publish = false
+license = "MPL-2.0"
+
+[[bin]]
+name = "font-tofu-check"
+path = "src/main.rs"
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+serde_json = "1"
+
+[profile.release]
+debug = false
+lto = "thin"
+codegen-units = 1

@@ -1,0 +1,60 @@
+[BytecodeFunction: <module>] {
+  Parameters: 0, Registers: 8
+     0: NewClosure r3, c0
+     3: NewClosure r4, c1
+     6: LoadImmediate r6, 1
+     9: StoreToScope r6, 1, 0
+    13: LoadImmediate r6, 2
+    16: StoreToScope r6, 2, 0
+    20: LoadImmediate r6, 3
+    23: StoreToScope r6, 3, 0
+    27: LoadImmediate r0, 4
+    30: LoadImmediate r1, 5
+    33: LoadImmediate r2, 6
+    36: NewClosure r5, c2
+    39: LoadImmediate r6, 100
+    42: LoadFromScope r7, 1, 0
+    46: Add r6, r6, r7
+    50: LoadUndefined r6
+    52: Ret r6
+  Constant Table:
+    0: [BytecodeFunction: toplevelNonCapturedFunction]
+    1: [BytecodeFunction: testToplevelBinding]
+    2: [BytecodeFunction: inBlock]
+}
+
+[BytecodeFunction: toplevelNonCapturedFunction] {
+  Parameters: 0, Registers: 1
+    0: LoadUndefined r0
+    2: Ret r0
+}
+
+[BytecodeFunction: toplevelCapturedFunction] {
+  Parameters: 0, Registers: 1
+    0: LoadUndefined r0
+    2: Ret r0
+}
+
+[BytecodeFunction: inBlock] {
+  Parameters: 0, Registers: 1
+    0: LoadUndefined r0
+    2: Ret r0
+}
+
+[BytecodeFunction: testToplevelBinding] {
+  Parameters: 0, Registers: 2
+     0: LoadFromScope r0, 1, 0
+     4: LoadFromScope r1, 2, 0
+     8: CheckTdz r1, c0
+    11: Add r0, r0, r1
+    15: LoadFromScope r1, 3, 0
+    19: CheckTdz r1, c1
+    22: Add r0, r0, r1
+    26: LoadFromScope r1, 4, 0
+    30: Add r0, r0, r1
+    34: LoadUndefined r0
+    36: Ret r0
+  Constant Table:
+    0: [String: x2]
+    1: [String: x3]
+}

@@ -1,0 +1,51 @@
+#!/bin/bash
+# Stub of macOS `plutil -lint`, in awk because this repository refuses new Python and there is no xmllint
+# on Linux. It checks the shape an Info.plist must have and is strict where a substitution can go wrong: a <key> with
+# no value element after it, an unbalanced <dict>, a leftover @PLACEHOLDER@ or a stray tag all fail the lint, and the
+# key/value pairs are written to $STUB_PLIST_KEYS (tab separated) for the test to assert on. On the Mac the real
+# plutil runs, so this stub only has to be strict enough to catch a broken template.
+set -u
+[ "${1-}" = "-lint" ] || { echo "plutil(stub): only -lint is supported" >&2; exit 1; }
+shift
+rc=0
+for f in "$@"; do
+  if ! out=$(awk '
+    BEGIN { npl = 0; depth = 0; key = ""; bad = "" }
+    {
+      line = $0
+      gsub(/^[ \t]+|[ \t]+$/, "", line)
+      if (line == "") next
+      if (line ~ /^<[?|!]/) next
+      if (line ~ /^<\/plist>/) { npl--; next }
+      if (line ~ /^<plist/)    { npl++; next }
+      if (line ~ /^<\/dict>/)  { depth--; next }
+      if (line ~ /^<dict>/)    { depth++; if (key != "") { bad = bad "key with no value: " key "\n"; key = "" } next }
+      if (npl != 1 || depth != 1) { bad = bad "element outside the top-level dict: " line "\n"; next }
+      if (line ~ /@[A-Z][A-Z_]*@/) { bad = bad "unfilled placeholder: " line "\n"; next }
+      if (line ~ /^<key>/) {
+        if (key != "") { bad = bad "key with no value: " key "\n" }
+        k = line; sub(/^<key>/, "", k); sub(/<\/key>.*$/, "", k); key = k; next
+      }
+      if (key == "") { bad = bad "value with no key: " line "\n"; next }
+      v = line
+      if (v ~ /^<true\/>/)       val = "True"
+      else if (v ~ /^<false\/>/) val = "False"
+      else { val = v; sub(/^<[a-z]+>/, "", val); sub(/<\/[a-z]+>.*$/, "", val) }
+      print key "\t" val > keys
+      key = ""
+      next
+    }
+    END {
+      if (npl != 0) bad = bad "unbalanced <plist>\n"
+      if (depth != 0) bad = bad "unbalanced <dict>\n"
+      if (key != "") bad = bad "key with no value: " key "\n"
+      if (bad != "") { printf "%s", bad > "/dev/stderr"; exit 1 }
+    }' keys="${STUB_PLIST_KEYS:-/dev/null}" "$f"); then
+    printf '%s: Error: the plist does not parse\n' "$f" >&2
+    printf '%s\n' "$out" >&2
+    rc=1
+  else
+    printf '%s: OK\n' "$f"
+  fi
+done
+exit $rc

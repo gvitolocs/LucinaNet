@@ -1,0 +1,418 @@
+[BytecodeFunction: <global>] {
+  Parameters: 0, Registers: 2
+      0: NewClosure r0, c0
+      3: StoreGlobal r0, c1, k0
+      7: NewClosure r0, c2
+     10: StoreGlobal r0, c3, k1
+     14: NewClosure r0, c4
+     17: StoreGlobal r0, c5, k2
+     21: NewClosure r0, c6
+     24: StoreGlobal r0, c7, k3
+     28: NewClosure r0, c8
+     31: StoreGlobal r0, c9, k4
+     35: NewClosure r0, c10
+     38: StoreGlobal r0, c11, k5
+     42: NewClosure r0, c12
+     45: StoreGlobal r0, c13, k6
+     49: NewClosure r0, c14
+     52: StoreGlobal r0, c15, k7
+     56: NewClosure r0, c16
+     59: StoreGlobal r0, c17, k8
+     63: NewClosure r0, c18
+     66: StoreGlobal r0, c19, k9
+     70: NewClosure r0, c20
+     73: StoreGlobal r0, c21, k10
+     77: NewClosure r0, c22
+     80: StoreGlobal r0, c23, k11
+     84: NewClosure r0, c24
+     87: StoreGlobal r0, c25, k12
+     91: LoadImmediate r0, 0
+     94: StoreGlobal r0, c26, k13
+     98: PushLexicalScope c27
+    100: NewObject r0, 2
+    103: StoreToScope r0, 0, 0
+    107: NewClosure r1, c29
+    110: DefineNamedProperty r0, c28, r1, k14
+    115: NewClosure r1, c31
+    118: DefineNamedProperty r0, c30, r1, k15
+    123: PopScope 
+    124: LoadUndefined r0
+    126: Ret r0
+  Constant Table:
+    0: [BytecodeFunction: use]
+    1: [String: use]
+    2: [BytecodeFunction: prefixIdAnyDest]
+    3: [String: prefixIdAnyDest]
+    4: [BytecodeFunction: prefixIdFixedDest]
+    5: [String: prefixIdFixedDest]
+    6: [BytecodeFunction: prefixIdNewTemporaryDest]
+    7: [String: prefixIdNewTemporaryDest]
+    8: [BytecodeFunction: postfixIdAnyDest]
+    9: [String: postfixIdAnyDest]
+    10: [BytecodeFunction: postfixIdFixedDest]
+    11: [String: postfixIdFixedDest]
+    12: [BytecodeFunction: postfixIdNewTemporaryDest]
+    13: [String: postfixIdNewTemporaryDest]
+    14: [BytecodeFunction: postfixIdUnused]
+    15: [String: postfixIdUnused]
+    16: [BytecodeFunction: prefixMember]
+    17: [String: prefixMember]
+    18: [BytecodeFunction: postfixMember]
+    19: [String: postfixMember]
+    20: [BytecodeFunction: postfixMemberUnused]
+    21: [String: postfixMemberUnused]
+    22: [BytecodeFunction: decrement]
+    23: [String: decrement]
+    24: [BytecodeFunction: inTernaryAssignedToSelf]
+    25: [String: inTernaryAssignedToSelf]
+    26: [String: global]
+    27: [ScopeNames]
+    28: [String: prefixSuperMember]
+    29: [BytecodeFunction: prefixSuperMember]
+    30: [String: postfixSuperMember]
+    31: [BytecodeFunction: postfixSuperMember]
+}
+
+[BytecodeFunction: use] {
+  Parameters: 0, Registers: 1
+    0: LoadUndefined r0
+    2: Ret r0
+}
+
+[BytecodeFunction: prefixIdAnyDest] {
+  Parameters: 1, Registers: 2
+     0: LoadImmediate r0, 1
+     3: Inc a0
+     5: Mov r1, a0
+     8: Neg r1, r1
+    11: Inc r0
+    13: Mov r1, r0
+    16: Neg r1, r1
+    19: LoadGlobal r1, c0, k0
+    23: Inc r1
+    25: StoreGlobal r1, c0, k1
+    29: Neg r1, r1
+    32: LoadUndefined r1
+    34: Ret r1
+  Constant Table:
+    0: [String: global]
+}
+
+[BytecodeFunction: prefixIdFixedDest] {
+  Parameters: 1, Registers: 2
+     0: LoadImmediate r0, 1
+     3: Inc a0
+     5: Mov r0, a0
+     8: Inc r0
+    10: LoadGlobal r1, c0, k0
+    14: Inc r1
+    16: StoreGlobal r1, c0, k1
+    20: Mov r0, r1
+    23: LoadUndefined r1
+    25: Ret r1
+  Constant Table:
+    0: [String: global]
+}
+
+[BytecodeFunction: prefixIdNewTemporaryDest] {
+  Parameters: 1, Registers: 3
+     0: LoadImmediate r0, 1
+     3: LoadGlobal r1, c0, k0
+     7: Inc a0
+     9: Mov r2, a0
+    12: Call r1, r1, r2, 1
+    17: LoadGlobal r1, c0, k1
+    21: Inc r0
+    23: Mov r2, r0
+    26: Call r1, r1, r2, 1
+    31: LoadGlobal r1, c0, k2
+    35: LoadGlobal r2, c1, k3
+    39: Inc r2
+    41: StoreGlobal r2, c1, k4
+    45: Call r1, r1, r2, 1
+    50: LoadUndefined r1
+    52: Ret r1
+  Constant Table:
+    0: [String: use]
+    1: [String: global]
+}
+
+[BytecodeFunction: postfixIdAnyDest] {
+  Parameters: 1, Registers: 3
+     0: LoadImmediate r0, 1
+     3: ToNumeric a0, a0
+     6: Mov r1, a0
+     9: Inc a0
+    11: Neg r1, r1
+    14: ToNumeric r0, r0
+    17: Mov r1, r0
+    20: Inc r0
+    22: Neg r1, r1
+    25: LoadGlobal r2, c0, k0
+    29: ToNumeric r2, r2
+    32: Mov r1, r2
+    35: Inc r2
+    37: StoreGlobal r2, c0, k1
+    41: Neg r1, r1
+    44: LoadUndefined r1
+    46: Ret r1
+  Constant Table:
+    0: [String: global]
+}
+
+[BytecodeFunction: postfixIdFixedDest] {
+  Parameters: 1, Registers: 2
+     0: LoadImmediate r0, 1
+     3: ToNumeric a0, a0
+     6: Mov r0, a0
+     9: Inc a0
+    11: ToNumeric r0, r0
+    14: Mov r1, r0
+    17: Inc r0
+    19: Mov r0, r1
+    22: LoadGlobal r1, c0, k0
+    26: ToNumeric r1, r1
+    29: Mov r0, r1
+    32: Inc r1
+    34: StoreGlobal r1, c0, k1
+    38: LoadUndefined r1
+    40: Ret r1
+  Constant Table:
+    0: [String: global]
+}
+
+[BytecodeFunction: postfixIdNewTemporaryDest] {
+  Parameters: 1, Registers: 4
+     0: LoadImmediate r0, 1
+     3: LoadGlobal r1, c0, k0
+     7: ToNumeric a0, a0
+    10: Mov r2, a0
+    13: Inc a0
+    15: Call r1, r1, r2, 1
+    20: LoadGlobal r1, c0, k1
+    24: ToNumeric r0, r0
+    27: Mov r2, r0
+    30: Inc r0
+    32: Call r1, r1, r2, 1
+    37: LoadGlobal r1, c0, k2
+    41: LoadGlobal r3, c1, k3
+    45: ToNumeric r3, r3
+    48: Mov r2, r3
+    51: Inc r3
+    53: StoreGlobal r3, c1, k4
+    57: Call r1, r1, r2, 1
+    62: LoadUndefined r1
+    64: Ret r1
+  Constant Table:
+    0: [String: use]
+    1: [String: global]
+}
+
+[BytecodeFunction: postfixIdUnused] {
+  Parameters: 1, Registers: 2
+     0: LoadImmediate r0, 1
+     3: Inc a0
+     5: Inc r0
+     7: LoadGlobal r1, c0, k0
+    11: Inc r1
+    13: StoreGlobal r1, c0, k1
+    17: LoadUndefined r1
+    19: Ret r1
+  Constant Table:
+    0: [String: global]
+}
+
+[BytecodeFunction: prefixMember] {
+  Parameters: 2, Registers: 2
+     0: GetNamedProperty r0, a0, c0, k0
+     5: Inc r0
+     7: SetNamedProperty a0, c0, r0, k1
+    12: Neg r0, r0
+    15: LoadImmediate r1, 0
+    18: ResolvePropertyKey r1, r1, a0
+    22: GetProperty r0, a0, r1
+    26: Inc r0
+    28: SetProperty a0, r1, r0
+    32: Neg r0, r0
+    35: GetNamedProperty r0, a0, c0, k2
+    40: Inc r0
+    42: SetNamedProperty a0, c0, r0, k3
+    47: Mov a1, r0
+    50: LoadUndefined r0
+    52: Ret r0
+  Constant Table:
+    0: [String: prop]
+}
+
+[BytecodeFunction: postfixMember] {
+  Parameters: 2, Registers: 3
+     0: GetNamedProperty r0, a0, c0, k0
+     5: ToNumeric r0, r0
+     8: Mov r1, r0
+    11: Inc r1
+    13: SetNamedProperty a0, c0, r1, k1
+    18: Neg r0, r0
+    21: LoadImmediate r1, 0
+    24: ResolvePropertyKey r1, r1, a0
+    28: GetProperty r0, a0, r1
+    32: ToNumeric r0, r0
+    35: Mov r2, r0
+    38: Inc r2
+    40: SetProperty a0, r1, r2
+    44: Neg r0, r0
+    47: GetNamedProperty r0, a0, c0, k2
+    52: ToNumeric r0, r0
+    55: Mov r1, r0
+    58: Inc r1
+    60: SetNamedProperty a0, c0, r1, k3
+    65: Mov a1, r0
+    68: LoadUndefined r0
+    70: Ret r0
+  Constant Table:
+    0: [String: prop]
+}
+
+[BytecodeFunction: postfixMemberUnused] {
+  Parameters: 1, Registers: 2
+     0: GetNamedProperty r0, a0, c0, k0
+     5: Inc r0
+     7: SetNamedProperty a0, c0, r0, k1
+    12: LoadImmediate r1, 0
+    15: ResolvePropertyKey r1, r1, a0
+    19: GetProperty r0, a0, r1
+    23: Inc r0
+    25: SetProperty a0, r1, r0
+    29: LoadUndefined r0
+    31: Ret r0
+  Constant Table:
+    0: [String: prop]
+}
+
+[BytecodeFunction: prefixSuperMember] {
+  Parameters: 1, Registers: 3
+     0: LoadFromScope r1, 0, 0
+     4: LoadConstant r2, c0
+     7: GetNamedSuperProperty r0, r1, <this>, c0
+    12: Inc r0
+    14: SetSuperProperty r1, <this>, r2, r0
+    19: Neg r0, r0
+    22: LoadFromScope r1, 0, 0
+    26: LoadImmediate r2, 0
+    29: GetSuperProperty r0, r1, <this>, r2
+    34: Inc r0
+    36: SetSuperProperty r1, <this>, r2, r0
+    41: Neg r0, r0
+    44: LoadFromScope r1, 0, 0
+    48: LoadConstant r2, c0
+    51: GetNamedSuperProperty r0, r1, <this>, c0
+    56: Inc r0
+    58: SetSuperProperty r1, <this>, r2, r0
+    63: Mov a0, r0
+    66: LoadUndefined r0
+    68: Ret r0
+  Constant Table:
+    0: [String: prop]
+}
+
+[BytecodeFunction: postfixSuperMember] {
+  Parameters: 1, Registers: 4
+     0: LoadFromScope r1, 0, 0
+     4: LoadConstant r2, c0
+     7: GetNamedSuperProperty r0, r1, <this>, c0
+    12: ToNumeric r0, r0
+    15: Mov r3, r0
+    18: Inc r3
+    20: SetSuperProperty r1, <this>, r2, r3
+    25: Neg r0, r0
+    28: LoadFromScope r1, 0, 0
+    32: LoadImmediate r2, 0
+    35: GetSuperProperty r0, r1, <this>, r2
+    40: ToNumeric r0, r0
+    43: Mov r3, r0
+    46: Inc r3
+    48: SetSuperProperty r1, <this>, r2, r3
+    53: Neg r0, r0
+    56: LoadFromScope r1, 0, 0
+    60: LoadConstant r2, c0
+    63: GetNamedSuperProperty r0, r1, <this>, c0
+    68: ToNumeric r0, r0
+    71: Mov r3, r0
+    74: Inc r3
+    76: SetSuperProperty r1, <this>, r2, r3
+    81: Mov a0, r0
+    84: LoadUndefined r0
+    86: Ret r0
+  Constant Table:
+    0: [String: prop]
+}
+
+[BytecodeFunction: decrement] {
+  Parameters: 1, Registers: 3
+     0: Dec a0
+     2: ToNumeric a0, a0
+     5: Mov r0, a0
+     8: Dec a0
+    10: Neg r0, r0
+    13: GetNamedProperty r0, a0, c0, k0
+    18: Dec r0
+    20: SetNamedProperty a0, c0, r0, k1
+    25: Mov r1, a0
+    28: GetNamedProperty r0, r1, c0, k2
+    33: ToNumeric r0, r0
+    36: Mov r2, r0
+    39: Dec r2
+    41: SetNamedProperty r1, c0, r2, k3
+    46: Neg r0, r0
+    49: LoadUndefined r0
+    51: Ret r0
+  Constant Table:
+    0: [String: prop]
+}
+
+[BytecodeFunction: inTernaryAssignedToSelf] {
+  Parameters: 2, Registers: 1
+     0: JumpToBooleanFalse a1, 16 (.L0)
+     3: ToNumeric a0, a0
+     6: Mov r0, a0
+     9: Inc a0
+    11: Mov a0, r0
+    14: Jump 5 (.L1)
+  .L0:
+    16: LoadImmediate a0, 0
+  .L1:
+    19: JumpToBooleanFalse a1, 7 (.L2)
+    22: Inc a0
+    24: Jump 5 (.L3)
+  .L2:
+    26: LoadImmediate a0, 0
+  .L3:
+    29: NewClosure r0, c0
+    32: LoadUndefined r0
+    34: Ret r0
+  Constant Table:
+    0: [BytecodeFunction: f]
+}
+
+[BytecodeFunction: f] {
+  Parameters: 2, Registers: 2
+     0: Mov r0, <closure>
+     3: JumpToBooleanFalse a1, 16 (.L0)
+     6: Mov r1, r0
+     9: ToNumeric r1, r1
+    12: Mov a0, r1
+    15: Inc r1
+    17: Jump 5 (.L1)
+  .L0:
+    19: LoadImmediate a0, 0
+  .L1:
+    22: JumpToBooleanFalse a1, 13 (.L2)
+    25: Mov r1, r0
+    28: Inc r1
+    30: Mov a0, r1
+    33: Jump 5 (.L3)
+  .L2:
+    35: LoadImmediate a0, 0
+  .L3:
+    38: LoadUndefined r1
+    40: Ret r1
+}
