@@ -12417,14 +12417,12 @@ pub mod root {
                 "Offset of field: BufferContentsDeleter::userData_",
             ][::std::mem::offset_of!(BufferContentsDeleter, userData_) - 8usize];
         };
-        #[allow(unused_variables)]
-        pub unsafe extern "C" fn NewArrayBufferWithUserOwnedContents(
-            cx: *mut root::JSContext,
-            nbytes: usize,
-            contents: *mut ::std::os::raw::c_void,
-        ) -> *mut root::JSObject {
-            crate::engine::missing("JS__NewArrayBufferWithUserOwnedContents")
-        }
+        const _: unsafe extern "C" fn(
+            *mut root::JSContext,
+            usize,
+            *mut ::std::os::raw::c_void,
+        ) -> *mut root::JSObject = crate::engine::api::JS__NewArrayBufferWithUserOwnedContents;
+        pub use crate::engine::api::JS__NewArrayBufferWithUserOwnedContents as NewArrayBufferWithUserOwnedContents;
         #[allow(unused_variables)]
         pub unsafe extern "C" fn NewMappedArrayBufferWithContents(
             cx: *mut root::JSContext,
@@ -22277,16 +22275,14 @@ pub mod root {
         pub use crate::engine::api::glue__GetLinearStringCharAt as GetLinearStringCharAt;
         const _: unsafe extern "C" fn(*mut root::JSAtom) -> *mut root::JSLinearString = crate::engine::api::glue__AtomToLinearString;
         pub use crate::engine::api::glue__AtomToLinearString as AtomToLinearString;
-        #[allow(unused_variables)]
-        pub unsafe extern "C" fn NewExternalArrayBuffer(
-            cx: *mut root::JSContext,
-            nbytes: usize,
-            contents: *mut ::std::os::raw::c_void,
-            freeFunc: root::JS::BufferContentsFreeFunc,
-            freeUserData: *mut ::std::os::raw::c_void,
-        ) -> *mut root::JSObject {
-            crate::engine::missing("glue__NewExternalArrayBuffer")
-        }
+        const _: unsafe extern "C" fn(
+            *mut root::JSContext,
+            usize,
+            *mut ::std::os::raw::c_void,
+            root::JS::BufferContentsFreeFunc,
+            *mut ::std::os::raw::c_void,
+        ) -> *mut root::JSObject = crate::engine::api::glue__NewExternalArrayBuffer;
+        pub use crate::engine::api::glue__NewExternalArrayBuffer as NewExternalArrayBuffer;
         const _: unsafe extern "C" fn(
             *mut root::JSContext,
             usize,

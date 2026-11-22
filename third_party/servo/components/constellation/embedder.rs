@@ -4,7 +4,7 @@
 
 use embedder_traits::{
     InputEventOutcome, JSValue, JavaScriptEvaluationError, JavaScriptEvaluationId,
-    MediaSessionEvent, NewWebViewDetails, TraversalId,
+    MediaSessionEvent, NewWebViewDetails, PageText, PageTextId, TraversalId,
 };
 use servo_base::generic_channel::GenericSender;
 use servo_base::id::{PipelineId, WebViewId};
@@ -34,6 +34,9 @@ pub enum ConstellationToEmbedderMsg {
         JavaScriptEvaluationId,
         Result<JSValue, JavaScriptEvaluationError>,
     ),
+    /// Inform the embedding layer of the page text it asked for (an empty `PageText` when the
+    /// page went away).
+    FinishPageText(PageTextId, PageText),
     /// Whether or not to allow script to open a new tab/browser
     AllowOpeningWebView(WebViewId, GenericSender<Option<NewWebViewDetails>>),
     /// Whether or not to allow a pipeline to load a url.

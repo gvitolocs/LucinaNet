@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Shows that Verus can fail on our shipped rule files and on the registry model: each line plants one bug in a copy, and Verus must
-# refuse it. As LucinaOS verification/*/mutants.sh. Run on the build host from the LucinaNet root, through
+# refuse it. As LucinaOS verification/*/mutants.sh. Run on a Linux desktop from the LucinaNet root, through
 # the verification script:
 #   verification/mutants.sh
 set -uo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
-servo=${SERVO:-$root/../LucinaNet-servo}
+servo=${SERVO:-$root/third_party/servo}
 source "$root/scripts/verus-pin.sh"   # resolves `verus`, prints it, and refuses a version other than verification/verus.version
 work=$(mktemp -d "${TMPDIR:-/tmp}/lucinanet-mutants.XXXXXX")
 trap 'rm -rf "${work:?}"' EXIT

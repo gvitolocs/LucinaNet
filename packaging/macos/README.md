@@ -49,13 +49,13 @@ KEEP=1 packaging/macos/tests/test-package.sh # leaves the fixture tree for inspe
 
 ## Real Mac staging (required before release)
 
-The stub tests prove the packager's logic; they do not prove that macOS accepts the bundle. A real run on the build Mac is required. The procedure below uses the **currently installed engine** — not a freshly built one — because a new engine binary is gated by a YouTube regression (see `MAC-ACCEPT-17f24cb.md`).
+The stub tests prove the packager's logic; they do not prove that macOS accepts the bundle. A real run on the build Mac is required. The procedure below uses the **currently installed engine** — not a freshly built one — because no fresh engine binary is accepted for macOS while the YouTube regression on that platform is open.
 
 ### Inputs
 
 | Input | Source | Note |
 |---|---|---|
-| Engine binary | `~/Applications/LucinaNet.app/Contents/MacOS/lucinanet-bin` | The currently installed engine. SHA-256 must be `cc8f46bffa8364f1ca0128e4824ca3534132e0f9717cbb45b198ea8f6f66b578`. Source provenance is **unknown** (a separate audit is pending); the manifest must say so, not label it a specific build. |
+| Engine binary | `~/Applications/LucinaNet.app/Contents/MacOS/lucinanet-bin` | The currently installed engine. SHA-256 must be `cc8f46bffa8364f1ca0128e4824ca3534132e0f9717cbb45b198ea8f6f66b578`. Source provenance is **unknown**; the manifest must say so, not label it a specific build. |
 | Fonts | `~/Applications/LucinaNet.app/Contents/Resources/fonts` | The fonts from the currently installed bundle, including its `LICENSE` file. |
 | Logo | `<repo>/assets/logo` | The approved mark, already in the repository. |
 
@@ -84,7 +84,7 @@ REPO=~/LucinaNet-mac/src   # the repository checkout (read-only; do not modify)
   --fonts "$FONTS" \
   --output "$STAGE/LucinaNet.app" \
   --version 0.1.0 \
-  --source "installed engine, unknown source provenance (audit pending), input sha256 $EXPECTED"
+  --source "installed engine, unknown source provenance, input sha256 $EXPECTED"
 
 # 3. Verify the result on the Mac: real iconutil, plutil, codesign.
 plutil -lint "$STAGE/LucinaNet.app/Contents/Info.plist"
@@ -101,12 +101,12 @@ cat "$STAGE/LucinaNet.app.manifest.txt"
 
 ### What the manifest must say
 
-- `source=installed engine, unknown source provenance (audit pending), input sha256 cc8f46bf…`
-- **Not** "build 487", **not** "17f", **not** any label that implies a known source. The exact input hash is the only provenance claim.
+- `source=installed engine, unknown source provenance, input sha256 cc8f46bf…`
+- **Not** a build number or a commit fragment, and not any other label that implies a known source. The exact input hash is the only provenance claim.
 
 ### What must not happen
 
-- No fresh engine binary from `out22` or any other build directory.
+- No fresh engine binary from `target/` or any other build directory.
 - No live install (`cp` to `~/Applications/`), no `open`, no killing the running browser.
 - No modification of `~/LucinaNet-mac/src`.
 - No push, tag, or release action.
@@ -121,7 +121,7 @@ After the staging run, the maintainer reviews the staged bundle and manifest. On
 |---|---|
 | `tools/release/package-macos.sh` | The packager (executable). |
 | `packaging/macos/Info.plist.in` | Info.plist template (`@EXECUTABLE@`, `@ICON_FILE@`, `@BUNDLE_ID@`, `@SHORT_VERSION@`, `@BUILD_VERSION@`). |
-| `packaging/macos/launcher.sh` | Launcher script template (`@BIN_NAME@`). Sets `LUCINANET_CONSOLE=1` and the JS-missing log path; does not enable frame/render/GC tracing. |
+| `packaging/macos/launcher.sh` | Launcher script template (`@BIN_NAME@`). Scrubs every `LUCINA*` / `LUCINANET_*` variable of the caller, then sets `LUCINANET_CONSOLE=1`; does not enable frame/render/GC tracing (to reproduce a tracing session run the engine binary directly). |
 | `packaging/macos/exclusive-rename.c` | Darwin exclusive-rename helper (`renamex_np` + `RENAME_EXCL`), built with system `cc` at packager runtime. |
 | `packaging/macos/tests/test-package.sh` | Stub-based test suite (runs on Linux and Mac). |
 | `packaging/macos/tests/stubs/` | Honest stubs for `file`, `sips`, `iconutil`, `codesign`, `plutil`, `lipo`, `stat`, `sw_vers`, `ditto`. |

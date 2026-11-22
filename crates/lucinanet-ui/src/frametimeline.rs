@@ -164,7 +164,7 @@ pub fn configure(profile: Option<&Path>) {
     }
 }
 
-/// The file the process's stderr is, when it is a regular file (the owner redirected it): where the engine's and
+/// The file the process's stderr is, when it is a regular file (stderr redirected to a file): where the engine's and
 /// WebRender's diagnostic lines can be read back from.
 fn stderr_path() -> Option<PathBuf> {
     #[cfg(target_os = "linux")]

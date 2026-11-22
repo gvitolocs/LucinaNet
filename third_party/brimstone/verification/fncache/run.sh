@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# Runs the proof of one shipped file of src/js/runtime/bytecode/fncache and its mutants. From the repo root on the build host:
+# Runs the proof of one shipped file of src/js/runtime/bytecode/fncache and its mutants. From the repo root:
 #   verification/fncache/run.sh disk_rules
 # The shipped file and mutants.sh are copied into a directory of their own, so that nothing depends on a path on the machine that
-# runs Verus. Verus runs on the proof host (`verus-remote`); if the proof host does not answer, FALLBACK=1 runs it here instead.
+# runs Verus. Verus is the `verus` on PATH, or the binary named by VERUS.
 set -euo pipefail
 name=${1:?name of the proof (disk_rules)}
 root=$(cd "$(dirname "$0")/../.." && pwd)
 stage=$(mktemp -d "${TMPDIR:-/tmp}/fncache-stage.XXXXXX")
 trap 'rm -rf "${stage:?}"' EXIT
 cp "$root/src/js/runtime/bytecode/fncache/$name.rs" "$root/verification/fncache/mutants.sh" "$stage/"
-if [ "${FALLBACK:-0}" = 1 ]; then
-    cd "$stage"
-    VERUS=/home/user/tools/verus/verus-x86-linux/verus exec ./mutants.sh "$name" "$name.rs"
-fi
-exec "$HOME/.local/bin/verus-remote" "$stage" ./mutants.sh "$name" "$name.rs"
+verus=${VERUS:-verus}
+command -v "$verus" >/dev/null 2>&1 || { echo "no Verus to run: '$verus' is not an executable here (put verus on PATH, or set VERUS)" >&2; exit 1; }
+cd "$stage"
+exec env VERUS="$verus" ./mutants.sh "$name" "$name.rs"

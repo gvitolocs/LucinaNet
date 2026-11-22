@@ -10,7 +10,7 @@
 # Usage: tests/fonts/font-check.sh [--bin PATH] [--tool PATH] [--out DIR] [--max-tofu N] [--system-fonts]
 #   --bin      the engine binary (default $WORK_DIR/lucinanet/target/probe/lucinanet-servo, or $LUCINANET_BIN)
 #   --tool     the built font-tofu-check (default $FONT_TOFU_CHECK, else tools/font-tofu-check/target/release/
-#              font-tofu-check, built with cargo if that is missing and cargo is on PATH; on the build host build it
+#              font-tofu-check, built with cargo if that is missing and cargo is on PATH; build it
 #              first and pass --tool)
 #   --out      where the render, its log and the table go (default $WORK_DIR/lucinanet/font-test-page)
 #   --max-tofu PASS when the non-control cells that drew as tofu are at most N, else FAIL (exit 1);

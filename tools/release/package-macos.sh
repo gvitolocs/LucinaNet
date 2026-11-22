@@ -17,6 +17,11 @@
 # Ad-hoc signing (no identity, no notarisation), the same as .github/workflows/release.yml: the bundle runs on the Mac
 # that built it, which is the only Mac this project ships to today. There is deliberately no --identity option: a
 # Developer ID flow needs the maintainer's Apple account and its own review, not an option on a packager.
+#
+# RELEASE PRECONDITION (comment only: this script does not run it): before the bundle this packages is installed on a
+# Mac (or its source pushed publicly), the nightly zero-network result for that commit must be GREEN:
+#   tests/zero-network/release-check.sh target/nightly/zero-network.log <commit>   # must exit 0
+# A red or stale nightly blocks the install and the push. See docs/release-checklist.md.
 set -u
 
 PROG=package-macos
@@ -92,6 +97,10 @@ case $BIN_NAME in .|..) die "--bin-name must not be '$BIN_NAME': the engine path
 
 [ -d "$ROOT/packaging/macos" ] || die "templates missing under $ROOT/packaging/macos"
 [ -f "$EXEC" ] && [ -r "$EXEC" ] || die "no readable engine binary at $EXEC"
+# a harness build (test and measurement doors, docs/harness-doors.md) is never packaged, and never put over an installed app.
+# shellcheck source=tools/release/harness-guard.sh
+. "$ROOT/tools/release/harness-guard.sh"
+refuse_harness_binary "$PROG" "$EXEC" "$OUTPUT"
 fileinfo=$(file -b "$EXEC") || die "file(1) failed on $EXEC"
 case $fileinfo in *Mach-O*) ;; *) die "$EXEC is not a Mach-O binary ($fileinfo): the engine cannot be cross-built on Linux";; esac
 ARCHS=""
@@ -276,7 +285,7 @@ refuse_existing() { # refuse_existing PATH LABEL: die if PATH exists in any form
 exclusive_rename() { # exclusive_rename SRC DST: kernel-exclusive rename on Darwin; best-effort elsewhere
   local src=$1 dst=$2 helper=""
   if [ "$(uname -s)" = Darwin ]; then
-    helper=$(mktemp "${TMPDIR:-/tmp}/.ln-xrename.XXXXXX") || die "cannot create a temp file for the rename helper"
+    helper=$(mktemp "${TMPDIR:?set TMPDIR to a scratch directory (not /tmp)}/.ln-xrename.XXXXXX") || die "cannot create a temp file for the rename helper"
     cc -o "$helper" "$ROOT/packaging/macos/exclusive-rename.c" 2>/dev/null \
       || { rm -f "$helper"; die "cc could not build the exclusive-rename helper: install the Xcode command line tools"; }
     if ! "$helper" "$src" "$dst"; then

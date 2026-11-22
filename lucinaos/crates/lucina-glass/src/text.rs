@@ -1,6 +1,6 @@
 //! Type for the glass kit: Lato Thin for the huge display words, Lato Light, Regular and Semibold for the small sans, and DejaVu
 //! Sans Mono for the uppercase mono blocks. All embedded (subsets of Latin-1 and a few symbols, `fonts/`), so a frame renders
-//! the same on the build host and on Juno. Glyphs are rasterised like lucina-app's (skrifa outlines, ab_glyph_rasterizer coverage)
+//! the same on a Linux desktop and on Juno. Glyphs are rasterised like lucina-app's (skrifa outlines, ab_glyph_rasterizer coverage)
 //! at the canvas's pixel size, at quarter-pixel horizontal positions so thin type keeps even spacing, and cached.
 
 use std::collections::HashMap;

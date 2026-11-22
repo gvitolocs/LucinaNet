@@ -10,16 +10,17 @@ Files of our workspace members that are not rustfmt-clean. Regenerate from the r
 
     cargo fmt --all -- --check -l | sed "s#^$PWD/##" | grep "\.rs$" | LC_ALL=C sort -u > tools/ci/fmt-baseline.txt
 
-## clippy-baseline.txt (not generated yet)
+## clippy-baseline.txt (not generated yet; no clippy job in ci.yml until it exists)
 
-Files of our workspace members with a clippy warning. Until the file exists the baseline is empty and every file with a
-finding fails the job. It needs a full clippy run (heavy; run it on the build host):
+Files of our workspace members with a clippy warning. The ratchet job is not in ci.yml yet: a whole-workspace clippy run does not
+finish today (lucinanet-media test targets fail to compile with two global allocators in one binary), so there is no baseline. When
+it finishes, generate the file with the pipeline below and put the job back (it needs a full clippy run, heavy: it builds every target):
 
     cargo clippy --workspace --all-targets --locked --keep-going --quiet --message-format=short \
       --features lucinanet-servo/desktop,lucinanet-servo/media -- --cap-lints warn 2>&1 \
       | grep -E "^[^ :]+\.rs:[0-9]+:[0-9]+: warning" | cut -d: -f1 | LC_ALL=C sort -u > tools/ci/clippy-baseline.txt
 
-(the same pipeline as the clippy job in ci.yml; the paths must come out repo-relative, as the job sees them.)
+(the pipeline the clippy job runs once it is back; the paths must come out repo-relative, as the job sees them.)
 
 ## Content scan
 

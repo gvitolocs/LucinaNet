@@ -3,16 +3,16 @@
 Every engine `extern "C"` function of `mozjs-sys/src/engine/` catches a panic at its edge,
 **poisons** its thread's context and returns a failure value; the script thread then unwinds in a Rust frame of the
 embedder into Servo's own panic handling. One tab is lost; the process and the other tabs live. A panic never becomes a
-script-visible exception (project lead decision, by the precedent of both reference browsers: a trusted internal failure
+script-visible exception (by the precedent of both reference browsers: a trusted internal failure
 is fatal for that content, as a release assert or a `CHECK` is).
 
 Why poisoning and not an exception: after a panic the engine state is not trusted. Handle scopes are entered and exited
 by hand, so an unwind skips `scope.exit()` (`engine/module.rs`, `JS__ModuleEvaluate`: `HandleScope::enter` then
 `scope.exit()`); the heap may be mid-allocation or mid-collection. The engine's own rule, quoted in
-`LucinaNet-brimstone/docs/engine-invariants.md:346-356` from `docs/embedding.md:511-520`: "A panic that unwinds out of a
-GC leaves the heap half moved; the context must not be used afterwards." The same document's enforcement register lists
-this very wrap as the missing check (`engine-invariants.md:64`, row (c): "No panic crosses an `extern "C"` entry point in
-the glue ... ordered").
+`third_party/brimstone/docs/engine-invariants.md:346-356` from the engine's `docs/embedding.md:511-520`: "A panic that
+unwinds out of a GC leaves the heap half moved; the context must not be used afterwards." The same document's
+enforcement register lists this very wrap as the missing check (`engine-invariants.md:64`, row (c): "No panic crosses an
+`extern "C"` entry point in the glue ... ordered").
 
 Code: `mozjs-sys/engine-shim/src/lib.rs` (the attribute), `mozjs-sys/src/engine/poison.rs` (what it expands to, the
 poisoned state, the crash record), `mozjs/src/panic.rs` (re-raise), `mozjs-sys/tests/engine_shim_coverage.rs` (the static
@@ -33,7 +33,7 @@ check), `mozjs/tests/brimstone_edge_wrap.rs` (behaviour).
    (`func::call_native`), interrupts refuse (`cx::ServoHost::interrupt`), and every outer gated shim returns its failure
    value even if its body completed (epilogue of `run_gated`).
 6. The embedder's panic hook already ran at the original panic, before any unwinding: servoshell's hook prints the message
-   and calls `error!` while panicking (`LucinaNet-servo/ports/servoshell/panic_hook.rs:52`), which Servo's logger turns into
+   and calls `error!` while panicking (`third_party/servo/ports/servoshell/panic_hook.rs:52`), which Servo's logger turns into
    `LogEntry::Panic` (`components/constellation/logging.rs:121`), which the constellation handles as a panic of that event
    loop (`constellation.rs:3182-3183` -> `handle_panic` `:3024`): crash page for its webviews, other event loops untouched;
    in `hard_fail` mode the hook raises SIGSEGV (`panic_hook.rs:47`) and the constellation exits 1 (`constellation.rs:3031-3035`):
@@ -70,7 +70,7 @@ That truncation is a heuristic, not a privacy guarantee, and the design does not
 can be page data, as open point 4 says of `panic!("bad key {key}: ...")`, which keeps `bad key <data>`. What bounds the
 exposure is not the shape of the message but where it is allowed to go.
 
-**Decision 6 (project lead 2026-11-17): the full panic text is local only.** It is allowed in exactly two places, where the
+**Decision 6 (2026-11-17): the full panic text is local only.** It is allowed in exactly two places, where the
 person debugging sits: the local session log, and the crash page (step 6: the embedder's panic hook prints the message and
 calls `error!`, which becomes `LogEntry::Panic`, which the constellation turns into the crash page). Anything an agent
 reads, or that can leave the machine - a crash summary, a flaw report, a crash-frame extract - carries the shim name, the
@@ -90,8 +90,7 @@ with-arguments lint of open point 4 stays later, as the decision says.
 
 * **Build-time assertion.** `poison.rs` has `#[cfg(panic = "abort")] compile_error!(..)`: `mozjs_sys` does not compile
   under `panic=abort`, so a profile that sets it cannot ship a browser where every engine panic kills the process. Today no
-  browser profile sets it (`LucinaNet/Cargo.toml` profile `juno` and the Servo profiles, audit glue.extern-c-audit.md
-  section 3); the two glue tools that do (`tools/wasm-inspect`, `tools/jit-probe`) do not depend on `mozjs_sys`.
+  browser profile sets it (`Cargo.toml` profile `juno` and the Servo profiles); the two glue tools that do (`tools/wasm-inspect`, `tools/jit-probe`) do not depend on `mozjs_sys`.
 * **`extern "C"`, not `extern "C-unwind"`.** The shims are called from Rust through the generated bindings
   (`jsapi_gen.rs`: `const _: unsafe extern "C" fn(..) = crate::engine::api::X; pub use .. as X;`), and engine code calls
   them back through Servo's `extern "C"` callbacks; a `C-unwind` shim would let a panic travel into Servo frames that are
@@ -102,10 +101,10 @@ with-arguments lint of open point 4 stays later, as the decision says.
   leaves: the thread is poisoned before anything else runs, every later gated shim, native and interrupt on it refuses,
   and the context is discarded as a whole: `JS_DestroyContext` is gated, so a poisoned heap is leaked, never finalized
   (one heap per crashed tab; tested by `panicking_shim_poisons_its_context_only`, which asserts `JS_DestroyContext`'s body
-  does not run on the poisoned thread — review change 8a). Only the glue's own bookkeeping outside the engine is touched
-  after a panic, and it is ordered so the state survives a panic in that bookkeeping: `on_panic` first sets the poison
-  byte — a `thread_local` `Cell<u8>` on the already-mapped thread stack, so the write allocates nothing and cannot fault
-  (review change 2) — and only then does it allocate the message, take the record mutex, and touch the `thread_local`
+  does not run on the poisoned thread). Only the glue's own bookkeeping outside the engine is touched
+  after a panic, and it is ordered so the state survives a panic in that bookkeeping: `on_panic` first sets the
+  poison byte — a `thread_local` `Cell<u8>` on the already-mapped thread stack, so the write allocates nothing
+  and cannot fault — and only then does it allocate the message, take the record mutex, and touch the `thread_local`
   `RefCell` payload and the `lucinanet-failpoints` `RefCell<HashMap>` entry counter. A panic in that second group loses at
   most the record (it runs in its own `catch_unwind`), never the poisoning.
 * **Cost.** `catch_unwind` costs nothing on the normal path (landing pads); the gate is one thread-local byte load and a
@@ -149,7 +148,7 @@ unwinds. They are chosen to be the values that make Servo do least (empty data, 
 never undefined behaviour. A shim whose plausible value would make Servo do something harmful takes an explicit
 `failure = ...` (none found in the prototype set; the slices check this per file, section f).
 
-**(b.1) Element-data getters whose own miss path is null override the dangling value (review change 5).** The type
+**(b.1) Element-data getters whose own miss path is null override the dangling value.** The type
 default for an element-pointer return is `NonNull::dangling()`, which is right only for the two string char getters above
 (a caller that pairs it with a length it already knows is 0 and rejects null). Every OTHER function that returns element
 data directly reports "no data" as **null**, which its caller null-checks; for those the dangling default would be read
@@ -162,7 +161,7 @@ affected functions (all in `typed.rs`; none is wrapped yet, so this is a rule th
 `JS_GetFloat32ArrayData`, `JS_GetFloat64ArrayData`, `JS_GetBigInt64ArrayData`, `JS_GetBigUint64ArrayData`. The
 `*mut c_void` data getter (`JS_GetArrayBufferViewData`) is unaffected: `c_void` already fails with null. A function
 returning data only through an out-parameter (`glue__Get*ArrayLengthAndData`, `JS__Get*BufferLengthAndData`) is `()` and
-has no failure value; the slice rule (section f, review section 10) is that its out-params must be written on the skip,
+has no failure value; the slice rule (section f) is that its out-params must be written on the skip,
 not left stale.
 
 **How script threads learn to unwind.** Not by an exception, and not by a check after every call: the payload waits in
@@ -171,7 +170,7 @@ own `wrap_panic` payloads too, so `mozjs::panic::maybe_resume_unwind()` re-raise
 pure Rust frames after a failed evaluation; it must never be called under an `extern "C"` frame that has no `wrap_panic`.
 The constellation does not depend on the unwind: it was already told by the hook (step 6). The unwind ends the poisoned
 script thread so it stops serving tasks (open point 1 adds the resume points it still lacks). `wrap_panic` no longer
-`assert!`s that the slot is empty (`mozjs/src/panic.rs`): that assert was a second abort (audit section 2.4); the first
+`assert!`s that the slot is empty (`mozjs/src/panic.rs`): that assert was a second abort; the first
 payload is kept, a later one is forgotten (dropping a payload runs foreign code that may panic).
 
 ## (c) Contexts, threads, where the flag lives
@@ -204,11 +203,11 @@ payload is kept, a later one is forgotten (dropping a payload runs foreign code 
 * **GC-time shims** (`#[engine_shim(gc)]`: the `glue__Call*Tracer` family, the `trace_*` root tracers, write barriers,
   the weak-pointer updates `JS_UpdateWeakPointerAfterGC*`) are never gated: a collection started in an engine frame above
   one may still be running, and a skipped tracer would free live objects under it. So their body runs even on an already
-  poisoned thread (review change 8b; tested: `gc_shim_enters_its_body_on_a_poisoned_thread`), and a poisoning that merely
+  poisoned thread (tested: `gc_shim_enters_its_body_on_a_poisoned_thread`), and a poisoning that merely
   *predates* the body is left to where it happened: the value is returned. What must not happen is a poisoning that
   *arises during* the body — a gated shim nested inside a tracer catching a panic — because the collection has since been
   tracing over a heap the engine no longer trusts. `run_gc`'s epilogue sees `STATE` go dirty across its body and aborts
-  with a `fatal` record first (review change 4; tested: `gc_shim_aborts_on_a_poisoning_arising_during_its_body`). A panic
+  with a `fatal` record first (tested: `gc_shim_aborts_on_a_poisoning_arising_during_its_body`). A panic
   in the body itself is recorded (`fatal: true`) and likewise aborts (`gc_shim_panic_aborts_with_a_record`).
 * **The limit of the GC containment.** Both aborts call `process::abort`, which can land anywhere inside a collection, so
   it may leave a half-traced graph and a torn CC. That is acceptable and deliberate: the containment for a GC-time failure
@@ -238,16 +237,16 @@ failure value: the `c_char` shims), `#[super::poison::engine_shim(gc)]` (tracers
 `EXEMPT` list, any other use fails the test). The five: `crash_bt.rs` `handler` (signal handler),
 `cx.rs` `JS_RequestInterruptCallback` and `JS_RequestInterruptCallbackCanWait` (other threads; the wrap calls it),
 `func.rs` `glue__JS_CallArgsFromVp` (pure; `CallArgs` has no failure value), `profile.rs` `flush_at_exit` (atexit). Exceptions are named in the code by this attribute, never by an ast-grep
-suppression comment, so the ast-grep rule R3 (an `extern "C"` fn with no `engine_shim` attribute, regex
+suppression comment, so the ast-grep rule for an `extern "C"` fn with no `engine_shim` attribute (regex
 `^#\[\s*(?:[a-z_]+::)*engine_shim\b`) counts down to 0 and the syn test checks the exemptions by name. The path form needs
 no `use` line, so a slice touches no imports. It is an attribute on the function item, not a function-like macro around
-it, so the function stays visible to ast-grep and `syn` (project lead constraint). The macro refuses: another ABI, variadic, `const`/`async`,
+it, so the function stays visible to ast-grep and `syn`. The macro refuses: another ABI, variadic, `const`/`async`,
 generics, methods, unknown arguments, `gc` with `failure`. A body's `return` returns from the closure, so bodies need no
 edit. `#[super::poison::engine_shim]` inside a nested module needs the matching path (`crate::engine::poison::engine_shim`
 always works).
 
 No `#![deny(clippy::unwrap_used, expect_used, panic)]` for the files not yet wrapped: the panics that matter are in
-Brimstone (heap exhaustion, `must!`, module asserts: audit glue.module-panic-hunt.md), which a lint on the glue never sees;
+Brimstone (heap exhaustion, `must!`, module asserts), which a lint on the glue never sees;
 the glue files would need hundreds of allows to pass it; and the wrap makes the lint moot once a file is done. The
 register's proposed lint (`engine-invariants.md:64`) is superseded by this wrap plus the coverage test.
 
@@ -270,9 +269,9 @@ main is on. The coverage test prints `pending lines in the ratchet: N` (its inve
 
 **The count: 848.** The syn scan finds 848 `extern "C"` function items under `src/engine/` (free functions and the one
 nested `flush_at_exit`; declarations in `extern "C" { }` blocks and `extern "C" fn(..)` pointer types are not items). That
-equals the project lead's independent count (850 `extern "C" fn` lines minus the fn-pointer types at `func.rs:21` and
-`mod.rs:95`). The audit's 853 included 8 functions outside `engine/` and was a rougher grep. 848 = 13 wrapped by this
-prototype + 5 exempt (named by attribute) + 830 pending. The ast-grep rule R3 sees all 18 attributed functions, so its
+equals an independent count of the raw lines (850 `extern "C" fn` lines minus the fn-pointer types at `func.rs:21` and
+`mod.rs:95`). A rougher grep counted 853, including 8 functions outside `engine/`. 848 = 13 wrapped by this
+prototype + 5 exempt (named by attribute) + 830 pending. The ast-grep rule sees all 18 attributed functions, so its
 count is 830 today and reaches 0 when the slices are done.
 
 Inventory (`cargo test -p mozjs_sys --test engine_shim_coverage -- --nocapture`), pending per file:
@@ -352,28 +351,28 @@ poisoned thread would carry into the next test), plus the existing mozjs test fi
 | A panic in a Servo callback without `wrap_panic` (`native_handler_callback`, `components/script/dom/promise/promise.rs:439`) | Servo's own `extern "C"` frame: aborts before reaching any shim | Servo companion change (open point 1) |
 | The 8 `extern "C"` functions outside `engine/` (`mozjs/src/error.rs`, `gc/custom.rs`, `gc/trace.rs`, `rust.rs`, `mozjs-sys/src/jsgc.rs`, `lib.rs`) | Servo-side trampolines under the `wrap_panic` convention, not engine shims | review them under that convention with open point 1 |
 
-## Open points for the project lead
+## Open points
 
-1. **Servo companion change (LucinaNet-servo, not this repository).** (i) Resume points where the script thread is in
+1. **Servo companion change (`third_party/servo`, not this repository).** (i) Resume points where the script thread is in
    pure Rust: after each task of the event loop (`components/script/event_loop/script_thread.rs`, the loop at `:1412`)
    and after the microtask checkpoint (`:4694`), the same in the worker loops; each a `js::panic::maybe_resume_unwind()`.
    (ii) `components/script/scripting/module_loading.rs:317`: `assert!(ModuleEvaluate(..))` becomes the failure branch that
    follows it (`:319-322`); today a poisoned `ModuleEvaluate` makes that `assert!` panic inside `native_handler_callback`,
    an `extern "C"` frame: the original abort, one frame higher. (iii) Wrap `native_handler_callback` (`promise.rs:439`) in
    `wrap_panic`. Without (ii) and (iii) the module path still aborts; the wrap must not be pinned into the browser before
-   them (decision point 2 of the brief: crash visibility first).
+   them (crash visibility first).
 2. **Pinning.** The wrap is behaviour-neutral on a clean context; pin it into LucinaNet only with the Servo change above.
    The pin moves `Cargo.lock`: a new crate `lucinanet_engine_shim` (proc-macro, `syn` 2 with `full`, already in the lock);
    the tools with their own lock (`tools/lucinanet-test262`, `tools/lucinanet-wpt-jsshell`, `tools/t262`) need
    `cargo update -p mozjs_sys` too.
 3. **Aborting on a `gc` shim panic** is a deliberate process abort (section d). The alternative, poisoning and skipping the
-   tracer, risks freeing live objects under a running collection: memory unsafety. Confirm.
+   tracer, risks freeing live objects under a running collection: memory unsafety.
 4. **The static message rule** keeps the text before the first `:` of a formatted panic message. A message like
    `panic!("bad key {key}: ...")` would keep `bad key <data>`. Brimstone and the glue have no such panic in the paths read;
    a lint for `panic!` with arguments before the first `:` is possible if wanted.
-6. **R2 cannot reach 0 by itself.** The wrap does not remove the `unwrap`/`expect`/`assert!` inside shim bodies; it makes
-   them safe. R2 (`glue-panic-in-extern-c`) should skip a function that carries a non-exempt `engine_shim` attribute, so
-   its 16 hits fall as the slices land; otherwise each needs a body rewrite that the wrap makes unnecessary.
+6. **The `glue-panic-in-extern-c` rule cannot reach 0 by itself.** The wrap does not remove the `unwrap`/`expect`/`assert!`
+   inside shim bodies; it makes them safe. That rule should skip a function that carries a non-exempt `engine_shim` attribute,
+   so its 16 hits fall as the slices land; otherwise each needs a body rewrite that the wrap makes unnecessary.
 7. **A partial wrap is not safe to pin.** The prototype proved it: in the out-of-memory test the still-unwrapped
    `JS__LeaveRealm` (mozjs `AutoRealm`'s drop) ran engine code on the poisoned context, the engine panicked ("leave_realm
    called while frames pushed after enter_realm are still active", `embed/mod.rs:1144`) and that panic aborted the process at

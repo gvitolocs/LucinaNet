@@ -5,7 +5,8 @@
 //     maintenance, so a stale instruction shows up as a wrong answer;
 //   - membarrier, which Cranelift's JIT module and SpiderMonkey use and Juno's kernel does not list;
 //   - what Cranelift costs per simulated bytecode on each core, and how large the code is.
-// Every test prints one line, so the output is the evidence.
+// Every test prints one line, so the output is the evidence. Run it on a Juno device: the cores, the traps
+// and the W^X behaviour measured here are that machine's.
 
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::time::Instant;

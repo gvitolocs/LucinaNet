@@ -10,8 +10,9 @@ set -u -o pipefail
 
 here=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
-# Set WORK_DIR to a scratch directory holding the engine binary and the run output.
-WORK_DIR=${WORK_DIR:-$(mktemp -d)}
+# Set WORK_DIR to a scratch directory holding the engine binary and the run output (no default: a
+# missing one stops here rather than writing into /tmp).
+WORK_DIR=${WORK_DIR:?set WORK_DIR to a scratch directory (not /tmp)}
 
 bin=$WORK_DIR/lucinanet/health/bin/lucinanet-servo-after2
 out=$WORK_DIR/lucinanet/health/sitesuite
@@ -37,6 +38,8 @@ Environment:
   SITES       site list (default: sites.txt next to this script)
   THRESHOLD   per-channel diff threshold handed to `sitecheck diff` (24)
   TIMEOUT     seconds allowed for one render of one site (150)
+  WORK_DIR    scratch dir the default --bin and --out paths sit under: required
+  TMPDIR      scratch dir for this run's temp dirs: required, nothing under /tmp
 EOF
 }
 
@@ -92,7 +95,7 @@ fi
 
 mkdir -p -- "$out" || exit 2
 out=$(cd -- "$out" && pwd)
-work=$(mktemp -d "${TMPDIR:-/tmp}/sitecheck-suite.XXXXXX") || exit 2
+work=$(mktemp -d "${TMPDIR:?set TMPDIR to a scratch directory (not /tmp)}/sitecheck-suite.XXXXXX") || exit 2
 trap 'rm -rf -- "$work"' EXIT
 
 # A name that is not in the list means a typo in --only, and silently running
@@ -123,7 +126,7 @@ render_lucinanet() {
 # A fresh profile each time, so no cache or session restore changes the reference.
 render_firefox() {
 	local name=$1 url=$2 profile rc
-	profile=$(mktemp -d "${TMPDIR:-/tmp}/sitecheck-ff.XXXXXX") || return 1
+	profile=$(mktemp -d "${TMPDIR:?set TMPDIR to a scratch directory (not /tmp)}/sitecheck-ff.XXXXXX") || return 1
 	timeout "$seconds" "$firefox" --headless --no-remote \
 		--screenshot "$out/$name.firefox.png" --window-size="${width},${height}" \
 		-profile "$profile" "$url" >"$out/$name.firefox.log" 2>&1

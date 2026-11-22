@@ -105,6 +105,7 @@ use crate::gamepad_delegate::{GamepadHapticEffectRequest, GamepadHapticEffectReq
 use crate::geolocation_delegate::{PositionRequest, PositionWatch};
 use crate::javascript_evaluator::JavaScriptEvaluator;
 use crate::network_manager::NetworkManager;
+use crate::page_text::PageTextRequests;
 use crate::proxies::ConstellationProxy;
 use crate::responders::ServoErrorChannel;
 use crate::servo_delegate::{DefaultServoDelegate, ServoDelegate, ServoError};
@@ -282,6 +283,8 @@ struct ServoInner {
     /// A struct that tracks ongoing JavaScript evaluations and is responsible for
     /// calling the callback when the evaluation is complete.
     javascript_evaluator: Rc<RefCell<JavaScriptEvaluator>>,
+    /// Tracks the page text requests (find bar) that are out in the engine.
+    page_text_requests: Rc<RefCell<PageTextRequests>>,
     /// Tracks whether we are in the process of shutting down, or have shut down.
     /// This is shared with `WebView`s and the `ServoRenderer`.
     shutdown_state: Rc<Cell<ShutdownState>>,
@@ -927,6 +930,16 @@ impl ServoInner {
                     .borrow_mut()
                     .finish_evaluation(evaluation_id, result);
             },
+            ConstellationToEmbedderMsg::FinishPageText(page_text_id, page_text) => {
+                // Take the callback out first: it runs with no borrow held.
+                let callback = self
+                    .page_text_requests
+                    .borrow_mut()
+                    .take_callback(page_text_id);
+                if let Some(callback) = callback {
+                    callback(page_text);
+                }
+            },
             ConstellationToEmbedderMsg::InputEventsHandled(webview_id, event_outcomes) => {
                 let webview = self.get_webview_handle(webview_id);
                 for InputEventOutcome {
@@ -1167,6 +1180,9 @@ impl Servo {
             javascript_evaluator: Rc::new(RefCell::new(JavaScriptEvaluator::new(
                 constellation_proxy.clone(),
             ))),
+            page_text_requests: Rc::new(RefCell::new(PageTextRequests::new(
+                constellation_proxy.clone(),
+            ))),
             constellation_proxy,
             embedder_receiver,
             net_embedder_receiver,
@@ -1280,6 +1296,10 @@ impl Servo {
 
     pub(crate) fn javascript_evaluator_mut<'a>(&'a self) -> RefMut<'a, JavaScriptEvaluator> {
         self.0.javascript_evaluator.borrow_mut()
+    }
+
+    pub(crate) fn page_text_requests_mut<'a>(&'a self) -> RefMut<'a, PageTextRequests> {
+        self.0.page_text_requests.borrow_mut()
     }
 
     pub(crate) fn add_pending_handled_input_event(&self, residue_event: PendingHandledInputEvent) {

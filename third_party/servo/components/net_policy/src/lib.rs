@@ -4,6 +4,5 @@
 
 //! The connector's rules as pure integer functions, so Verus can read the very files (`//@` lines hold the proof, see
 //! `verify.sh` and `mutants.sh`). The Servo `net` crate keeps only the glue: sockets, locks and wakeups.
-//! Numbers and where each comes from: LucinaNet `docs/specs/connector.md`.
 pub mod dns;
 pub mod slots;

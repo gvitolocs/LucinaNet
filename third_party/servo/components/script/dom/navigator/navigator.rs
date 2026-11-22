@@ -343,7 +343,7 @@ impl NavigatorMethods<crate::DomTypeHolder> for Navigator {
 
     /// <https://html.spec.whatwg.org/multipage/#dom-navigator-platform>
     fn Platform(&self) -> DOMString {
-        navigatorinfo::Platform()
+        navigatorinfo::Platform(&pref!(navigator_platform))
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-navigator-useragent>

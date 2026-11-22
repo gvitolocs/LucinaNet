@@ -8,8 +8,8 @@
 // so the record branch of `write_object` (mozjs-sys/src/engine/clone.rs:286-337) must follow the HTML
 // Standard's StructuredSerializeInternal, which has no prototype check at all.
 //
-// The corpus in this checkout has no spec text, so the behaviour asserted here is cited by WPT test
-// name, from LucinaNet-servo/tests/wpt/tests/html/webappapis/structured-clone/:
+// The WPT corpus (`tests/wpt/tests/html/webappapis/structured-clone/` of a Servo checkout) has no spec
+// text, so the behaviour asserted here is cited by WPT test name:
 //   structured-clone-battery-of-tests.js:478 'Object with property on prototype' — a `new Foo()` whose
 //       Foo.prototype = {'foo':'bar'} clones, and the copy has no 'foo' (:473 check_absent_property).
 //   :484  'Object with non-enumerable property' — own non-enumerable properties are dropped.

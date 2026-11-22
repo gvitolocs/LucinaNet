@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-//! Credentials in recorded addresses (docs/specs/wiring-omnibox-history.md, "Credentials in addresses").
+//! Credentials in recorded addresses (the omnibox/history wiring spec, "Credentials in addresses").
 //!
 //! An OAuth redirect lands on `https://app/cb?code=...&state=...` or, in the implicit flow, on `https://app/cb#access_token=...`.
 //! The address is a place the person may visit again, so it is recorded; but `history.json` is a cleartext file, so what is

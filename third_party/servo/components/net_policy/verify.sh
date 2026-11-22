@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Verus on the functions that ship, not on a model of them (as LucinaNet raster/verify.sh and LucinaOS scripts/verify-shipped.sh):
+# Verus on the functions that ship, not on a model of them (as raster/verify.sh and scripts/verify-shipped.sh do):
 # a shipped file is plain Rust with its proof in `//@` lines, and what Verus reads is made by mechanical steps only, checked by
 # undoing them:  `-> T //@ret` becomes `-> (ret: T)`;  `... //@omit` is dropped;  `//@ proof` becomes `proof`.
-# Run on the build host through the verification script, from the Servo checkout root: components/net_policy/verify.sh
+# Run from the Servo checkout root: components/net_policy/verify.sh (needs Verus: put it on PATH or set VERUS to its binary).
 set -euo pipefail
 root=${ROOT_OVERRIDE:-$(cd "$(dirname "$0")/../.." && pwd)}
-verus=${VERUS:-/home/user/tools/verus/verus-x86-linux/verus}
+verus=${VERUS:-verus}
+command -v "$verus" >/dev/null 2>&1 || { echo "error: Verus not found; put verus on PATH or set VERUS=/path/to/verus" >&2; exit 1; }
 read -r -a files <<< "${FILES:-components/net_policy/src/dns.rs components/net_policy/src/slots.rs}"
 work=$(mktemp -d "${TMPDIR:-/tmp}/netpolicy-verify.XXXXXX")
 trap 'rm -rf "$work"' EXIT

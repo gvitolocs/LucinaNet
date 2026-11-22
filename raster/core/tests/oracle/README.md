@@ -77,7 +77,7 @@ saturate like Rust's `as`. The approximations use the intrinsic glsl.h calls on 
 ## AArch64
 
 The oracle test builds for `aarch64-unknown-linux-musl`, with the shim cross-compiled by clang
-(`--target=aarch64-alpine-linux-musl`) against the Alpine sysroot in `<work-dir>/lucinanet/sysroot`, linked
+(`--target=aarch64-alpine-linux-musl`) against the Alpine aarch64 sysroot (`$S`), linked
 statically with lld as `scripts/build-juno.sh` does:
 
 ```
@@ -85,7 +85,7 @@ W=<dir with cc/cxx wrappers: clang(++) --target=aarch64-alpine-linux-musl --sysr
 export CC_aarch64_unknown_linux_musl=$W/cc CXX_aarch64_unknown_linux_musl=$W/cxx AR_aarch64_unknown_linux_musl=<rust llvm-ar>
 export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=$W/cxx
 export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_RUSTFLAGS="-C target-feature=+crt-static -C link-self-contained=no \
-  -C link-arg=-static -C link-arg=-lstdc++ -L $WORK_DIR/lucinanet/wrap/lib"
+  -C link-arg=-static -C link-arg=-lstdc++ -L $W/lib"
 cargo test --release --no-run --target aarch64-unknown-linux-musl
 ```
 
@@ -96,8 +96,7 @@ Until that run, the AArch64 results are unverified.
 ## Run on the laptop
 
 2026-11-04, Galaxy Book Go under Juno (8 CPUs): the static aarch64-unknown-linux-musl oracle test, with the shim built
-strict-float by clang for AArch64, passed all 13 groups (156 checks, 100,000 inputs each) in 1.04 s. Output kept on the
-laptop in /data/raster/oracle_glsl.txt.
+strict-float by clang for AArch64, passed all 13 groups (156 checks, 100,000 inputs each) in 1.04 s.
 
 # The texture, blend and composite oracle: swgl's gl.cc against `texture`, `blend`, `composite`
 
@@ -145,7 +144,7 @@ in `shim_t.o`); until they run on an AArch64 machine, the NEON paths (`vqmovun` 
 The texture, blend and composite oracle tests ran on the laptop too (2026-11-04, AArch64 static binaries built as
 above): oracle_texture 8, oracle_blend 6, oracle_composite 7, oracle_glsl 13 and the 14 unit tests, all passed. The NEON
 paths (vqmovun packs, vqrdmulh lerps, unsigned vminq_u16/vmaxq_u16) are therefore checked against strict swgl on
-real hardware. Output in /data/raster/*.txt on the laptop.
+real hardware.
 
 # The rasterizer oracle: gl.cc drawing with a hand-written program
 

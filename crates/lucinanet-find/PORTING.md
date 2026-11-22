@@ -9,7 +9,7 @@ Revisions read, both `main` of 2026-11-11:
 - **Firefox** `mozilla-firefox/firefox` @`33abb900fc1646fef2e5ffed2d6b22e806ae10c1` — MPL-2.0
 - **Chromium** `chromium/chromium` @`e9a46735de970a8e31217f2233efa3a47a1c337d` — BSD-3-Clause
 
-Sources were fetched with curl into `<work-dir>/lucinanet/batch1/src/` (outside the repository). Verdicts below:
+Sources were fetched with curl into a scratch directory outside the repository. Verdicts below:
 
 | verdict | meaning |
 | --- | --- |
@@ -22,20 +22,20 @@ Sources were fetched with curl into `<work-dir>/lucinanet/batch1/src/` (outside 
 
 | File | Verdict | What it decided |
 | --- | --- | --- |
-| `toolkit/components/find/nsFind.cpp` | adapt | the matcher. Per-character comparison with case folding then the accent off (`:1034-1039`); the same folding applied to the query (`:798-803`); soft hyphen stripped from the query (`:805-807`, `CH_SHY` `:43-47`) and skipped in the page (`:1003-1006`); combining marks skipped unless diacritics are matched (`:998-1001`); the whitespace state machine (`:1031-1032` enter, `:1147-1158` accumulate a page run, `:1196-1204` one query space absorbs the whole run); word boundaries by `BreakInBetween` (`:634-642`, applied `:1071-1076` and `:1147-1152`); surrogate pairs and UTF-16 indices (`:550-564`); the matched range spans anchor to last matched character (`:1161-1177`); a fragment stops at a block boundary (`:906-914`); NBSP counts as space (`:718-727`) |
-| `toolkit/modules/Finder.sys.mjs` | adapt | searching starts from the current selection (`:211-216`, `fastFind` always `FIND_INITIAL`); *find again* continues from it (`:254-263`); a wrap is a result code, not a move (`:278-279` plays the wrap sound for it); the matches count is `total == limit → -1` (`:597-599`) and an empty or not-found search counts as 0/0 (`:612-622`) |
-| `toolkit/modules/FinderIterator.sys.mjs` | adapt | highlight-all restarts the search at the end of the range it just yielded, so matches never overlap (`:759-761`); the limit stops the counting loop (`:535`, `:561-562`) |
-| `toolkit/content/widgets/findbar.js` | adapt | the counter and the status message are two elements (`found-matches` `:57`, `find-status` `:59`) and a wrap writes only the status (`:1077-1083`), leaving the counter on screen; *Phrase not found* hides the counter (`:1084-1090`) and disables both step buttons (`:1113-1119`); an empty field hides the counter (`:1324-1328`) and the input handler searches whatever the field holds, including blanks (`:176-184`) |
-| `toolkit/locales/en-US/toolkit/main-window/findbar.ftl` | adopt | the strings, copied verbatim: `findbar-not-found` (`:38`), `findbar-wrapped-to-top` (`:40`), `findbar-wrapped-to-bottom` (`:41`), `findbar-found-matches` with its `[one]`/`*[other]` plural on `$total` (`:60-65`), `findbar-found-matches-count-limit` (`:69-74`), and the option labels (`:15-36`) that name the three `Options` fields |
-| `modules/libpref/init/all.js` | adopt | `accessibility.typeaheadfind.matchesCountLimit` 1000 → `MATCH_LIMIT` (`:491`); the defaults behind `Options::default()`: case sensitivity 0 = never (`:476`), `findbar.entireword` false (`:493`), `findbar.matchdiacritics` 0 (`:499`) |
-| `intl/unicharutil/util/nsUnicharUtils.cpp` | adapt | `ToFoldedCase` (`:152-166`) and `ToNaked` (`:168-173`): one character in, one character out, surrogate pairs folded as one. `ToNaked(nsAString&)` (`:175-196`) is where the marks vanish from a whole string, skipping any character `IsCombiningDiacritic` accepts (`nsUnicodeProperties.cpp`:180-182, a generated bitset) |
-| `intl/unicharutil/operators/nsUnicodeProperties.h` | adapt | `GetFoldedcase` gives plain `i` for both U+0130 `İ` and U+0131 `ı` (`:106-112`) — the one special case in `folded_case`, and the reason `İ` is not in the base-letter table's way |
-| `intl/unicharutil/util/base_chars.py` | reference | the rule that generates Gecko's naked-character table (canonically decompose; keep the row when the first character is not a combining diacritic and the second is, `:45-67`), and the combining-diacritic predicate with its excluded classes (`:9-27`). `BASE_LETTERS` in `fold.rs` is that rule run over U+00A0-U+017F |
-| `intl/unicharutil/util/is_combining_diacritic.py` | reference | the same predicate and its exclusion list (`:14-24`), i.e. which marks Firefox ignores and which it does not |
-| `xpcom/ds/nsCRT.h`, `xpcom/ds/nsCRTGlue.h` | adopt | `nsCRT::IsAsciiSpace` is exactly space, CR, LF, TAB (`nsCRT.h`:109-111, `nsCRTGlue.h`:115-117) — no vertical tab, no form feed |
-| `toolkit/components/find/nsFind.h` | reject | the `nsIFind` interface, its `State` struct and the iterator callbacks: they exist to walk a content tree, which this crate does not own |
-| `toolkit/modules/Finder.jsm` selection/highlight code, `nsTypeAheadFind` | reject | selection painting, `FIND_LINKS`/typeahead modes, sub-frame cycling, the search cache, sounds, telemetry. UI and engine plumbing on both sides of the boundary this crate sits at |
-| `toolkit/components/find/nsFind.cpp` CJK newline (`:1042-1051`), default-ignorables (`:1053-1056`), math/music exception (`:998-1001`) | reject | see "Not ported" |
+| Firefox source: `toolkit/components/find/nsFind.cpp` | adapt | the matcher. Per-character comparison with case folding then the accent off (`:1034-1039`); the same folding applied to the query (`:798-803`); soft hyphen stripped from the query (`:805-807`, `CH_SHY` `:43-47`) and skipped in the page (`:1003-1006`); combining marks skipped unless diacritics are matched (`:998-1001`); the whitespace state machine (`:1031-1032` enter, `:1147-1158` accumulate a page run, `:1196-1204` one query space absorbs the whole run); word boundaries by `BreakInBetween` (`:634-642`, applied `:1071-1076` and `:1147-1152`); surrogate pairs and UTF-16 indices (`:550-564`); the matched range spans anchor to last matched character (`:1161-1177`); a fragment stops at a block boundary (`:906-914`); NBSP counts as space (`:718-727`) |
+| Firefox source: `toolkit/modules/Finder.sys.mjs` | adapt | searching starts from the current selection (`:211-216`, `fastFind` always `FIND_INITIAL`); *find again* continues from it (`:254-263`); a wrap is a result code, not a move (`:278-279` plays the wrap sound for it); the matches count is `total == limit → -1` (`:597-599`) and an empty or not-found search counts as 0/0 (`:612-622`) |
+| Firefox source: `toolkit/modules/FinderIterator.sys.mjs` | adapt | highlight-all restarts the search at the end of the range it just yielded, so matches never overlap (`:759-761`); the limit stops the counting loop (`:535`, `:561-562`) |
+| Firefox source: `toolkit/content/widgets/findbar.js` | adapt | the counter and the status message are two elements (`found-matches` `:57`, `find-status` `:59`) and a wrap writes only the status (`:1077-1083`), leaving the counter on screen; *Phrase not found* hides the counter (`:1084-1090`) and disables both step buttons (`:1113-1119`); an empty field hides the counter (`:1324-1328`) and the input handler searches whatever the field holds, including blanks (`:176-184`) |
+| Firefox source: `toolkit/locales/en-US/toolkit/main-window/findbar.ftl` | adopt | the strings, copied verbatim: `findbar-not-found` (`:38`), `findbar-wrapped-to-top` (`:40`), `findbar-wrapped-to-bottom` (`:41`), `findbar-found-matches` with its `[one]`/`*[other]` plural on `$total` (`:60-65`), `findbar-found-matches-count-limit` (`:69-74`), and the option labels (`:15-36`) that name the three `Options` fields |
+| Firefox source: `modules/libpref/init/all.js` | adopt | `accessibility.typeaheadfind.matchesCountLimit` 1000 → `MATCH_LIMIT` (`:491`); the defaults behind `Options::default()`: case sensitivity 0 = never (`:476`), `findbar.entireword` false (`:493`), `findbar.matchdiacritics` 0 (`:499`) |
+| Firefox source: `intl/unicharutil/util/nsUnicharUtils.cpp` | adapt | `ToFoldedCase` (`:152-166`) and `ToNaked` (`:168-173`): one character in, one character out, surrogate pairs folded as one. `ToNaked(nsAString&)` (`:175-196`) is where the marks vanish from a whole string, skipping any character `IsCombiningDiacritic` accepts (`nsUnicodeProperties.cpp`:180-182, a generated bitset) |
+| Firefox source: `intl/unicharutil/operators/nsUnicodeProperties.h` | adapt | `GetFoldedcase` gives plain `i` for both U+0130 `İ` and U+0131 `ı` (`:106-112`) — the one special case in `folded_case`, and the reason `İ` is not in the base-letter table's way |
+| Firefox source: `intl/unicharutil/util/base_chars.py` | reference | the rule that generates Gecko's naked-character table (canonically decompose; keep the row when the first character is not a combining diacritic and the second is, `:45-67`), and the combining-diacritic predicate with its excluded classes (`:9-27`). `BASE_LETTERS` in `fold.rs` is that rule run over U+00A0-U+017F |
+| Firefox source: `intl/unicharutil/util/is_combining_diacritic.py` | reference | the same predicate and its exclusion list (`:14-24`), i.e. which marks Firefox ignores and which it does not |
+| Firefox source: `xpcom/ds/nsCRT.h`, `xpcom/ds/nsCRTGlue.h` | adopt | `nsCRT::IsAsciiSpace` is exactly space, CR, LF, TAB (`nsCRT.h`:109-111, `nsCRTGlue.h`:115-117) — no vertical tab, no form feed |
+| Firefox source: `toolkit/components/find/nsFind.h` | reject | the `nsIFind` interface, its `State` struct and the iterator callbacks: they exist to walk a content tree, which this crate does not own |
+| Firefox source: `toolkit/modules/Finder.jsm` selection/highlight code, `nsTypeAheadFind` | reject | selection painting, `FIND_LINKS`/typeahead modes, sub-frame cycling, the search cache, sounds, telemetry. UI and engine plumbing on both sides of the boundary this crate sits at |
+| Firefox source: `toolkit/components/find/nsFind.cpp` CJK newline (`:1042-1051`), default-ignorables (`:1053-1056`), math/music exception (`:998-1001`) | reject | see "Not ported" |
 
 ## Chromium sources (BSD-3-Clause)
 
@@ -174,6 +174,16 @@ there is no `NOTICE` file (see Licences).
     `search` takes an explicit `from` instead of reading a selection, `State` carries `wrapped` instead of returning a
     result code, and `Pos` names a run index instead of a DOM node. The `CounterStyle` enum exists because two
     wordings were specified; `Firefox` is the one the browser actually shows.
+12. **`State::epoch`, the find's stamp.** *Ours, and not from a browser: the spec asks for it.*
+    The bar reads the page through the engine, so an answer can land after a later `search` or `refresh` has
+    already re-derived the matches from the page as it is now, and painting the older one would highlight ranges
+    of text that is gone. Each of those two calls therefore counts a private `u64` up by one and stamps the
+    returned `State` with it, and `Finder::is_current` answers the consumer's question — apply the state or drop
+    it. `next` and `previous` keep the stamp of the search whose list they walk, and a blank `search` is stamped
+    like any other: clearing is an answer too. Nothing of this was read off Firefox or Chromium — how each browser
+    keeps a stale find off screen is plumbing on their side of the boundary this crate sits at — so it stands as an
+    API addition of ours. It is a counter and not a clock, so the "everything that needs a clock" exclusion below
+    still holds.
 
 ## Not ported, and why
 

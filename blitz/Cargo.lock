@@ -1685,10 +1685,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "lucinanet-find"
+version = "0.1.0"
+
+[[package]]
 name = "lucinanet-omnibox"
 version = "0.1.0"
 dependencies = [
  "url",
+]
+
+[[package]]
+name = "lucinanet-settings"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
 ]
 
 [[package]]
@@ -1703,7 +1714,9 @@ dependencies = [
  "libc",
  "lucina-app",
  "lucina-glass",
+ "lucinanet-find",
  "lucinanet-omnibox",
+ "lucinanet-settings",
  "lucinanet-shortcuts",
  "lucinanet-zoom",
  "png",

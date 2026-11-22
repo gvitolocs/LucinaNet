@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Records swgl call traces of real pages for the rasterizer comparison (raster/gltrace). On the build host:
+# Records swgl call traces of real pages for the rasterizer comparison (raster/gltrace). On the reference Linux development machine:
 #   raster/capture-traces.sh <lucinanet-servo binary> <out dir> [site ...]
 # Each site is `name=url`; without sites, the default set below. Each run is short test work, not background work: it
-# waits only while Tctl is at or above MAX_TCTL (default 97 °C), runs at nice 10, pinned to CPUs 4-11 (8, like the laptop). example-site idles 3 s with its animations; Wikipedia scrolls 4 steps down and up.
-# Set WORK_DIR to a scratch directory holding the font tree that LUCINANET_FONT_DIRS falls back to.
+# waits only while Tctl is at or above MAX_TCTL (default 97 °C), runs at nice 10, pinned to CPUs 4-11 (8 cores). example-site idles 3 s with its animations; Wikipedia scrolls 4 steps down and up.
+# The pages need the font tree the engine reads: set LUCINANET_FONT_DIRS, else /usr/share/fonts is used.
 set -uo pipefail
 bin=${1:?binary}; out=${2:?out dir}; shift 2
 sites=("$@")
@@ -19,7 +19,7 @@ if [ ${#sites[@]} -eq 0 ]; then
     )
 fi
 temp() { sensors | awk '/Tctl/{gsub(/[+°C]/,"",$2); print int($2); exit}'; }
-export LUCINANET_FONT_DIRS=${LUCINANET_FONT_DIRS:-${WORK_DIR:-$(mktemp -d)}/lucinanet/fonts}
+export LUCINANET_FONT_DIRS=${LUCINANET_FONT_DIRS:-/usr/share/fonts}
 for site in "${sites[@]}"; do
     name=${site%%=*}; url=${site#*=}
     dir=$out/$name

@@ -17,7 +17,7 @@ use embedder_traits::{
     ContextMenuAction, ContextMenuItem, Cursor, DownloadId, EmbedderControlId,
     EmbedderControlRequest, Image, InputEvent, InputEventAndId, InputEventId, JSValue,
     JavaScriptEvaluationError, LoadStatus, MediaSessionActionType, NewWebViewDetails,
-    ScreenGeometry, ScreenshotCaptureError, Scroll, Theme, TraversalId, UrlRequest,
+    PageText, ScreenGeometry, ScreenshotCaptureError, Scroll, Theme, TraversalId, UrlRequest,
     ViewportDetails, WebViewPoint, WebViewRect,
 };
 use euclid::{Scale, Size2D};
@@ -784,6 +784,36 @@ impl WebView {
             script.to_string(),
             Box::new(callback),
         );
+    }
+
+    /// Ask the engine for the text of the document shown in this [`WebView`], as blocks, for a
+    /// find bar. `callback` is called once, later, with the result.
+    ///
+    /// The walk runs inside the script thread, by the engine's own DOM traversal over its
+    /// internal structs: no page JavaScript is evaluated, no event fires, nothing is mutated or
+    /// selected or focused, and the page cannot observe it. Nothing leaves the process. The
+    /// engine keeps no copy of the text: the returned [`PageText`] is owned by the caller.
+    ///
+    /// At most `limit_bytes` bytes of text are returned in all, counted over the runs. If there is
+    /// more, the blocks that fit come back (the last run cut at a character boundary) and
+    /// [`PageText::partial`] is true; that is not an error.
+    ///
+    /// What is covered: the text nodes of the top document only. Frames, iframes and shadow
+    /// trees are not walked; cross-origin frames only later, by the same in-engine walk per
+    /// pipeline, never through script. `script`, `style`, `noscript`, `template` and `head`
+    /// content, elements with the `hidden` attribute (but not `hidden="until-found"`) and elements
+    /// whose own inline style says `display: none` are skipped; `display: none` coming from a
+    /// stylesheet is not seen (resolved style would force layout), and `visibility: hidden` text
+    /// is included. `<input>` and `<textarea>` contribute nothing, so form values (passwords
+    /// included) are never reachable; the text of `<option>`, `<button>` and `<label>` is
+    /// included.
+    ///
+    /// If the page navigates away or exits before the walk is answered, `callback` gets an empty
+    /// [`PageText`], never text of the old page.
+    pub fn request_page_text(&self, limit_bytes: usize, callback: impl FnOnce(PageText) + 'static) {
+        self.servo()
+            .page_text_requests_mut()
+            .request(self.id(), limit_bytes, Box::new(callback));
     }
 
     /// Asynchronously take a screenshot of the [`WebView`] contents, given a `rect` or the whole

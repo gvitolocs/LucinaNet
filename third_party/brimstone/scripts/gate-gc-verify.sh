@@ -7,7 +7,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-# Set WORK_DIR to a scratch directory. CARGO_TARGET_DIR is the caller's when set, otherwise a target
+# Set WORK_DIR to a temporary directory. CARGO_TARGET_DIR is the caller's when set, otherwise a target
 # directory under it.
 : "${CARGO_TARGET_DIR:=${WORK_DIR:-$(mktemp -d)}/brim-gate-target}"
 export CARGO_TARGET_DIR

@@ -173,7 +173,7 @@ fn browser_style_error_messages() {
 }
 
 /// `style: "currency"` has baked data since the fork's Intl.NumberFormat part B, so it formats. The strings are V8's, checked
-/// with `node -e` on the build host (node v22.23.4) and identical to the fork's own `number_format_currency.js` expectations. What the
+/// with `node -e` (node v22.23.4) and identical to the fork's own `number_format_currency.js` expectations. What the
 /// fork still refuses stays refused: `notation: "scientific"` and `style: "unit"` have no data.
 #[test]
 fn currency_number_format_formats_usd() {

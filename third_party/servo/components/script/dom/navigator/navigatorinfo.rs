@@ -39,28 +39,34 @@ pub(crate) fn AppCodeName() -> DOMString {
     DOMString::from_static("Mozilla")
 }
 
+/// `navigator.platform`: the embedder's `navigator_platform` preference when set, else the build target's default.
 #[expect(non_snake_case)]
+pub(crate) fn Platform(configured: &str) -> DOMString {
+    if configured.is_empty() {
+        DOMString::from_static(target_platform())
+    } else {
+        DOMString::from(configured)
+    }
+}
+
 #[cfg(target_os = "windows")]
-pub(crate) fn Platform() -> DOMString {
-    DOMString::from_static("Win32")
+const fn target_platform() -> &'static str {
+    "Win32"
 }
 
-#[expect(non_snake_case)]
 #[cfg(any(target_os = "android", target_os = "linux", target_os = "freebsd"))]
-pub(crate) fn Platform() -> DOMString {
-    DOMString::from_static("Linux")
+const fn target_platform() -> &'static str {
+    "Linux"
 }
 
-#[expect(non_snake_case)]
 #[cfg(target_os = "macos")]
-pub(crate) fn Platform() -> DOMString {
-    DOMString::from_static("Mac")
+const fn target_platform() -> &'static str {
+    "Mac"
 }
 
-#[expect(non_snake_case)]
 #[cfg(target_os = "ios")]
-pub(crate) fn Platform() -> DOMString {
-    DOMString::from_static("iOS")
+const fn target_platform() -> &'static str {
+    "iOS"
 }
 
 #[expect(non_snake_case)]
@@ -76,4 +82,15 @@ pub(crate) fn AppVersion() -> DOMString {
 #[expect(non_snake_case)]
 pub(crate) fn Language() -> DOMString {
     DOMString::from(net_traits::get_current_locale().0.clone())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Platform, target_platform};
+
+    #[test]
+    fn configured_platform_wins_and_empty_falls_back_to_the_target() {
+        assert_eq!(&*Platform("MacIntel"), "MacIntel");
+        assert_eq!(&*Platform(""), target_platform());
+    }
 }

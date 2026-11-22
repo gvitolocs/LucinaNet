@@ -1,6 +1,6 @@
 # LucinaNet site log
 
-Source 3 of `docs/missing.md`: what real sites find missing when they run, as opposed to what test262
+Source 3 of the missing-feature inventory: what real sites find missing when they run, as opposed to what test262
 says (source 1) and the engine's own audit (source 2). It is a pure post-processor — it reads log files
 and writes tables, and needs neither the engine nor mozjs nor the network.
 
@@ -16,11 +16,11 @@ mkdir -p "$WORK_DIR"/sitelog/runs/$(date -u +%F)/sites
 while read -r name url; do
   LUCINANET_TIMING=1 LUCINANET_CONSOLE=1 timeout 120 \
     /path/to/lucinanet-servo --render "$url" sites/$name.png 1280x720 2> sites/$name.err
-done < docs/missing/sites-script-heavy.txt
+done < sites-script-heavy.txt
 ```
 
-The site list is `docs/missing/sites-script-heavy.txt`, one `name url` pair per line; `name` is the file
-stem, so it is also the site name in the tables.
+The site list is a text file of URLs you supply, one per line as a `name url` pair (`sites-script-heavy.txt`
+above); `name` is the file stem, so it is also the site name in the tables.
 
 ## Aggregating
 
@@ -35,9 +35,9 @@ cargo run --locked --offline --manifest-path tools/lucinanet-sitelog/Cargo.toml 
 skipped, not fatal. `mlog` is the stem the 30-site run writes its `LUCINANET_JS_MISSING_LOG` to; the site
 name is the file stem, so `youtube.err` and `youtube.mlog` are still one site. `--build` is copied verbatim
 into both outputs: it is where the run says which binary made these
-logs, because a table of stale lines is only honest with its date. The files are `docs/missing/missing-
-runtime.tsv` and `docs/missing/missing-runtime.md`. Exit codes: 0 written, 2 bad arguments or no log
-found.
+logs, because a table of stale lines is only honest with its date. The files are `missing-runtime.tsv` and
+`missing-runtime.md`, written into the directory given by `--out-dir`. Exit codes: 0 written, 2 bad arguments or no
+log found.
 
 ## Input lines
 

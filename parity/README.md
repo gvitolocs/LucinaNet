@@ -1,9 +1,9 @@
 # Parity: LucinaNet's engines against headless Chromium
 
-Chromium is a test reference on the build host only: never on Juno, never linked. Build and run:
+Chromium is a test reference, used on a Linux desktop: never on Juno, never linked. Build and run:
 
 ```sh
-cd parity && cargo run --release -- --engine /path/to/lucinanet-blitz --name blitz --out ../evidence/parity/blitz sites.txt
+cd parity && cargo run --release -- --engine /path/to/lucinanet-blitz --name blitz --out ../target/parity/blitz sites.txt
 ```
 
 For every site it loads Chromium and the engine at 1920x1000, scale 1, and writes `scores.tsv`, each site's PNGs, and
@@ -15,6 +15,4 @@ For every site it loads Chromium and the engine at 1920x1000, scale 1, and write
 - `score`: their mean. A load that fails or crashes scores 0.
 
 `--render` runs headless in an engine, at scale 1, with the same fonts Juno has if `LUCINANET_FONT_DIRS` says so. Chromium uses
-the build host's fonts: expect a few points of pixel difference from that alone.
-
-The owner's Secretary web app needs a login; add it with a cookie once there is a test account.
+the desktop's own fonts: expect a few points of pixel difference from that alone.

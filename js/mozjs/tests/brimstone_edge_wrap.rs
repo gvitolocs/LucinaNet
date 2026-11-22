@@ -185,7 +185,7 @@ fn panicking_shim_poisons_its_context_only() {
         .join()
         .unwrap();
     // The poisoned runtime drops here. JS_DestroyContext is a gated shim, so on this poisoned thread its body never runs:
-    // the heap is leaked, not finalized (review change 8a). The leak is the point of the containment: the poisoned context
+    // the heap is leaked, not finalized. The leak is the point of the containment: the poisoned context
     // is discarded as a unit, so no finalizer ever touches the half-updated engine state a panic left behind.
     let destroy_before = failpoint::entered("JS_DestroyContext");
     let refused_before = skipped();
@@ -319,8 +319,8 @@ fn gc_child() {
 }
 
 /// A `gc` shim is never gated: entered on an already-poisoned thread it still runs its body, so a live collection keeps
-/// tracing (review change 8b, docs/edge-wrap.md section d). And because the poisoning predates this body, `run_gc` returns
-/// the body's value rather than aborting — change 4 aborts only on a poisoning that arises DURING a body. Exercises
+/// tracing (docs/edge-wrap.md section d). And because the poisoning predates this body, `run_gc` returns
+/// the body's value rather than aborting — `run_gc` aborts only on a poisoning that arises DURING a body. Exercises
 /// `poison::run_gated` / `poison::run_gc` directly, so no heap is involved.
 #[test]
 fn gc_shim_enters_its_body_on_a_poisoned_thread() {
@@ -408,7 +408,7 @@ fn payload_survives_its_thread_undropped() {
 
     assert!(
         !dropped.load(Ordering::SeqCst),
-        "an untaken payload must be forgotten at thread exit, not dropped (review change 6)"
+        "an untaken payload must be forgotten at thread exit, not dropped"
     );
 }
 
@@ -423,7 +423,7 @@ fn poison_this_thread() {
     assert_eq!(thread_poisoned(), Some(PoisonReason::Panic), "and poisons this thread");
 }
 
-/// Review change (1): the refused `JS__GetWellKnownSymbolKey` answers the void id THIS tree uses (`id_bits::void_id`,
+/// The refused `JS__GetWellKnownSymbolKey` answers the void id THIS tree uses (`id_bits::void_id`,
 /// Brimstone's empty value), not the bindgen `PropertyKey_VoidTypeTag` (2). In the NaN-box a word with the top 16 bits
 /// clear and a nonzero payload is a heap pointer, so `2` reads as a GC thing: `jsid::is_void` and
 /// `glue__RUST_JSID_IS_VOID` do not accept it and a later trace follows it.
@@ -447,11 +447,11 @@ fn refused_well_known_symbol_key_is_the_void_id() {
         .unwrap();
 }
 
-/// Review changes (2), (3) and (4): `glue__RUST_INTERNED_STRING_TO_JSID`, `glue__RUST_SYMBOL_TO_JSID` and
+/// `glue__RUST_INTERNED_STRING_TO_JSID`, `glue__RUST_SYMBOL_TO_JSID` and
 /// `glue__int_to_jsid` return `()` and write nothing, so their ONLY result is the out-param. A refused call used to leave
 /// the caller's word there: a caller that had zeroed the id (mozjs/tests/brimstone_proxy.rs:69-71) kept `asBits_ == 0`,
 /// which `is_void` rejects, and a caller that had not kept the id it put in and goes on using it — there is no bool to
-/// ignore. Each now writes the same void id as change (1).
+/// ignore. Each now writes the same void id as `JS__GetWellKnownSymbolKey`.
 #[test]
 fn refused_id_shims_write_the_void_id() {
     std::thread::Builder::new()
@@ -479,7 +479,7 @@ fn refused_id_shims_write_the_void_id() {
         .unwrap();
 }
 
-/// Review changes (5), (6), (7) and (8): `()` shims whose only result is a value out-param write UNDEFINED on the refusal
+/// `()` shims whose only result is a value out-param write UNDEFINED on the refusal
 /// — the word each body writes on its own miss path (`promise.rs:296` a non-settled promise, `module.rs:1066` a non-module
 /// object, `script.rs:288` a missing private entry, `jobs.rs:177` an empty queue) — instead of leaving the caller's stale
 /// value, which the wrappers read unconditionally. `glue__JS_DequeueNextMicroTask` still does not pop the queue: the pop

@@ -1,6 +1,6 @@
 //! The page's accessibility tree, as Servo builds it (AccessKit `TreeUpdate`s through
 //! `WebViewDelegate::notify_accessibility_tree_update`), served to Lucina through Juno's own
-//! AccessKit adapter, `lucina-ax` (stage B of LucinaOS `docs/research/juno-ai-native.md`): the
+//! AccessKit adapter, `lucina-ax` (the LucinaOS accessibility work): the
 //! same socket, requests, replies, version and rules as every Juno app, so one reader in
 //! `lucina-devd` covers apps and pages.
 //!
@@ -180,8 +180,8 @@ impl PageAx {
             },
         );
         // A secret field that isn't a password (a one-time code, a card): Servo withholds its value
-        // and says so with class_name "secret"; mark it as stage B marks a password, so that she
-        // asks the owner rather than reading an empty field.
+        // and says so with class_name "secret"; mark it as `lucina-ax` marks a password, so that the
+        // assistant asks the owner rather than reading an empty field.
         for (id, _) in &snapshot.update.nodes {
             if document.nodes.get(&NodeId(id.0)).and_then(Node::class_name) == Some("secret") {
                 snapshot

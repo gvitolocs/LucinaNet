@@ -11,8 +11,6 @@
 //! - `components.png`: every strip with its name and a line about it, one under another, 2400 px wide;
 //! - `variants/juno-render.png`: the settled dashboard at full size;
 //! - `icons.png`: the icon sheet.
-//!
-//! `review-mp4.sh` (a working tool, not committed) turns each frame folder into `mp4/<name>.mp4`.
 use std::path::Path;
 
 use lucina_glass::home::{self, Home, HomeData, Key, Note, Pointer, fixture};

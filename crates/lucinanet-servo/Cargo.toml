@@ -10,11 +10,15 @@ license.workspace = true
 # Media through crates/lucinanet-media (Servo patch 0037, set_media_backend). Off by default until it is proven on the laptop:
 # a build without it is the same as before.
 media = ["dep:lucinanet-media"]
-# The desktop window (`--desktop`), for the build host.
+# The desktop window (`--desktop`) for a Linux desktop build.
 desktop = ["lucinanet-ui/desktop"]
+# Test and measurement doors (LUCINANET_USER_JS, _USER_CSS, _PREFS, _AX, the diagnostic subcommands, `--render`): see
+# crates/lucinanet-ui/Cargo.toml. OFF by default and in every build that can reach a user.
+harness = ["lucinanet-ui/harness"]
 
 [dependencies]
 dpi = "0.1"
+mozjs_sys = "153.6.0-1"
 euclid = "0.22"
 gleam = "0.15.1"
 glow = "0.17"
@@ -23,6 +27,7 @@ lucinanet-ui = { path = "../lucinanet-ui" }
 lucinanet-ax = { path = "../lucinanet-ax" }
 lucinanet-bookmarks = { path = "../lucinanet-bookmarks" }
 lucinanet-errlog = { path = "../lucinanet-errlog" }
+lucinanet-find = { path = "../lucinanet-find" }
 lucinanet-history = { path = "../lucinanet-history" }
 lucinanet-historydb = { path = "../lucinanet-historydb" }
 lucinanet-omnibox = { path = "../lucinanet-omnibox" }

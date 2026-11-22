@@ -1,9 +1,10 @@
 #!/bin/bash
-# Mac-build acceptance (lead LN). Usage: mac-build.sh <worktree of the pinned main> <outdir>
-# Steps: build; OOM pages (early: the fork-landing evidence); local MSE variants (recovery 0/1) with the trace checked
+# Mac-build acceptance. Usage: mac-build.sh <worktree of the pinned main> <outdir>
+# Steps: build; OOM pages (run early); local MSE variants (recovery 0/1) with the trace checked
 # PER VARIANT log; consent answered through the redirect in a throwaway profile (only proceeds if "consent2: clicked");
 # YouTube 120 s recovery 0 then 1 with the trace checked on the WHOLE log. Muted; profile none except the throwaway one.
 # A trace step cannot pass vacuously: see check_trace in lib.sh and tests/acceptance/README.md.
+# The binary it tests is a HARNESS build (cargo feature `harness`, tools/build-harness.sh): the doors it uses exist only there.
 # Optional: RUN_MEDIA_TESTS=1 also runs `cargo test -p lucinanet-media` (default off: a separate job).
 # PRECONDITION: never delete a cargo target by file age; delete a whole profile (a half-pruned target links stale rlibs).
 set -u
@@ -42,7 +43,7 @@ if [ "${RUN_MEDIA_TESTS:-0}" = "1" ]; then
 else
   echo "media unit tests: not run (separate job)"
 fi
-cargo build --offline --profile probe -p lucinanet-servo --features desktop,media 2>&1 | grep -E "^error|Finished"; brc=${PIPESTATUS[0]}
+cargo build --offline --profile probe -p lucinanet-servo --features desktop,media,harness 2>&1 | grep -E "^error|Finished"; brc=${PIPESTATUS[0]}
 echo "rc build=$brc"
 if [ "$brc" -ne 0 ]; then step_fail "build" "cargo build exit $brc"; finish; fi
 step_pass "build"
@@ -50,8 +51,10 @@ cp "$CARGO_TARGET_DIR/probe/lucinanet-servo" "$D/lucinanet-servo-accept" && sha2
 TC=$(trace_checker "$W") || { step_fail "media-trace-check build" "cargo build of tools/media-trace-check failed"; finish; }
 export TC
 B=$D/lucinanet-servo-accept
+# this script drives the browser through harness doors (--render, LUCINANET_USER_JS, LUCINANET_PREFS); refuse a binary without them.
+require_harness_binary "$B" "harness binary" || { step_fail "harness binary" "not a harness build"; finish; }
 
-echo "=== OOM pages (early: the fork-landing evidence) $(date -u +%T)"
+echo "=== OOM pages (early) $(date -u +%T)"
 for pg in oom-probe oom-microtask oom-raf oom-worker; do
   f=$W/tests/edge-wrap/$pg.html; [ -f "$f" ] || f=$WORK_DIR/lucinanet/edge-wrap/$pg.html; [ -f "$f" ] || continue
   LUCINANET_PROFILE_DIR=none timeout 170 "$B" --render "file://$f" "$D/$pg.png" 1280x720 "$D/$pg.dump" > "$D/$pg.log" 2>&1; echo "rc $pg=$?"

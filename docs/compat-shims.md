@@ -2,7 +2,7 @@
 
 LucinaJS implements some web APIs and not others, and a page that calls a missing one at script load stops there.
 `crates/lucinanet-servo/src/compat.js` is a plain script the engine injects as a user script at **document start, in
-every frame, before the page's own scripts and before `LUCINANET_USER_JS`** (engine.rs, next to the user content
+every frame, before the page's own scripts and before `LUCINANET_USER_JS` (a harness build only, `docs/harness-doors.md`)** (engine.rs, next to the user content
 manager). It defines each API **only where the engine has none**, so a real implementation is never overridden, and
 `LUCINANET_COMPAT_SHIMS=0` leaves every page exactly as it was. The script is ES5-level syntax on purpose (no arrow,
 `class`, template string or block scoping): LucinaJS parses the file as one script, so one construct it would reject
@@ -17,8 +17,8 @@ takes the whole shim down, and only a page run shows that.
 
 ## `document.all`: the engine has it, since this pin
 
-The engine pinned here, LucinaNet-servo `engine-next` at `40c0ff93cec46c2b962dac7273f75fa6b2f0e7e3`, carries `HTMLAllCollection`
-and the `[[IsHTMLDDA]]` object itself, so `document.all` is the real thing: falsy, `typeof` it is `"undefined"`, and never `=== undefined` on any host. (flaw a tracked flaw)
+The engine pinned here, at `40c0ff93cec46c2b962dac7273f75fa6b2f0e7e3`, carries `HTMLAllCollection`
+and the `[[IsHTMLDDA]]` object itself, so `document.all` is the real thing: falsy, `typeof` it is `"undefined"`, and never `=== undefined` on any host (the underlying flaw is tracked privately).
 The interim `compat.js` shim of it, with its `allHostSuffixes` host list, is removed; the sanitizer guard it stood in for stood down by itself the moment `document.all === undefined` stopped being true.
 
 ## Measured and dropped: `Animation` and `Element.prototype.animate`
@@ -78,14 +78,15 @@ Nothing in Rust can parse a script in a unit test, so the checks are a script an
   (`<work-dir>/lucinanet/compat/run-page.sh on|off <port>`), writes PASS/FAIL lines into its own body text for each API
   and is read back from the PNG. The same page with `LUCINANET_COMPAT_SHIMS=0` must show them absent, which proves the
   guard and the injection point at once; the page also prints what `LUCINANET_USER_JS` saw, which is the ordering.
-- `<work-dir>/lucinanet/compat/run-yt.sh on|off <settle>` runs the YouTube search page both ways through the yt-check
-  harness (read-only there), with `measure.sh` and `below.py` for the numbers.
+- `<work-dir>/lucinanet/compat/run-yt.sh on|off <settle>` runs the YouTube search page both ways through the
+  consent-reject harness (read-only there), with `measure.sh` and `below.py` for the numbers.
 
 ### The YouTube search page, three runs each way
 
 Binary `sha256 693b37a879fc…` (compat.js without the Web Animations definitions), `https://www.youtube.com/results?
-search_query=rust+programming`, 1366x900, quiet 6000 ms + hold 10 s, the yt-check consent-reject harness plus
-`harness/70-compat-watch.js`, `LUCINANET_COMPAT_SHIMS=0` for the off runs. The polyfill column is the net log: this
+search_query=rust+programming`, 1366x900, quiet 6000 ms + hold 10 s, the consent-reject harness plus its
+compat-watch script (part of the private test setup, not in this tree), `LUCINANET_COMPAT_SHIMS=0` for the off runs.
+The polyfill column is the net log: this
 build has no `GET request for` line, so it is `grep web-animations` over the `netphase … request …` lines.
 
 | Run | Shims | console Error lines | `web-animations-next-lite` requested | `yt-video-renderer` | rows stamped | px below y=56 not background | `No valid entry type` Warn |

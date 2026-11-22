@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Shows that verification/ftcompat.rs can fail: each try plants one bug in a copy of the shipped
-# crates/lucina-ftcompat/src/lib.rs, and Verus has to refuse it. Run from the repo root; this script
-# calls Verus directly, one verification at a time, as the verification script does on a shared host.
+# crates/lucina-ftcompat/src/lib.rs, and Verus has to refuse it. Run from the repository root; this script
+# calls Verus directly, one harness at a time.
 # Exits non-zero when a mutant is not refused or its text is not found.
 set -uo pipefail
+cd "$(dirname "$0")/.."
 verus=${VERUS:-}
 if [ -z "$verus" ]; then
     if [ -x "$HOME/tools/verus/verus-x86-linux/verus" ]; then

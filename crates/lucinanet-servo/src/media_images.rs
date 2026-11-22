@@ -9,7 +9,7 @@
 //!
 //! Either way the bytes are never copied: `set_texture_buffer` points a texture at them, and the picture stays pinned
 //! (`surfaces::pin`) until WebRender unlocks it. `LUCINANET_MEDIA_COPY_PLANES=1` says copy instead ([`tight_copy`], [`Copies`]),
-//! into a buffer of ours whose rows are exactly `w` apart and which outlives the unlock: the experiment for flaw a tracked flaw.
+//! into a buffer of ours whose rows are exactly `w` apart and which outlives the unlock: the experiment for the scaled-video flaw.
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -61,7 +61,7 @@ fn texture(gl: &swgl::Context, key: (u64, usize)) -> u32 {
 }
 
 /// Whether planes are copied before upload: `LUCINANET_MEDIA_COPY_PLANES=1`, read once, off otherwise. Said once, when it turns on.
-/// The experiment for the handover side of `a tracked flaw`: answered no on x86 2026-11-13 — the render is byte-identical with and
+/// The experiment for the handover side of the scaled-video flaw: answered no on x86 2026-11-13 — the render is byte-identical with and
 /// without it, so neither the pointer, nor its pitch, nor the copy's lifetime is what makes the scaled picture bars.
 fn copy_planes() -> bool {
     static ON: OnceLock<bool> = OnceLock::new();

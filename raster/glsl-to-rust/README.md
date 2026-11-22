@@ -160,13 +160,13 @@ sampler2D_impl, slot) -> sampler2D` (`lookup_isampler` for `isampler2D`). Sample
 ## The programs on the runtime, and the `ext` intrinsics each uses
 
 All 77 programs build in raster/core (`crate::shaders`, `gl::load_shader`) with clippy `-D warnings`, against the
-`crate::ext` merged from raster-x (the `ext` feature gate of phase 2a is gone). Replayed through `raster/compare.sh`
+`crate::ext` as it stands now (the old `ext` feature gate is gone). Replayed through `raster/compare.sh`
 (one gltrace built with `SWGL_STRICT_FP=1`, `--backend cxx` against `--backend rust`, one thread), every frame of
 the example, bench, hn, github, bbc, wiki and example-site traces is identical. Per-draw hashes can still differ after a
 delayed clear on a freshly allocated target: the readback does not resolve the clear, and the C++ buffer then holds
 whatever `realloc` returned where the Rust one is zeroed (rows nothing has drawn yet; never on screen).
 
-Which `ext` intrinsics each program calls (from the `use crate::ext::{..}` line of each module, as of phase 2a,
+Which `ext` intrinsics each program calls (from the `use crate::ext::{..}` line of each module, taken
 before the YUV commits were split into `..YUV2`/`..YUV3`):
 
 | program | `crate::ext` intrinsics it needs |

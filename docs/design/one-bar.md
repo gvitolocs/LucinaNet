@@ -67,7 +67,7 @@ it is, over a 44-point band instead of the two-row band. Classic variant: same g
   that starts on the field's text is a text selection when editing and a tab drag when not.
 - Middle-click a tab closes it. Scroll wheel over the tabs scrolls nothing (no hidden tabs: overflow is the chip).
 
-## Out of scope for this change
+## Out of scope
 
 Page-under-glass (engine top inset), tab groups, a sidebar, vertical tabs.
 

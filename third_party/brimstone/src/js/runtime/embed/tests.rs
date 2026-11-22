@@ -2803,6 +2803,53 @@ fn heap_size_follows_the_live_data() {
     assert!(shrunk.last_live_bytes * 8 < shrunk.semispace_capacity_bytes, "{shrunk:?}");
 }
 
+/// Run `script` in a fresh context with `gc_log` set as given, force a few collections, and return
+/// `(gc_count, last_live_bytes)`. Both branches of the test below take the same options otherwise.
+fn heap_stats_after_script(gc_log: bool, script: &str) -> (u64, usize) {
+    let (cx, _recorder) = new_context_with_options(
+        OptionsBuilder::new()
+            .min_heap_size(DEFAULT_MIN_HEAP_SIZE)
+            .gc_log(gc_log),
+    );
+    handle_scope_guard!(cx);
+    let realm = cx.initial_realm();
+    eval(cx, realm, script);
+    // Back-to-back forced collections, all well inside the high-frequency window, so the sizing
+    // (and therefore the collection count) is a function of the script alone, not of gc_log.
+    for _ in 0..4 {
+        embed::gc(cx);
+    }
+    let stats = embed::heap_stats(cx);
+    (stats.gc_count, stats.last_live_bytes)
+}
+
+#[test]
+fn gc_log_changes_no_heap_statistics() {
+    // The weak-phase per-step log lives behind `Options::gc_log`. When it is off, no clock is read
+    // and no counter is bumped; when it is on, it adds only clock reads, local counters and stderr
+    // writes. None of that allocates on the JS heap, changes the allocation window, or moves a
+    // collection. So the same allocation-heavy script, run with the log off and then on, must
+    // report the identical `gc_count` and `last_live_bytes`.
+    let script = "function f(k) { return { a: k, b: [k, 's' + k] }; } \
+                  var wm = new WeakMap(), ws = new WeakSet(), wrs = [], keep = []; \
+                  var fr = new FinalizationRegistry(function (x) {}); \
+                  for (var i = 0; i < 20000; i++) { \
+                    var o = f(i); \
+                    keep.push(o); \
+                    wm.set(o, i); \
+                    ws.add(o); \
+                    wrs.push(new WeakRef(o)); \
+                    if (i % 500 === 0) { fr.register(o, i); } \
+                  }";
+
+    let off = heap_stats_after_script(false, script);
+    let on = heap_stats_after_script(true, script);
+
+    assert!(off.0 > 0, "the script collected nothing: {off:?}");
+    assert_eq!(on.0, off.0, "gc_count changed with gc_log on: off {off:?}, on {on:?}");
+    assert_eq!(on.1, off.1, "last_live_bytes changed with gc_log on: off {off:?}, on {on:?}");
+}
+
 #[test]
 fn census_counts_live_items_by_kind() {
     let options = OptionsBuilder::new().gc_census(true).build().unwrap();

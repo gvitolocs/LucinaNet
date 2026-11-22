@@ -1,17 +1,16 @@
 # LucinaNet browser chrome in the glass design (mockups)
 
 **Real implementation:** the top bar these screens propose now ships in `crates/lucinanet-ui/src/chrome.rs` (the mode switch, `Layout`, the blur rule)
-and `crates/lucinanet-ui/src/glass.rs` (the bars drawn with the kit) — see `docs/specs/glass-chrome-slice1.md`, Mac path
-type-checked by `scripts/check-darwin`. The overlays below (sheets, dialogs, the downloads strip, settings) are not in it yet,
-so what follows stays the design reference.
+and `crates/lucinanet-ui/src/glass.rs` (the bars drawn with the kit). The overlays below (sheets, dialogs, the downloads strip,
+settings) are not in it yet, so what follows stays the design reference.
 
 Mockups only: no Servo, no wiring into `lucinanet-ui`. Rendered by `docs/design/browser-glass/render/` (a standalone crate
-over the `lucina-glass` kit of LucinaOS, path `/home/user/Projects/Lucina/LucinaOS/crates/lucina-glass`; it needs the kit with the browser widgets):
+over the `lucina-glass` kit of LucinaOS, `lucinaos/crates/lucina-glass`; it needs the kit with the browser widgets):
 
-    CARGO_TARGET_DIR=/home/user/Projects/Lucina/LucinaOS/target cargo +1.99.1 build --offline -j 4
-    $CARGO_TARGET_DIR/debug/browser-glass-render docs/design/browser-glass [juno|phone|tablet] [shot]
+    cargo build --offline -j 4                          # in docs/design/browser-glass/render, its own workspace
+    target/debug/browser-glass-render docs/design/browser-glass [juno|phone|tablet] [shot]
 
-Rules followed: `LucinaOS/docs/design/rules.md`. Glass on the control layer (bars, popovers, sheets), the thicker
+Rules followed: the LucinaOS design rules (`docs/design/rules.md` in LucinaOS, outside this tree; only its crates are vendored here). Glass on the control layer (bars, popovers, sheets), the thicker
 `MATERIAL` for content that is read (suggestions, settings cards, dialog, select list). The one accent (`ACCENT`) marks
 selection and activity only: the active tab, the selected card, the focused address field, toggles that are on, the download
 ring, the chosen row. Primary buttons are the kit's light `PAPER` button, not the accent. Sentence case, verbs on buttons,
@@ -20,8 +19,8 @@ no filler, no illustrations (site marks are plain initials, pages are plain text
 Sizes (dp): Juno 1366 x 768 at 1.5 px/dp; Diana phone 360 x 800 at 3 (1080 x 2400 px, the POCO X3 "surya" panel and the kit's phone canvas); Diana tablet 1024 x 768 at 1.5. The shell's own
 status bar sits above the Juno window and is not drawn; the phone shows the kit's status bar.
 
-Phone metrics used (Diana has no Android-style inset API; the repo documents only 1080 x 2400, `docs/research/boot-chain.md`,
-and the 360 x 800 dp / 3 px per dp canvas of `phone-concept.md`, so these insets are design assumptions to confirm on the
+Phone metrics used (Diana has no Android-style inset API; the device is documented only at 1080 x 2400 and on the
+360 x 800 dp / 3 px per dp canvas, so these insets are design assumptions to confirm on the
 device): status bar 32 dp (96 px, holds the front camera hole); gesture inset 24 dp (72 px) with the 134 x 5 dp indicator of
 the kit drawn in it; keyboard 248 dp = 4 rows of 46 dp keys at 54 dp pitch plus 8 dp top padding (224 dp) plus the 24 dp
 gesture inset, so it has no empty band under the keys. Dock 56 dp above the gesture inset, address pill 48 dp above the dock.
@@ -94,7 +93,7 @@ tabs 16 dp (10 dp visual), chevrons 18 dp, the pin 20 dp, bar icons 0.58 of the 
 From `lucina-glass`: tokens, `Paint` (glass, shadow, fit, text), `Canvas` (shapes, blur, `blit_region` for thumbnails), `Type`, the
 night sky, `chrome::status_bar`, `chrome::spinner`, `screens::home_indicator`, icons Clock, Doc, Bell, ArrowUpRight.
 
-## Promoted to the kit (`lucina-glass`, LucinaOS branch `glass-browser-widgets`)
+## Promoted to the kit (`lucina-glass`)
 
 The render crate draws with the kit's versions; what it keeps of its own is the layout of each screen (`chrome.rs`, `overlays.rs`,
 `main.rs`), the placeholder pages and thin wrappers in `ui.rs` that give the old call sites the kit's controls.
@@ -112,8 +111,7 @@ The render crate draws with the kit's versions; what it keeps of its own is the 
   least `min_hit` (44 dp, `space::TAP`, by default; a pointer layout whose neighbours touch sets it to the drawn size). Each has
   `focused` and draws the Home's focus ring. Tab order is `FocusOrder`.
 - **Rules:** `browser_rules.rs` holds the integer rules (hit area and test, focus step, switch thumb ends, stepper, download fraction and
-  fill, text scroll and caret, tab width, popover/sheet/dialog placement), proved by Verus like `rules.rs`; their mutants are in
-  `verification/glass-browser/mutants.sh`.
+  fill, text scroll and caret, tab width, popover/sheet/dialog placement), proved by Verus like `rules.rs`.
 - **Animation:** every moving control holds a tween read at `Paint::now` (switch flip, popover and sheet in and out, segmented thumb,
   progress, adaptive tint), with the kit's easing. The kit's glass has no global opacity, so a popover or sheet slides; it does not fade.
 

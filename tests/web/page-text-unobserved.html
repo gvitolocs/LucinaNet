@@ -1,0 +1,52 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>page-text-unobserved</title>
+<!--
+  the page cannot tell that the find bar asked for its text. Everything a page could use to notice a walk over its
+  DOM is trapped before anything else runs, and the count is printed to the console every 100 ms ("TRAPS n"). The engine
+  walks its own structs, so n has to stay 0. With #probe the page itself reads textContent once, which is the positive control:
+  the trap works, so a 0 elsewhere means something.
+-->
+<body>
+<h1>Find me</h1>
+<p>The quick brown fox <b>jumps</b> over the lazy dog, twice: fox fox.</p>
+<ul><li>one<li>two<li>three</ul>
+<script>
+(function () {
+  let n = 0;
+  const names = [];
+  // The page's own load (the parser still adding nodes, the first layout's events) is not what is being measured: counting
+  // starts 200 ms after `load`, and the request comes later (`wait 600` after the load completes).
+  let armed = false;
+  addEventListener("load", () => setTimeout(() => { armed = true; }, 200));
+  const bump = (what) => {
+    if (!armed) return; n++; names.push(typeof what === "string" ? what : "event"); };
+  const trap = (proto, name) => {
+    const d = Object.getOwnPropertyDescriptor(proto, name);
+    if (!d || !d.get) return;
+    Object.defineProperty(proto, name, { configurable: true, enumerable: d.enumerable,
+      get() { bump(name); return d.get.call(this); }, set: d.set });
+  };
+  trap(Node.prototype, "textContent");
+  trap(Node.prototype, "nodeValue");
+  trap(Node.prototype, "firstChild");
+  trap(Node.prototype, "childNodes");
+  trap(Node.prototype, "nextSibling");
+  trap(Element.prototype, "innerHTML");
+  trap(Element.prototype, "children");
+  if ("innerText" in HTMLElement.prototype) trap(HTMLElement.prototype, "innerText");
+  trap(CharacterData.prototype, "data");
+  new MutationObserver(() => bump("mutation")).observe(document, { subtree: true, childList: true, characterData: true, attributes: true });
+  for (const type of ["selectionchange", "focus", "blur", "focusin", "focusout", "scroll", "click"]) {
+    document.addEventListener(type, () => bump("doc-" + type), true);
+    window.addEventListener(type, () => bump("win-" + type), true);
+  }
+  const sel = getSelection;
+  const base = n;
+  // The page's own reads from here on are counted too, so the interval only prints and reads nothing that is trapped.
+  const say = () => console.log("TRAPS " + n + " " + names.join(","));
+  if (location.hash === "#probe") addEventListener("load", () => setTimeout(() => { void document.body.textContent; }, 400));
+  setInterval(say, 100);
+  void sel; void base;
+})();
+</script>

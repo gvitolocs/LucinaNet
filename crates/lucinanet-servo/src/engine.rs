@@ -98,7 +98,7 @@ struct Delegate {
     context: Rc<SoftContext>,
     scale: f32,
     downloads: Downloads,
-    /// Per tab: when each history entry was left, for the depth policy (docs/specs/history-depth.md).
+    /// Per tab: when each history entry was left, for the history-depth policy.
     history: RefCell<HashMap<WebViewId, lucinanet_history::ledger::Ledger>>,
     /// A navigation began or an entry was left: the history depth is sampled next time round the loop (never on a timer).
     sample_depth: Cell<bool>,
@@ -417,8 +417,8 @@ impl WebViewDelegate for Delegate {
         let Some(request) = errlog_glue::route(load.request.url.as_str()) else { return };
         // The three cheap gates beside the token: a top-level document request, a GET (nothing else
         // this page writes), and no other site's document in front of it. None of the three can tell
-        // the bar from a link on a page — see `errlog_glue::Asks` and the section in
-        // `docs/specs/wiring-errlog.md` — which is why the confirm step also needs a token this run
+        // the bar from a link on a page — see `errlog_glue::Asks` and the error-log wiring
+        // spec — which is why the confirm step also needs a token this run
         // minted for one thing and one use.
         let referrer_is_somebody_elses = load.request.referrer_url.as_ref().is_some_and(|from| {
             matches!(from.scheme(), "http" | "https" | "ftp" | "file")
@@ -843,6 +843,12 @@ pub fn start(starting: Starting) -> Box<dyn lucinanet_ui::Engine> {
     Box::new(handle)
 }
 
+/// The User-Agent and `navigator.platform` from the one platform table (`lucinanet_ui::platform`), so they agree.
+fn set_platform_identity(preferences: &mut Preferences) {
+    preferences.user_agent = lucinanet_ui::USER_AGENT.clone();
+    preferences.navigator_platform = lucinanet_ui::platform::host_identity().navigator_platform;
+}
+
 fn run(starting: Starting, inbox: Receiver<Cmd>, waker: Waker) {
     let Starting {
         width,
@@ -861,26 +867,25 @@ fn run(starting: Starting, inbox: Receiver<Cmd>, waker: Waker) {
     let context = Rc::new(SoftContext::new(size, pacing.clone()));
     let mut low_memory = LowMemory::default();
     let mut preferences = Preferences::default();
-    preferences.user_agent = lucinanet_ui::USER_AGENT.to_owned();
+    set_platform_identity(&mut preferences);
     // Each page kept for Back holds all its memory; further back reloads. How many follows the memory left
-    // (docs/specs/history-depth.md, `HistoryDepth`).
+    // (the history-depth spec, `HistoryDepth`).
     preferences.session_history_max_length = initial_history_depth();
     for pref in WEB_FEATURES {
         preferences.set_value(pref, PrefValue::Bool(true));
     }
     // The page's accessibility tree, served with actions by node id through Juno's AccessKit adapter (lucina-ax,
     // crates/lucinanet-ax): on Juno at /run/lucina/ax/<pid>.sock, as every app, where lucina-devd reads the app in
-    // front; elsewhere only when `LUCINANET_AX=<socket path>` asks. Off otherwise: the tree costs a walk of the page
+    // front; elsewhere only in a `harness` build, when `LUCINANET_AX=<socket path>` asks. Off otherwise: the tree costs a walk of the page
     // per change.
-    let ax_socket = std::env::var_os("LUCINANET_AX").map(std::path::PathBuf::from);
+    let ax_socket = crate::doors::ax_socket_override(crate::doors::environment);
     let ax_wanted = ax_socket.is_some() || std::path::Path::new("/run/lucina").is_dir();
     if ax_wanted {
         preferences.set_value("accessibility_enabled", PrefValue::Bool(true));
     }
-    // An experiment from the command line, as servoshell's --pref: name=value,name=value.
-    for pref in std::env::var("LUCINANET_PREFS").unwrap_or_default().split(',').filter(|p| !p.is_empty()) {
-        let (name, value) = pref.split_once('=').unwrap_or((pref, "true"));
-        preferences.set_value(name, PrefValue::from_booleanish_str(value));
+    // An experiment from the command line, as servoshell's --pref: name=value,name=value; a `harness` build only (doors.rs).
+    for (name, value) in crate::doors::extra_prefs(crate::doors::environment) {
+        preferences.set_value(name.as_str(), PrefValue::from_booleanish_str(&value));
     }
     lucinanet_ui::phase("rendering context");
     // Servo's own time profiler, every `LUCINANET_PROFILE` seconds to stderr: script, style, layout, paint.
@@ -904,7 +909,7 @@ fn run(starting: Starting, inbox: Receiver<Cmd>, waker: Waker) {
     }
     // Where `zoom.json` lives: the same profile, so none when there is none.
     let profile = opts.config_dir.clone();
-    // The session error log (`errlog_glue.rs`, docs/specs/wiring-errlog.md): `<profile>/errors.jsonl`,
+    // The session error log (`errlog_glue.rs`, the errlog wiring spec): `<profile>/errors.jsonl`,
     // one line per thing that went wrong, written by a thread of its own so that no page error costs
     // this loop a disk wait. `LUCINANET_PROFILE_DIR=none` keeps the lines in memory, and
     // `LUCINANET_ERRLOG=0` or `privacy.error_log` false keeps nothing at all — the variable wins.
@@ -1022,14 +1027,15 @@ fn run(starting: Starting, inbox: Receiver<Cmd>, waker: Waker) {
         lucinanet_ui::on_exit(Box::new(move || errlog.flush()));
     }
     let mut history_depth = HistoryDepth::default();
-    // `LUCINANET_USER_CSS=<file>` and `LUCINANET_USER_JS=<file>`: a user style sheet or script on every page,
-    // for experiments and diagnosis.
-    let css = std::env::var("LUCINANET_USER_CSS").ok();
-    let js = std::env::var("LUCINANET_USER_JS").ok();
+    // `LUCINANET_USER_CSS=<file>` and `LUCINANET_USER_JS=<file>`: a user style sheet or script on every page, for experiments
+    // and diagnosis; read only in a `harness` build (doors.rs), in any other both are None.
+    let (css, js) = crate::doors::user_files(crate::doors::environment);
     // The compat shims of `COMPAT_JS` run on every page unless `LUCINANET_COMPAT_SHIMS=0` (docs/compat-shims.md).
     let compat = std::env::var("LUCINANET_COMPAT_SHIMS").as_deref() != Ok("0");
     let user_content = (compat || css.is_some() || js.is_some()).then(|| {
         let manager = Rc::new(servo::UserContentManager::new(&servo));
+        // The harness doors only (docs/harness-doors.md): without the feature `css` and `js` are always None and this code is not built.
+        #[cfg(feature = "harness")]
         if let Some(path) = css {
             if let (Ok(source), Ok(url)) = (std::fs::read_to_string(&path), lucinanet_ui::Url::from_file_path(&path)) {
                 manager.add_stylesheet(Rc::new(servo::UserStyleSheet::new(source, url)));
@@ -1039,6 +1045,7 @@ fn run(starting: Starting, inbox: Receiver<Cmd>, waker: Waker) {
         if compat {
             manager.add_script(Rc::new(servo::UserScript::new(COMPAT_JS.to_string(), None)));
         }
+        #[cfg(feature = "harness")]
         if let Some(path) = js {
             if let Ok(source) = std::fs::read_to_string(&path) {
                 manager.add_script(Rc::new(servo::UserScript::new(source, Some(path.into()))));
@@ -1116,7 +1123,23 @@ fn run(starting: Starting, inbox: Receiver<Cmd>, waker: Waker) {
                             let entries = delegate.marks().candidates(&text);
                             (delegate.news)(News::BookmarkHits { id, entries });
                         },
+                        Cmd::ListHistory { id, limit } => {
+                            let entries = delegate.visits().recent(limit);
+                            (delegate.news)(News::HistoryList { id, entries });
+                        },
+                        Cmd::ListBookmarks { id, limit } => {
+                            let entries = delegate.marks().recent(limit);
+                            (delegate.news)(News::BookmarkList { id, entries });
+                        },
                         Cmd::ToggleBookmark => browser.toggle_bookmark(),
+                        // The find bar's text of the shown page, walked by the engine itself (no page script runs): the answer
+                        // goes out as news and is kept nowhere here; the log line has counts only.
+                        Cmd::PageText { id } => {
+                            let news = delegate.news.clone();
+                            browser.shown().request_page_text(crate::pagetext::LIMIT_BYTES, move |page| {
+                                crate::pagetext::answer(id, page, &*news, &mut |line| eprintln!("{line}"));
+                            });
+                        },
                         cmd @ (Cmd::Back | Cmd::Forward) => {
                             delegate.visits().intend(browser.shown().id(), How::Traversal);
                             apply(browser.shown(), cmd, &delegate.news, &delegate.downloads);
@@ -1261,6 +1284,9 @@ fn apply(webview: &WebView, cmd: Cmd, news: &Rc<dyn Fn(News)>, downloads: &Downl
         | Cmd::Answer(..)
         | Cmd::LoadTyped { .. }
         | Cmd::HistoryQuery { .. }
+        | Cmd::ListHistory { .. }
+        | Cmd::ListBookmarks { .. }
+        | Cmd::PageText { .. }
         | Cmd::ToggleBookmark => {},
         Cmd::Back => {
             webview.go_back(1);
@@ -1341,7 +1367,7 @@ fn total_mib() -> Option<u64> {
 
 /// The depth now, from memory and age, or `LUCINANET_HISTORY_DEPTH=n` for an experiment. `tabs` holds the ages of each
 /// tab (behind, ahead). Memory is read here, when a navigation starts or an entry is left, never on a timer; a pressure
-/// level from the OS would replace the sample (docs/specs/history-depth.md, "Which layer owns the signal"). Servo has one
+/// level from the OS would replace the sample (the history-depth spec, "Which layer owns the signal"). Servo has one
 /// preference for all tabs, so the memory above the reserve is shared between them (`shared_available`) and the deepest
 /// tab sets the value.
 fn history_depth(tabs: &[(Vec<u64>, Vec<u64>)]) -> i64 {
@@ -1452,22 +1478,25 @@ fn servo_allocator_purge() {
 }
 
 /// Brimstone's structural function cache lives in the profile (`js-fn-cache`, size-capped by the engine): scripts compiled
-/// once are reused on the next visit and across a player's releases. The engine turns the cache on when
-/// `LUCINANET_JS_FN_CACHE_DIR` is set, so this sets it to the profile's, unless it is set already or the profile is `none`
-/// (then nothing is kept). SpiderMonkey builds ignore the variable.
+/// once are reused on the next visit and across a player's releases. The directory is a place compiled function records are
+/// loaded from and run, so it is ours to name and never comes from the environment: this tells the engine the profile's
+/// directory through `mozjs_sys::engine::cx::set_function_cache_config`, unless the profile is `none` (then nothing is kept).
+/// The engine reads no environment variable for it in this build.
 ///
-/// Opt-in with `LUCINANET_JS_FN_CACHE=1` until the engine partitions the cache per top-level site: a cache shared across
-/// sites lets one site time another's scripts, which leaks history. Measurements only until then.
+/// Opt-in with `LUCINANET_JS_FN_CACHE=1` (that variable is read here, by us, and is only the switch: it names no directory) until
+/// the engine partitions the cache per top-level site: a cache shared across sites lets one site time another's scripts, which
+/// leaks history. Measurements only until then.
 ///
-/// # Safety
-/// No other thread may be running: `main` calls this first, before it starts any.
-pub(crate) unsafe fn set_js_fn_cache_dir() {
-    if std::env::var_os("LUCINANET_JS_FN_CACHE_DIR").is_some() || std::env::var("LUCINANET_JS_FN_CACHE").as_deref() != Ok("1") {
+/// Call it once, before the first JavaScript context exists: `main` calls it first.
+pub(crate) fn set_js_fn_cache_dir() {
+    if std::env::var("LUCINANET_JS_FN_CACHE").as_deref() != Ok("1") {
         return;
     }
     if let Some(dir) = profile_dir() {
-        // SAFETY: the caller's contract: the process is single-threaded, so nothing reads the environment meanwhile.
-        unsafe { std::env::set_var("LUCINANET_JS_FN_CACHE_DIR", dir.join("js-fn-cache")) };
+        let config = mozjs_sys::engine::cx::FunctionCacheConfig { dir: dir.join("js-fn-cache"), max_mb: 64, enabled: true };
+        if let Err(err) = mozjs_sys::engine::cx::set_function_cache_config(config) {
+            eprintln!("lucinanet: the JavaScript function cache stays off: {err}");
+        }
     }
 }
 
@@ -1664,5 +1693,22 @@ mod http_cache_tests {
             Some((PathBuf::from("/run/lucina/net/http-cache.redb"), 64 * MB, CacheHome::Tmpfs))
         );
         assert_eq!(loc(None, None, Some(""), None), None);
+    }
+}
+
+#[cfg(test)]
+mod platform_identity_tests {
+    use super::{Preferences, set_platform_identity};
+
+    /// The preferences the engine starts with say one thing: the User-Agent's token and `navigator.platform` both
+    /// come from the table row of the build target.
+    #[test]
+    fn user_agent_and_navigator_platform_are_the_build_targets_table_row() {
+        let mut preferences = Preferences::default();
+        set_platform_identity(&mut preferences);
+        let id = lucinanet_ui::platform::platform_identity(std::env::consts::OS, std::env::consts::ARCH);
+        assert_eq!(preferences.navigator_platform, id.navigator_platform);
+        assert!(preferences.user_agent.contains(&format!("({})", id.ua_token)), "{}", preferences.user_agent);
+        assert_eq!(preferences.user_agent, lucinanet_ui::USER_AGENT.as_str());
     }
 }

@@ -140,7 +140,10 @@ jobs:
           rustup toolchain install --profile minimal --no-self-update
           rustup target add "$TARGET"
 
-      - name: cargo build --release
+      - name: No shipped build names the harness feature
+        run: tools/release/check-workflow-builds.sh .github/workflows/release.yml .github/workflows/windows.yml
+
+      - name: cargo build --release (the shipped binary, desktop and media, no harness)
         id: build
         continue-on-error: true
         run: |
@@ -148,9 +151,37 @@ jobs:
           cargo build --locked --release -p lucinanet-servo --features desktop,media \
             --target "$TARGET" --message-format short 2>&1 | tee build.log
 
+      - name: The shipped binary holds no harness door
+        id: gate
+        if: steps.build.outcome == 'success'
+        run: |
+          # Static check of the built file (tests/harness-gate/check-release-binary.sh <binary>), the same one release.yml runs on the
+          # Linux and macOS binaries: none of the doors' names and not the harness marker may be in it. Nothing is packaged before this passes.
+          tests/harness-gate/check-release-binary.sh "target/$TARGET/release/lucinanet-servo.exe"
+
+      - name: Package the shipped binary
+        id: package
+        if: steps.gate.outcome == 'success'
+        run: |
+          mkdir dist
+          cp "target/$TARGET/release/lucinanet-servo.exe" dist/lucinanet.exe
+          7z a lucinanet-windows-x86_64.zip ./dist/lucinanet.exe
+
+      - name: cargo build for the smoke (a harness build, never packaged or uploaded)
+        id: smokebuild
+        if: steps.package.outcome == 'success'
+        continue-on-error: true
+        run: |
+          # `--render` exists only in a harness build, so the smoke needs one. The zip above is already made from the shipped binary;
+          # this overwrites target/$TARGET/release/lucinanet-servo.exe, which only the smoke step reads.
+          set -o pipefail
+          # harness-smoke: never packaged or uploaded
+          cargo build --locked --release -p lucinanet-servo --features desktop,media,harness \
+            --target "$TARGET" --message-format short 2>&1 | tee smoke-build.log
+
       - name: Smoke, render a local page to PNG
         id: smoke
-        if: steps.build.outcome == 'success'
+        if: steps.smokebuild.outcome == 'success'
         continue-on-error: true
         env:
           LUCINANET_MEDIA_SINK: none
@@ -163,19 +194,13 @@ jobs:
           <div style="width:240px;height:120px;background:#2e7d32"></div></body>
           HTML
           exe="target/$TARGET/release/lucinanet-servo.exe"
+          # the positive control: the check proves something only if it finds every door in a harness build
+          tests/harness-gate/check-release-binary.sh --harness --desktop "$exe"
           "$exe" --render "file:///$(pwd -W | sed "s|\\\\|/|g")/smoke/page.html" smoke/out.png 800x600 2>&1 | tee smoke/run.log
           test -s smoke/out.png
 
-      - name: Package (only when the smoke passed)
-        id: package
+      - name: Upload the zip (the shipped binary, only when the smoke passed)
         if: steps.smoke.outcome == 'success'
-        run: |
-          mkdir dist
-          cp "target/$TARGET/release/lucinanet-servo.exe" dist/lucinanet.exe
-          7z a lucinanet-windows-x86_64.zip ./dist/lucinanet.exe
-
-      - name: Upload the zip (only when the smoke passed)
-        if: steps.package.outcome == 'success'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: lucinanet-windows-x86_64
@@ -186,12 +211,14 @@ jobs:
         if: always()
         env:
           BUILD_OUTCOME: ${{ steps.build.outcome }}
+          GATE_OUTCOME: ${{ steps.gate.outcome }}
           SMOKE_OUTCOME: ${{ steps.smoke.outcome }}
         run: |
           {
             echo "## Windows probe: release build and smoke"
             echo
             echo "- cargo build --release: **${BUILD_OUTCOME}**"
+            echo "- shipped binary holds no harness door (check-release-binary): **${GATE_OUTCOME}**"
             echo "- smoke (render a local page to PNG): **${SMOKE_OUTCOME}**"
             if [ "$BUILD_OUTCOME" != "success" ] && [ -f build.log ]; then
               echo

@@ -11,7 +11,7 @@
 //!
 //! - `media elem event=… paused=… ended=… seeking=… potentially_playing=… player_playing=… cmd=…` — the element's own view, to
 //!   be emitted by the fork. The format is fixed here so the fork has something to aim at; no log taken before trace-format has one,
-//!   and on those the four `MEDIA-ELEM-*` properties are reported as *not observed*.
+//!   and on those the four `element-contract-*` properties are reported as *not observed*.
 //! - `show pts=… now=Some(µs)|None sound=Some(µs)|None` (player.rs) — the clock, once per picture shown.
 //! - `starving queued=… eof=… now=…`, `played VP9 seconds=…`, `clock source: …`, `screen hold on|off`.
 //! - `audio cmd Start pts=… paused=… running=…`, `audio cmd Paused true|false`, `audio cmd Stop` (mse_play.rs) — commands as the

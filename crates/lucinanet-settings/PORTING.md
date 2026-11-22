@@ -5,7 +5,7 @@ and what changed between two settings. Nothing in this crate reads a file, the
 environment, the clock or the network; the wiring owns `prefs.json` in the profile
 directory and this crate only moves between a string and a [`Settings`].
 
-Sources were fetched with `curl` into `<work-dir>/lucinanet/batch1/src/st/` on the build host,
+Sources were fetched with `curl` into a scratch directory outside this repo,
 never into the repo:
 
 | Scratch file | Upstream path | Revision | Licence |
@@ -41,9 +41,9 @@ in the form the rules ask for:
 
 | Short cite | Full source |
 | --- | --- |
-| `@firefox.js:N` | Firefox `browser/app/profile/firefox.js` @33abb90, line N |
-| `@all.js:N` | Firefox `modules/libpref/init/all.js` @33abb90, line N |
-| `@StaticPrefList.yaml:N` | Firefox `modules/libpref/init/StaticPrefList.yaml` @33abb90, line N |
+| `@firefox.js:N` | Firefox source: `browser/app/profile/firefox.js` @33abb90, line N |
+| `@all.js:N` | Firefox source: `modules/libpref/init/all.js` @33abb90, line N |
+| `@StaticPrefList.yaml:N` | Firefox source: `modules/libpref/init/StaticPrefList.yaml` @33abb90, line N |
 | `@download_prefs.cc:N` | Chromium `chrome/browser/download/download_prefs.cc` @e9a4673, line N |
 | `@page_zoom.cc:N` | Chromium `third_party/blink/common/page/page_zoom.cc` @e9a4673, line N |
 | `@page_zoom.h:N` | Chromium `third_party/blink/public/common/page/page_zoom.h` @e9a4673, line N |
@@ -61,18 +61,18 @@ The value column is the value the original ships and the value `src/schema.rs` u
 
 | Setting (field) | Pref name | Value | Source file:line |
 | --- | --- | --- | --- |
-| `general.startup` = `home_page` | `browser.startup.page` | 1 (homepage) | `firefox.js:340` |
+| `general.startup` = `home_page` | `browser.startup.page` | 1 (homepage); **LucinaNet**: the preference is stored but startup does not read it yet, a window with no address starts on `about:blank` (`start_url`, `crates/lucinanet-ui/src/address.rs`) | `firefox.js:340` |
 | `general.home_page` | `browser.startup.homepage` | Firefox `"about:home"`; **LucinaNet** `"about:blank"` | `firefox.js:341` |
 | `general.accept_languages` | `intl.accept_languages` | static value `"und"`, read through `Services.locale.acceptLanguages`; **LucinaNet** ships the en-US expansion `["en-US","en"]` | `all.js:1457-1459` |
-| `search.default_engine` = `duckduckgo` | — | **LucinaNet**: the DuckDuckGo endpoints `crates/lucinanet-ui/src/browser.rs:1043` already uses | this crate |
-| `search.suggest_remote` | `browser.search.suggest.enabled` (+ `browser.urlbar.suggest.searches`) | true | `all.js:3441`, `firefox.js:500` |
+| `search.default_engine` = `duckduckgo` | — | **LucinaNet**: the DuckDuckGo endpoint built in `crates/lucinanet-settings/src/schema.rs` (`Engine::builtin`), the only place the code names an engine | this crate |
+| `search.suggest_remote` | `browser.search.suggest.enabled` (+ `browser.urlbar.suggest.searches`) | **LucinaNet**: false (Firefox: true; deviation 1) | `all.js:3441`, `firefox.js:500` |
 | `search.suggest_history` | `browser.urlbar.suggest.history` | true | `firefox.js:497` |
 | `search.suggest_bookmarks` | `browser.urlbar.suggest.bookmark` | true | `firefox.js:495` |
 | `privacy.do_not_track` = false | `privacy.donottrackheader.enabled` | false | `StaticPrefList.yaml:18630` |
 | `privacy.cookies` = `block_third_party_trackers` | `network.cookie.cookieBehavior` | 5 | `firefox.js:2703` |
-| `privacy.content_blocking` = false | — | **LucinaNet**: no blocklist ships, so there is nothing to apply. Firefox's `permissions.policy.*` and uBlock's switch are not read here; there is no `docs/specs/privacy.md` to point at | this crate |
+| `privacy.content_blocking` = false | — | **LucinaNet**: no blocklist ships, so there is nothing to apply. Firefox's `permissions.policy.*` and uBlock's switch are not read here; there is no privacy spec to point at | this crate |
 | `privacy.clear_on_exit.*` = false | `privacy.sanitize.sanitizeOnShutdown` | false | `StaticPrefList.yaml:18905` |
-| `downloads.directory` = null | `browser.download.dir` | no directory shipped; the wiring resolves one | `docs/specs/downloads.md` step 4 |
+| `downloads.directory` = null | `browser.download.dir` | no directory shipped; the wiring resolves one | the downloads spec, step 4 |
 | `downloads.ask_where` = false | `browser.download.useDownloadDir` | true (take the folder, do not ask); Chromium: `download.prompt_for_download` false | `firefox.js:936`, `download_prefs.cc:356` |
 | `appearance.theme` = `auto` | `layout.css.prefers-color-scheme.content-override` | 2 = auto (system) | `StaticPrefList.yaml:11534-11539` |
 | `appearance.default_zoom_percent` = 100 | the `1` step of `toolkit.zoomManager.zoomValues`; Chromium's `kPresetBrowserZoomFactors` holds the same `1.0` | 100 % | `all.js:3028`, `page_zoom.cc:13-17` |
@@ -90,7 +90,7 @@ The value column is the value the original ships and the value `src/schema.rs` u
 | Source | What it gives | Line |
 | --- | --- | --- |
 | Firefox `toolkit.zoomManager.zoomValues` | `.2,.3,.4,.5,.6,.7,.8,.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2,2.2,2.4,2.6,2.8,3,4,5` — the steps a zoom control walks: 20 % to 500 % | `all.js:3028` |
-| Firefox's zoom UI code | **not reachable at this revision.** The brief names `toolkit/modules/ZoomManager.jsm`; that path and `toolkit/components/zoom/ZoomManager.jsm`, `toolkit/components/zoom/content/ZoomManager.sys.mjs`, `browser/extensions/zoom/ZoomManager.jsm`, `toolkit/modules/ZoomUI.jsm` and `toolkit/browser/views/controls/zoom/main.js` all return 404 at `33abb900fc16…`. What the menu offers is the pref above, so the pref is what is cited, and nothing about a menu range is claimed. | — |
+| Firefox's zoom UI code | **not reachable at this revision.** The spec names `toolkit/modules/ZoomManager.jsm`; that path and `toolkit/components/zoom/ZoomManager.jsm`, `toolkit/components/zoom/content/ZoomManager.sys.mjs`, `browser/extensions/zoom/ZoomManager.jsm`, `toolkit/modules/ZoomUI.jsm` and `toolkit/browser/views/controls/zoom/main.js` all return 404 at `33abb900fc16…`. What the menu offers is the pref above, so the pref is what is cited, and nothing about a menu range is claimed. | — |
 | Chromium `kMinimumBrowserZoomFactor`, `kMaximumBrowserZoomFactor` | 0.25 and 5.0 on desktop; 0.425 and 6.0 on Android, where the comment says the wider end absorbs the OS font scale | `third_party/blink/common/page/page_zoom.cc:25-26`, `:28-33` |
 | Chromium `kPresetBrowserZoomFactors` | 0.25, 1/3, 0.5, 2/3, 0.75, 0.8, 0.9, 1.0, 1.1, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0, 4.0, 5.0 | `third_party/blink/common/page/page_zoom.cc:13-17` |
 
@@ -115,9 +115,9 @@ The warning the clamp writes (`Clamped`, with the value it found) is what tells 
 
 | File | Kind | Licence | What was taken |
 | --- | --- | --- | --- |
-| `browser/app/profile/firefox.js` | **adopt** (values) | MPL-2.0 | The shipped values behind startup, homepage, urlbar suggestions, download behaviour, cookie behaviour, bookmarks-bar visibility, new-window behaviour and `warnOnClose`. Numbers and strings only — no code, no comment text — with `file:line` next to each use. |
-| `modules/libpref/init/all.js` | **adopt** (values) | MPL-2.0 | `intl.accept_languages` and its comment's meaning (the pref is a placeholder, the locale supplies the value), `font.minimum-size.*` 0, `browser.search.suggest.enabled`, the zoom table. |
-| `modules/libpref/init/StaticPrefList.yaml` | **adopt** (values) | MPL-2.0 | `privacy.donottrackheader.enabled` false, `privacy.sanitize.sanitizeOnShutdown` false, `layout.css.prefers-color-scheme.content-override` 2. |
+| Firefox source: `browser/app/profile/firefox.js` | **adopt** (values) | MPL-2.0 | The shipped values behind startup, homepage, urlbar suggestions, download behaviour, cookie behaviour, bookmarks-bar visibility, new-window behaviour and `warnOnClose`. Numbers and strings only — no code, no comment text — with `file:line` next to each use. |
+| Firefox source: `modules/libpref/init/all.js` | **adopt** (values) | MPL-2.0 | `intl.accept_languages` and its comment's meaning (the pref is a placeholder, the locale supplies the value), `font.minimum-size.*` 0, `browser.search.suggest.enabled`, the zoom table. |
+| Firefox source: `modules/libpref/init/StaticPrefList.yaml` | **adopt** (values) | MPL-2.0 | `privacy.donottrackheader.enabled` false, `privacy.sanitize.sanitizeOnShutdown` false, `layout.css.prefers-color-scheme.content-override` 2. |
 | `components/bookmarks/common/bookmark_pref_names.h` | **reference** | BSD-3 | The name `kShowBookmarkBar` = `"bookmark_bar.show_on_all_tabs"` (`:41`), to check that a bookmarks bar is a boolean there and a three-way choice here. No value taken. |
 | `chrome/browser/prefs/session_startup_pref.cc` | **reference** | BSD-3 | The startup choices (homepage / continue where you left off / new tab page) to check `Startup` covers the same ground. No value taken. |
 | `chrome/browser/prefs/browser_prefs.cc`, `chrome/common/pref_names.h`, `components/prefs/pref_registry_simple.h` | **reference** | BSD-3 | How a default is registered, to check that a false boolean there means "off in a fresh profile". No text taken. |
@@ -129,18 +129,17 @@ The warning the clamp writes (`Clamped`, with the value it found) is what tells 
 | Firefox `Sanitizer.jsm`, `nsICookiePermission`, permission manager | **reject** | MPL-2.0 | The per-site permission model and the sanitize *dialog* shape: this crate stores four booleans and nothing else; those belong to the wiring. |
 | Chromium `PrefChangeRegistrar`, `PrefRegistrySyncable` | **reject** | BSD-3 | Listener registration and sync metadata. [`Settings::changed_keys`] is the only diff mechanism here, and the caller owns what listens. |
 
-## Deviations from the brief, and from the original
+## Deviations from the spec, and from the original
 
 The rule is that the original wins and the difference is written down. These are those differences.
 
-1. **`search.suggest_remote` is `true`, not `false`.** The brief's example file writes
-   `"suggest_remote": false`; the same brief says the defaults are taken from Firefox's prefs, and
-   `browser.search.suggest.enabled` is true (`all.js:3441`) with `browser.urlbar.suggest.searches` true behind the
-   same checkbox (`firefox.js:500`). The pref wins. The example file in the brief is an *example*, and this crate's
-   `default_json_matches_the_documented_shape` test asserts the shape, not that value.
+1. **`search.suggest_remote` is `false`; Firefox ships `true`.** Firefox has `browser.search.suggest.enabled` true
+   (`all.js:3441`) with `browser.urlbar.suggest.searches` true behind the same checkbox (`firefox.js:500`). LucinaNet
+   follows the rule that no request leaves the machine that the person did not cause, and a request to the
+   engine on every keystroke is one. An explicit `true` in a settings file still loads.
 2. **`tabs.confirm_close_multiple` is `false`, not `true`.** Same reasoning: `browser.tabs.warnOnClose` is false
    (`firefox.js:1153`). Chromium warns; Firefox is the source, and the difference is also in the table above.
-3. **`general.home_page` is `"about:blank"`, Firefox's is `"about:home"`** (`firefox.js:341`). The brief names this
+3. **`general.home_page` is `"about:blank"`, Firefox's is `"about:home"`** (`firefox.js:341`). The spec names this
    as a LucinaNet choice (there is no branded start page to show), so it is followed, and the original's value is
    recorded in the table.
 4. **The zoom clamp is 20..=500, not the spec's 30..=500.** The spec's bottom came from reading Firefox's menu as
@@ -150,14 +149,14 @@ The rule is that the original wins and the difference is written down. These are
    `third_party/blink/common/page/page_zoom.cc` had been fetched under the wrong path and came back 404. The file is
    there; `curl` of the path in the table above returns it, and its numbers (0.25/5.0, 0.425/6.0) are now what the
    zoom section cites. The claim was wrong and is corrected here rather than left standing.
-6. **`toolkit/modules/ZoomManager.jsm`, the file the brief names for the zoom table, is not in this revision.** Six
+6. **`toolkit/modules/ZoomManager.jsm`, the file the spec names for the zoom table, is not in this revision.** Six
    candidate paths 404 (listed in "the zoom range"). The same fact — the list of steps a zoom control walks — is in
    the `toolkit.zoomManager.zoomValues` pref at `all.js:3028`, and that is what is cited. No menu range is claimed
    anywhere in this crate, because no file that would show one could be read.
 7. **`browser.zoom.full` is not a default here.** It is Firefox's toggle for zooming text only versus the whole
    page; this crate holds one number (`default_zoom_percent`) and the wiring that would honour a text-only mode does
    not exist yet, so no field pretends at it.
-8. **`%s` becomes `{searchTerms}` in the v0 migration, and the derived engine is `custom`/"Custom".** The brief
+8. **`%s` becomes `{searchTerms}` in the v0 migration, and the derived engine is `custom`/"Custom".** The spec
    asks for that; the name is ours, because a v0 file recorded a URL and nothing else, and a settings page needs a
    word to show. Firefox's own OpenSearch reader accepts `%s` in the same position, which is why the migration does
    the replacement rather than rejecting the URL.
@@ -170,8 +169,8 @@ The rule is that the original wins and the difference is written down. These are
     reported and read as 0**, so the file is upgraded and rewritten correctly instead of being refused over one odd
     key. Absent and `null` are version 0 silently.
 12. **`search.engines` with no usable engine left is reported at `search.engines`, and the built-in comes back.**
-    The brief says "none left → built-in"; the warning names the list rather than each dropped item twice.
-13. **`unknown` is one `changed_keys` path.** The brief asks for dotted names and the return type is
+    The spec says "none left → built-in"; the warning names the list rather than each dropped item twice.
+13. **`unknown` is one `changed_keys` path.** The spec asks for dotted names and the return type is
     `&'static str`, so a key that only exists in the file cannot be named; the map reports itself and the caller
     re-reads it.
 
@@ -200,7 +199,7 @@ The rule is that the original wins and the difference is written down. These are
         "suggest_url": "https://duckduckgo.com/ac/?q={searchTerms}&type=list"
       }
     ],
-    "suggest_remote": true,
+    "suggest_remote": false,
     "suggest_history": true,
     "suggest_bookmarks": true
   },
@@ -255,7 +254,7 @@ it as an unknown top-level key. Keys the chain does not know are never dropped.
 ## Checks
 
 ```
-export CARGO_TARGET_DIR=$WORK_DIR/lucinanet/target-batch1
+export CARGO_TARGET_DIR=$WORK_DIR/lucinanet/target
 cargo test -p lucinanet-settings --offline
 cargo clippy -p lucinanet-settings --offline --all-targets -- -D warnings
 ```

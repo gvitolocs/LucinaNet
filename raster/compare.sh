@@ -3,29 +3,33 @@
 # (built with SWGL_STRICT_FP=1: --backend cxx is strict swgl, --backend rust is lucinanet-raster), then diff frames.
 set -uo pipefail
 
-# Set WORK_DIR to a scratch directory holding the recorded traces and the built binaries.
+root=$(cd "$(dirname "$0")/.." && pwd)
+
+# Set WORK_DIR to the directory holding the traces recorded by raster/capture-traces.sh. When it is unset a new empty temporary directory is created and the run stops at once for lack of traces.
 WORK_DIR=${WORK_DIR:-$(mktemp -d)}
 
-TRACES_DIR=$WORK_DIR/lucinanet-raster/traces
+TRACES_DIR=$WORK_DIR/traces
 OUT_DIR=
 THREADS=
 TOLERANCE=0
 PAGES=()
 
-GLTRACE=${GLTRACE:-$WORK_DIR/lucinanet-raster/target-s-strict/release/gltrace}
-PIXDIFF=${PIXDIFF:-$WORK_DIR/lucinanet-raster/target-pixdiff/release/pixdiff}
+GLTRACE=${GLTRACE:-$root/target/release/gltrace}
+PIXDIFF=${PIXDIFF:-$root/target/release/pixdiff}
 
 usage() {
   cat <<'EOF'
 Usage: raster/compare.sh [--traces DIR] [--out DIR] [--threads N] [--tolerance N] [page ...]
 
-  --traces DIR       directory of trace pages (default: $WORK_DIR/lucinanet-raster/traces)
-  --out DIR          output directory (default: $WORK_DIR/lucinanet-raster/compare/<UTC timestamp>)
+  --traces DIR       directory of trace pages (default: $WORK_DIR/traces)
+  --out DIR          output directory (default: $WORK_DIR/compare/<UTC timestamp>)
   --threads N        the Rust replay draws with N threads on CPUs 4..3+N (the C++ oracle has one thread)
   --tolerance N      pixdiff tolerance (default: 0)
   page ...           pages to run (default: every subdirectory of --traces, sorted)
 
-Environment overrides: GLTRACE (one binary built with SWGL_STRICT_FP=1, both backends), PIXDIFF, MAX_TCTL (default 97).
+Environment overrides: WORK_DIR (above), GLTRACE (one binary built with SWGL_STRICT_FP=1, both backends;
+default target/release/gltrace from the workspace root), PIXDIFF (default target/release/pixdiff),
+MAX_TCTL (default 97).
 EOF
 }
 
@@ -63,7 +67,7 @@ if [[ ${#PAGES[@]} -eq 0 ]]; then
 fi
 
 if [[ -z $OUT_DIR ]]; then
-  OUT_DIR="$WORK_DIR/lucinanet-raster/compare/$(date -u +%Y%m%d-%H%M%S)"
+  OUT_DIR="$WORK_DIR/compare/$(date -u +%Y%m%d-%H%M%S)"
 fi
 mkdir -p "$OUT_DIR"
 SUMMARY="$OUT_DIR/summary.txt"

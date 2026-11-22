@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shows that Verus can fail on the connector rules: each line plants one bug in a copy of dns.rs or slots.rs, and Verus must refuse it.
-# Run on the build host from the Servo checkout root, through the verification script: components/net_policy/mutants.sh
+# Run from the Servo checkout root: components/net_policy/mutants.sh (needs Verus; see components/net_policy/verify.sh)
 set -uo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 work=$(mktemp -d "${TMPDIR:-/tmp}/netpolicy-mutants.XXXXXX")

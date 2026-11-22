@@ -15,10 +15,10 @@ level table and the host-keyed store rules, and the notice for them is in `NOTIC
 
 | Source file | Verdict | What we took |
 |---|---|---|
-| Firefox `modules/libpref/init/all.js` @33abb90 | adopt | Line 3028, `toolkit.zoomManager.zoomValues` — the Firefox level table, as whole percent (`FIREFOX_LEVELS`, 26 rows, 20 to 500). Numbers only; MPL like ours. |
-| Firefox `modules/libpref/init/StaticPrefList.yaml` @33abb90 | adopt | `zoom.minPercent` = 20 (line 22022) and `zoom.maxPercent` = 500 (line 22013, 400 under `#ifdef ANDROID`). These are the ends of the range, and they cut nothing off the pref table on desktop. |
-| Firefox `toolkit/content/viewZoomOverlay.js` @33abb90 | adapt | `ZoomManager`'s rules, rewritten in Rust integer arithmetic: `snap` (the first level at or above the value, back to the predecessor only when that is strictly nearer — so midpoints go **up**), `enlarge`/`reduce` as `zoomValues.indexOf(snap(zoom)) ± 1` with no move past either end, `MIN`/`MAX` as the intersection of the pref table with the two percent prefs, and `setZoomForBrowser` refusing a value outside `MIN..MAX` (which is why `clamp` exists here). `reset` sets 1, which is our `DEFAULT`. The `zoomValues` fallback string in the same file (which starts at `.3`) is only what is used when the pref is missing, so it is not the shipped table. |
-| Firefox `browser/components/tabbrowser/content/browser-fullZoom.js` @33abb90 | reference | The per-site memory's shape: pref name `browser.content.full-zoom`, gated by `browser.zoom.siteSpecific`, `_ensureValid` clamping a stored value into `MIN..MAX`, `_onContentPrefChanged` applying a changed global value only to sites that have no row, and `reset` removing the site's row (`_removePref`). The rows themselves are grouped by base domain, not host, so they are not the key we use (deviation 2). |
+| Firefox source: `modules/libpref/init/all.js` @33abb90 | adopt | Line 3028, `toolkit.zoomManager.zoomValues` — the Firefox level table, as whole percent (`FIREFOX_LEVELS`, 26 rows, 20 to 500). Numbers only; MPL like ours. |
+| Firefox source: `modules/libpref/init/StaticPrefList.yaml` @33abb90 | adopt | `zoom.minPercent` = 20 (line 22022) and `zoom.maxPercent` = 500 (line 22013, 400 under `#ifdef ANDROID`). These are the ends of the range, and they cut nothing off the pref table on desktop. |
+| Firefox source: `toolkit/content/viewZoomOverlay.js` @33abb90 | adapt | `ZoomManager`'s rules, rewritten in Rust integer arithmetic: `snap` (the first level at or above the value, back to the predecessor only when that is strictly nearer — so midpoints go **up**), `enlarge`/`reduce` as `zoomValues.indexOf(snap(zoom)) ± 1` with no move past either end, `MIN`/`MAX` as the intersection of the pref table with the two percent prefs, and `setZoomForBrowser` refusing a value outside `MIN..MAX` (which is why `clamp` exists here). `reset` sets 1, which is our `DEFAULT`. The `zoomValues` fallback string in the same file (which starts at `.3`) is only what is used when the pref is missing, so it is not the shipped table. |
+| Firefox source: `browser/components/tabbrowser/content/browser-fullZoom.js` @33abb90 | reference | The per-site memory's shape: pref name `browser.content.full-zoom`, gated by `browser.zoom.siteSpecific`, `_ensureValid` clamping a stored value into `MIN..MAX`, `_onContentPrefChanged` applying a changed global value only to sites that have no row, and `reset` removing the site's row (`_removePref`). The rows themselves are grouped by base domain, not host, so they are not the key we use (deviation 2). |
 | Chromium `third_party/blink/common/page/page_zoom.cc` @e9a4673 | adopt | `kPresetBrowserZoomFactors` (17 factors) as `CHROMIUM_LEVELS` in whole percent, and `kMinimumBrowserZoomFactor` 0.25 / `kMaximumBrowserZoomFactor` 5.0 as its ends. The 1.2 multiplier of `kTextSizeMultiplierRatio` and the float level conversions are not needed once zoom is whole percent (deviation 8). |
 | Chromium `components/zoom/page_zoom.cc` @e9a4673 | adapt | `PageZoom::Zoom`: for a value between levels, the step up is the first preset strictly above the current (`std::upper_bound`), the step down the last strictly below, and nothing happens at either end (`ZoomPlus_AtMaximum` / `ZoomMinus_AtMinimum`). That is `zoom_in`/`zoom_out` for `Profile::Chromium`. `PAGE_ZOOM_RESET` sets the *default* level, not 1.0 (deviation 6). The epsilon of `ZoomValuesEqual` (0.001 in level space, about a tenth of a percent) only matters for float levels, so it cannot decide a step between integer percents and is not carried over. |
 | Chromium `content/browser/host_zoom_map_impl.cc` @e9a4673 | adapt | Zoom keyed by host and stored in one map, so a host's level holds across scheme and port (`SetZoomLevelForWebContents` → `SetZoomLevelForHost(net::GetHostOrSpecFromURL(url))`), and `SetZoomLevelForHostInternal` **erases** the host when the new level equals the default — the rule behind `SiteZoom::set`. `ClearZoomLevels` and the temporary/per-frame levels are browsing-context plumbing, not store rules, and are rejected. |
@@ -27,16 +27,16 @@ Rust crates: `url` (adopt — host extraction, IDNA and case folding are its job
 `serde_json` (adopt — the store's file form). Servo is not touched: `WebView::set_page_zoom` already
 applies a factor, and `factor()` is the bridge to it.
 
-## Where the brief or the spec differs from the originals
+## Where the spec differs from the originals
 
 The original wins; each of these says which way we went.
 
-1. **Firefox's bottom level.** The brief says Firefox steps are "30..500 %". The shipped pref table
+1. **Firefox's bottom level.** The spec says Firefox steps are "30..500 %". The shipped pref table
    (`all.js:3028`) starts at `.2`, and `zoom.minPercent` is 20, so the trim in the `zoomValues` getter
    removes nothing: **20..500, and we followed the original.** 30 is where the *fallback* string inside
    `viewZoomOverlay.js` starts, which Firefox uses only if the pref is absent. The test
    `firefox_table_is_ascending_and_matches_pref` parses the pref string itself, so a wrong table fails.
-2. **The key a site is stored under.** The brief says "keyed by origin". Chromium keys by host
+2. **The key a site is stored under.** The spec says "keyed by origin". Chromium keys by host
    (`host_zoom_map_impl.cc`), so `http://example.org` and `https://example.org:8443` share a level.
    Firefox keys *coarser still*: content prefs group by base domain, so `www.example.org` shares a row
    with `example.org`. One key rule for both profiles, the **host as the spec says, which is Chromium's**,
@@ -76,7 +76,7 @@ The original wins; each of these says which way we went.
 ## Not in this crate
 
 The command itself (`Cmd::Zoom`), the toolbar label beyond `label()`, the profile file beyond
-`to_json()`/`from_json()`, and pinch-zoom interaction: the wiring pieces listed in the batch plan.
+`to_json()`/`from_json()`, and pinch-zoom interaction: the wiring pieces listed in the spec.
 
 ## Provable properties, left available
 
@@ -86,4 +86,4 @@ The command itself (`Cmd::Zoom`), the toolbar label beyond `label()`, the profil
 tests already walk: the result of a step is always a level of its own table; `zoom_in` never goes down
 and `zoom_out` never goes up; a step from a level is the next level of the table, each level reachable
 from `min` in `levels.len() - 1` steps; `clamp` is the identity exactly on `min..=max`; `snap` is inside
-the table and `clamp`ed. Verus was **not** run here (batch 1: optional and not run), nor were mutants.
+the table and `clamp`ed. Verus was **not** run here (optional for this crate, and not run), nor were mutants.

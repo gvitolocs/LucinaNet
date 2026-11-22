@@ -205,26 +205,29 @@ pub fn suggest(input: &RankInput<'_>) -> Vec<Suggestion> {
     let remote_allowed = match &action {
         Action::Search { .. } => true,
         Action::Navigate { .. } => input.typed.trim().contains(char::is_whitespace),
-        Action::Keyword { .. } | Action::Empty => false,
+        Action::Keyword { .. } | Action::Empty | Action::NoEngine { .. } | Action::Refused { .. } => false,
     };
     if remote_allowed {
         rows.extend(remote_rows(input, matches!(action, Action::Search { .. }), &typed_lower, prefix_floor));
     }
     if matches!(action, Action::Keyword { .. }) {
         let terms = input.typed.trim();
-        rows.push(Candidate {
-            suggestion: Suggestion {
-                kind: Kind::KeywordSearch,
-                text: terms.to_owned(),
-                url: input.cx.default_engine.url_for(terms),
-                title: format!("{terms} \u{2014} {}", input.cx.default_engine.name),
-                score: VERBATIM_WITH_KEYWORD,
-                inline_completion: None,
-                bookmarked: false,
-            },
-            recency: i64::MIN,
-            prefix_match: false,
-        });
+        // The verbatim row goes to the default engine; with none (or an unusable one) there is no such row.
+        if let Some((engine, url)) = input.cx.default_engine.and_then(|engine| Some((engine, engine.url_for(terms)?))) {
+            rows.push(Candidate {
+                suggestion: Suggestion {
+                    kind: Kind::KeywordSearch,
+                    text: terms.to_owned(),
+                    url,
+                    title: format!("{terms} \u{2014} {}", engine.name),
+                    score: VERBATIM_WITH_KEYWORD,
+                    inline_completion: None,
+                    bookmarked: false,
+                },
+                recency: i64::MIN,
+                prefix_match: false,
+            });
+        }
     }
 
     rows.sort_by(order);
@@ -246,7 +249,7 @@ fn order(a: &Candidate, b: &Candidate) -> Ordering {
 
 fn heuristic(action: &Action) -> Option<Suggestion> {
     let (text, title, url) = match action {
-        Action::Empty => return None,
+        Action::Empty | Action::NoEngine { .. } | Action::Refused { .. } => return None,
         Action::Navigate { url, .. } => (url.to_string(), url.to_string(), url.clone()),
         Action::Search { terms, url, .. } => (terms.clone(), format!("{terms} \u{2014} search"), url.clone()),
         Action::Keyword { engine, terms, url } => (terms.clone(), format!("{terms} \u{2014} {}", engine.name), url.clone()),
@@ -308,11 +311,12 @@ fn remote_rows(input: &RankInput<'_>, query_like: bool, typed_lower: &str, prefi
         }
         score = score.min(previous - 1).max(0);
         previous = score;
+        let Some(url) = input.cx.default_engine.and_then(|engine| engine.url_for(text)) else { continue };
         rows.push(Candidate {
             suggestion: Suggestion {
                 kind: Kind::RemoteSearch,
                 text: text.to_owned(),
-                url: input.cx.default_engine.url_for(text),
+                url,
                 title: text.to_owned(),
                 score,
                 inline_completion: None,
@@ -423,8 +427,38 @@ fn first_at_word_start(term: &[char], text: &[char], starts: &[usize]) -> Option
 /// only when the typed text already holds a `/`; never with a space) and Chromium url_prefix.cc @e9a4673 (the typed
 /// text may start right after `http://`, `https://www.` and so on, so a person who typed no scheme gets none).
 fn inline_completion(input: &RankInput<'_>) -> Option<String> {
+    inline_best(input).map(|(_, tail)| tail)
+}
+
+/// The origin the typed text completes to, and the tail that shows it: what Enter opens when the person leaves the
+/// completion in place. Only for text without a `/` (an origin completion; a URL completion is the typed address), so
+/// the origin is the stored one, over the scheme the visits and bookmarks used, and never one the history does not have.
+pub fn inline_origin(input: &RankInput<'_>) -> Option<InlineOrigin> {
+    if input.typed.contains('/') {
+        return None;
+    }
+    inline_best(input).map(|(url, tail)| InlineOrigin { url, tail })
+}
+
+/// See [`inline_origin`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct InlineOrigin {
+    /// The origin as stored, such as `http://old.example/`.
+    pub url: String,
+    /// What the field shows after the typed text, selected.
+    pub tail: String,
+}
+
+/// A typed text that is, whole, an engine's keyword: the keyword is the person's, so no page is completed over it.
+fn is_keyword(input: &RankInput<'_>) -> bool {
+    let typed = input.typed.trim().to_lowercase();
+    input.cx.keywords.iter().any(|engine| engine.keyword.as_deref().is_some_and(|keyword| !keyword.is_empty() && keyword.to_lowercase() == typed))
+}
+
+/// The best candidate and its tail; see [`inline_completion`].
+fn inline_best(input: &RankInput<'_>) -> Option<(String, String)> {
     let typed = input.typed;
-    if !input.cursor_at_end || input.deleting || typed.is_empty() || typed.chars().any(char::is_whitespace) {
+    if !input.cursor_at_end || input.deleting || typed.is_empty() || typed.chars().any(char::is_whitespace) || is_keyword(input) {
         return None;
     }
     if strip_scheme_and_www(&typed.to_lowercase()).is_empty() {
@@ -469,7 +503,7 @@ fn inline_completion(input: &RankInput<'_>) -> Option<String> {
             best = Some((*rank, candidate.as_str(), tail));
         }
     }
-    best.map(|(_, _, tail)| tail)
+    best.map(|(_, candidate, tail)| (candidate.to_owned(), tail))
 }
 
 /// Higher rank wins; then the shorter text; then the alphabetically smaller one, so the choice is deterministic.
@@ -530,7 +564,7 @@ mod tests {
                 keyword: Some("w".to_owned()),
                 template: "https://en.wikipedia.org/w/index.php?search={searchTerms}".to_owned(),
             };
-            World { default_engine: SearchEngine::duckduckgo_html(), keywords: vec![wiki] }
+            World { default_engine: crate::testing::engine(), keywords: vec![wiki] }
         }
 
         fn run(&self, typed: &str, history: &[HistoryEntry], bookmarks: &[BookmarkEntry], remote: &[&str]) -> Vec<Suggestion> {
@@ -546,7 +580,7 @@ mod tests {
             bookmarks: &[BookmarkEntry],
             remote: &[&str],
         ) -> Vec<Suggestion> {
-            let cx = Context { default_engine: &self.default_engine, keywords: &self.keywords, allow_single_label_hosts: false };
+            let cx = Context { default_engine: Some(&self.default_engine), keywords: &self.keywords, allow_single_label_hosts: false };
             let remote: Vec<String> = remote.iter().map(|s| (*s).to_owned()).collect();
             suggest(&RankInput { typed, cursor_at_end, deleting, now_us: NOW, history, bookmarks, remote: &remote, cx: &cx })
         }
@@ -789,5 +823,40 @@ mod tests {
         assert_eq!(world.run_with("exa", false, false, &history, &[], &[])[0].inline_completion, None);
         assert_eq!(world.run("exa ", &history, &[], &[])[0].inline_completion, None);
         assert_eq!(world.run("exa mple", &history, &[], &[])[0].inline_completion, None);
+    }
+    fn inline_origin_of(world: &World, typed: &str, history: &[HistoryEntry], bookmarks: &[BookmarkEntry]) -> Option<InlineOrigin> {
+        let cx = Context { default_engine: Some(&world.default_engine), keywords: &world.keywords, allow_single_label_hosts: false };
+        inline_origin(&RankInput { typed, cursor_at_end: true, deleting: false, now_us: NOW, history, bookmarks, remote: &[], cx: &cx })
+    }
+
+    #[test]
+    fn inline_origin_names_the_most_visited_origin_over_the_scheme_the_history_has() {
+        let world = World::new();
+        // The most visited origin: the tail and the origin it completes to.
+        let history = [page("https://wikipedia.org/a", "", 9, 0, 0), page("https://wikipedia.org/b", "", 9, 0, 0), page("https://weather.example/", "", 1, 0, 0)];
+        let got = inline_origin_of(&world, "wi", &history, &[]).expect("wikipedia wins");
+        assert_eq!((got.url.as_str(), got.tail.as_str()), ("https://wikipedia.org/", "kipedia.org/"));
+        // An origin with only an http page is named over http, never https.
+        let old = [page("http://old.example/page", "", 3, 0, 0)];
+        let got = inline_origin_of(&world, "o", &old, &[]).expect("old.example");
+        assert_eq!((got.url.as_str(), got.tail.as_str()), ("http://old.example/", "ld.example/"));
+        // A bookmark counts, as it does for the tail.
+        let marks = [bookmark("https://Docs.Rs/crate", "docs")];
+        assert_eq!(inline_origin_of(&world, "d", &[], &marks).expect("docs.rs").url, "https://docs.rs/");
+        // No history, nothing to open; a typed slash is a URL completion, not an origin one.
+        assert_eq!(inline_origin_of(&world, "w", &[], &[]), None);
+        assert_eq!(inline_origin_of(&world, "wikipedia.org/", &history, &[]), None);
+    }
+
+    #[test]
+    fn suggest_no_inline_for_a_typed_keyword() {
+        let world = World::new();
+        // "w" is the Wikipedia keyword: history for an origin that starts with it does not take the text over.
+        let history = [page("https://wikipedia.org/", "", 9, 0, 0)];
+        assert_eq!(world.run("w", &history, &[], &[])[0].inline_completion, None);
+        assert_eq!(inline_origin_of(&world, "w", &history, &[]), None);
+        // The keyword compares whole, case-folded: "wi" is not it.
+        assert_eq!(world.run("wi", &history, &[], &[])[0].inline_completion.as_deref(), Some("kipedia.org/"));
+        assert_eq!(world.run("W", &history, &[], &[])[0].inline_completion, None);
     }
 }

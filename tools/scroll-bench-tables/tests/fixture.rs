@@ -1,6 +1,6 @@
 //! The byte-for-byte test: the tool over the committed fixture, against what the retired Python printed.
 //!
-//! The fixture is ten runs from the the build host matrices - four of the pre-rewrite driver, two of the paced
+//! The fixture is ten runs from the three matrices - four of the pre-rewrite driver, two of the paced
 //! re-run, three of the fills, one of the unpaced re-run - and a job log excerpt whose clocks have been
 //! moved to a fixed epoch so that `mtimes.txt` can put every run's json back inside the window of the
 //! block it belongs to. git carries no mtimes, so the test touches the copies before it runs anything.

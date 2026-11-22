@@ -2,12 +2,12 @@
 
 LucinaJavascript (LucinaJS for short) is LucinaNet's JavaScript engine, in Rust, behind a Rust `mozjs_sys` (this repo). It was
 forked from Brimstone (Hans-Halverson/brimstone, MIT, base 64d6698) and has changed a lot since (2026-11-08). Brimstone
-is only its upstream origin, recorded in `third_party/UPSTREAMS.toml`. The crates and the fork repo keep
+is only its upstream origin, recorded in `third_party/UPSTREAMS.toml`. The crates and the fork keep
 their `brimstone` names until the rename below.
 
 ## Direction (2026-11-08): interpreter-first, no JIT, modelled on JavaScriptCore's LLInt
 
-"This is our way to go." JavaScriptCore's interpreter stays fast on ARM without a JIT (Safari on iOS gives third parties no
+JavaScriptCore's interpreter stays fast on ARM without a JIT (Safari on iOS gives third parties no
 JIT), which is LucinaJS's situation on Juno (aarch64, no executable memory, simple W^X story).
 
 Records per our porting guidelines (the originals are the source of truth for behaviour; JavaScriptCore is
@@ -23,14 +23,13 @@ pinned at WebKit eeb5ad7, id `javascriptcore`):
 | V8 | Script streaming, preparser, code cache | **reference** for streaming parse and the cache | BSD-3-Clause |
 | SpiderMonkey | Off-thread parse, stencil cache, syntax parser, lazy scripts | **reference** for the same | MPL-2.0 |
 
-Dispatch: measure on the laptop (A76) before choosing: a `match` loop with careful layout, tail-call threading (`become`, nightly,
+Dispatch: measure on the A76 hardware before choosing: a `match` loop with careful layout, tail-call threading (`become`, nightly,
 only if the toolchain policy allows it) and a jump table of handler functions. Pick by numbers.
 
 ## Where it stands (2026-11-08)
 
-x86 YouTube watch page, against SpiderMonkey (bench3.sh, 6 rounds, medians of valid runs): CPU over 45 s 17.6 s against 19.3 s;
-time to play 2.00 s against 1.81 s; max RSS 810 MB against 552 MB (was 1,200 MB). Fork `lucinanet-engine` df1a67b8, glue
-`brimstone-backend` fb68e32. Details: the project lead's shared note `js-engine-perf-vs-spidermonkey-2026-11-08.md`.
+x86 YouTube watch page, against SpiderMonkey (6 rounds, medians of valid runs): CPU over 45 s 17.6 s against 19.3 s;
+time to play 2.00 s against 1.81 s; max RSS 810 MB against 552 MB (was 1,200 MB). Fork at df1a67b8, glue at fb68e32.
 
 Juno (lucinanet's t2 run, A76, cold): `playing` at 8.90 s; the script thread was busy from 3.0 to 9.0 s. kevlar_base (9.7 MB):
 parse 1,556 ms, top-level generation 646 ms, execution 3,374 ms of which 1,186 ms first-call generation. x86: parse 539, execute
@@ -53,15 +52,15 @@ parse 1,556 ms, top-level generation 646 ms, execution 3,374 ms of which 1,186 m
 5. **LLInt-style interpreter**: dispatch measured on the A76, inline caches with Verus-checked shape checks; for kevlar's
    top-level execution (817 ms x86, about 2.2 s Juno without first-call generation).
 
-Same rules for each: test262 failure list identical, before and after tables, benchmarks on a quiet machine (the proof host cannot run the
+Same rules for each: test262 failure list identical, before and after tables, benchmarks on a quiet machine (a Verus runner cannot run the
 browser: glibc 2.39 there, the binary needs 2.43).
 
 ## Rename plan (after the YouTube work lands)
 
 | Step | What | Cost |
 |---|---|---|
-| 1 | Crates: `brimstone_core` -> `lucinajs_core`, `brimstone_macros`, `brimstone_serialized_heap`, `brimstone_icu_collections`, binary `brimstone` -> `lucinajs_*` | fork: 178 lines in 52 files; the glue depends on it under the old name with `package = "lucinajs_core"` first, then its 2,431 mentions in 55 files are renamed mechanically. About 1 h of edits, then a full rebuild of every tree that uses the glue (a Servo build is about 1 h on the build host), the glue suite and test262 |
-| 2 | Fork repo `LucinaNet-brimstone` -> `LucinaJS` (the checkout and any separate working copies of it) | absolute paths in the glue's `mozjs-sys/Cargo.toml`, lucinanet's build scripts and trees, `third_party/UPSTREAMS.toml` (`ours`), memory notes; keep a `LucinaNet-brimstone` symlink for a transition; one coordinated pause of every session that builds against the fork |
+| 1 | Crates: `brimstone_core` -> `lucinajs_core`, `brimstone_macros`, `brimstone_serialized_heap`, `brimstone_icu_collections`, binary `brimstone` -> `lucinajs_*` | fork: 178 lines in 52 files; the glue depends on it under the old name with `package = "lucinajs_core"` first, then its 2,431 mentions in 55 files are renamed mechanically. About 1 h of edits, then a full rebuild of everything that uses the glue (a Servo build is about 1 h on the reference Linux development machine), the glue suite and test262 |
+| 2 | Fork repo renamed to `LucinaJS` (the checkout under `third_party/brimstone`) | absolute paths in the glue's `mozjs-sys/Cargo.toml`, the build scripts and `third_party/UPSTREAMS.toml` (`ours`); one coordinated pause of everything that builds against the fork |
 | 3 | Docs and labels | done or cheap: this file, doc titles, bench labels `lucinajs-*` (from 2026-11-08) |
 
 Kept as they are: the `LUCINANET_JS_*` switches (engine-neutral), git history, and the upstream remote.

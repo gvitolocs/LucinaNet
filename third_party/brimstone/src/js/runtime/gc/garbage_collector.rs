@@ -190,8 +190,10 @@ impl GarbageCollector {
         lap(1, &mut mark);
 
         // All live items have been identified and moved. We can now prune dead weak references and
-        // handle finalizers.
-        gc.prune_weak_references_and_handle_finalizers(cx);
+        // handle finalizers. The post-copy instant (`mark`, passed by value so the `lap(2)` below
+        // still times the whole weak phase unchanged) seeds the per-step clock; the times and
+        // counts print on one `jsweak` line after the `jsgc` line when the log is on.
+        let weak_steps = gc.prune_weak_references_and_handle_finalizers(cx, mark);
         lap(2, &mut mark);
 
         // Let the embedder update its weak pointers, then finalize and free dead host objects. Must
@@ -297,6 +299,29 @@ impl GarbageCollector {
                 embed::try_state(cx).map_or(0, |state| state.space.num_objects()),
                 cx.heap.accounting().associated_bytes as f64 / 1048576.0,
                 embed::try_state(cx).map_or(0, |state| state.space.used_bytes()) as f64 / 1048576.0,
+            );
+            eprintln!(
+                "jsweak n={} interned={:.1} trans={:.1} sweep_perm={:.1}({}) sweep_to={:.1}({}) caches={:.1}({}) polycaches={:.1}({}) lazy={:.1}({}) src={:.1} refs={:.1} sets={:.1} maps={:.1}({}) vecs={:.1} finreg={:.1}",
+                stats.gc_count,
+                weak_steps.interned,
+                weak_steps.trans,
+                weak_steps.sweep_perm,
+                weak_steps.items_perm,
+                weak_steps.sweep_to,
+                weak_steps.items_to,
+                weak_steps.caches,
+                weak_steps.cache_arrays,
+                weak_steps.polycaches,
+                weak_steps.poly_cache_arrays,
+                weak_steps.lazy,
+                weak_steps.lazy_entries,
+                weak_steps.src,
+                weak_steps.refs,
+                weak_steps.sets,
+                weak_steps.maps,
+                weak_steps.map_entries,
+                weak_steps.vecs,
+                weak_steps.finreg,
             );
         }
 
@@ -718,37 +743,63 @@ impl GarbageCollector {
         weak_rules::resolve(in_moved, in_host, host_marked, fwd, ptr as usize)
     }
 
-    fn prune_weak_references_and_handle_finalizers(&mut self, cx: Context) {
+    /// Prune dead weak references and run finalizers. Each step is timed with one clock read
+    /// (`tick`) and counts what it visits, but only while the collection log is on: `weak_start` is
+    /// `Some` then and `None` otherwise, and with `None` no clock is read, no counter is bumped
+    /// beyond the ones the sweeps already keep, and nothing is allocated. The step order and what
+    /// each step does are unchanged.
+    fn prune_weak_references_and_handle_finalizers(
+        &mut self,
+        cx: Context,
+        weak_start: Option<std::time::Instant>,
+    ) -> WeakSteps {
+        let mut steps = WeakSteps { armed: weak_start.is_some(), ..WeakSteps::default() };
+        let mut mark = weak_start;
+
         // Prune interned strings that are no longer referenced
         self.prune_weak_interned_strings(cx);
+        steps.interned = tick(&mut mark);
 
         // Prune shapes in the transition tree that are no longer referenced from the heap
         self.prune_weak_transition_tree(cx);
+        steps.trans = tick(&mut mark);
 
         // Then repair the weak edges of the items in the new semispace that those walks reach only
-        // by name, which is where a shape detached from the transition tree hides
-        self.prune_weak_edges_in_to_space();
+        // by name, which is where a shape detached from the transition tree hides. The two walks
+        // over `swept_spaces` are timed and counted inside, one clock read each.
+        self.prune_weak_edges_in_to_space(&mut mark, &mut steps);
 
         // Prune caches whose items are no longer referenced from the heap
-        self.prune_weak_cache_arrays();
-        self.prune_weak_polymorphic_cache_arrays();
+        self.prune_weak_cache_arrays(&mut steps);
+        steps.caches = tick(&mut mark);
+        self.prune_weak_polymorphic_cache_arrays(&mut steps);
+        steps.polycaches = tick(&mut mark);
 
         // Drop the lazy function entries of collected stubs, freeing their AST once no stub of its
         // program is left
-        self.prune_weak_lazy_functions(cx);
+        self.prune_weak_lazy_functions(cx, &mut steps);
+        steps.lazy = tick(&mut mark);
 
         // Drop the texts of collected source files
         let mut source_cx = cx;
         source_cx
             .source_texts
             .sweep(|file| self.resolve_weak_pointer(file));
+        steps.src = tick(&mut mark);
 
         // Fix the weak objects, handling objects that have been garbage collected
         self.fix_weak_refs();
+        steps.refs = tick(&mut mark);
         self.fix_weak_sets();
-        self.fix_weak_maps();
+        steps.sets = tick(&mut mark);
+        self.fix_weak_maps(&mut steps);
+        steps.maps = tick(&mut mark);
         self.fix_weak_vecs();
+        steps.vecs = tick(&mut mark);
         self.fix_finalization_registries(cx);
+        steps.finreg = tick(&mut mark);
+
+        steps
     }
 
     // Visit live weak refs and check if their targets are still live. Should only be called after
@@ -792,13 +843,17 @@ impl GarbageCollector {
 
     // Visit live weak maps and check if their keys are still live. Should only be called after
     // liveness of all items has been determined.
-    fn fix_weak_maps(&mut self) {
+    fn fix_weak_maps(&mut self, steps: &mut WeakSteps) {
         // Walk all live weak maps in the list
         let mut next_weak_map = self.weak_map_list;
         while let Some(weak_map) = next_weak_map {
             next_weak_map = weak_map.next_weak_map();
 
             for mut entry in weak_map.weak_map_data().iter_entries_mut_gc_unsafe() {
+                if steps.armed {
+                    steps.map_entries += 1;
+                }
+
                 let key = entry.key_mut().value_mut();
                 debug_assert!(key.is_pointer());
 
@@ -1092,9 +1147,13 @@ impl GarbageCollector {
         }
     }
 
-    /// Update the stubs in the lazy function registry, which holds them weakly.
-    fn prune_weak_lazy_functions(&mut self, cx: Context) {
+    /// Update the stubs in the lazy function registry, which holds them weakly. The sweep visits
+    /// exactly the pending entries, so that count is logged before the sweep runs.
+    fn prune_weak_lazy_functions(&mut self, cx: Context, steps: &mut WeakSteps) {
         let mut cloned_cx = cx;
+        if steps.armed {
+            steps.lazy_entries = cloned_cx.lazy_functions.num_pending();
+        }
         cloned_cx
             .lazy_functions
             .sweep(|stub| self.resolve_weak_pointer(stub));
@@ -1158,7 +1217,11 @@ impl GarbageCollector {
     /// containers outgrown there for good, and a resizing collection moves the whole space, which
     /// leaves their weak slots pointing into the old copy. It holds none of the list kinds (a test
     /// pins that), which would otherwise never be repaired.
-    fn prune_weak_edges_in_to_space(&mut self) {
+    fn prune_weak_edges_in_to_space(
+        &mut self,
+        mark: &mut Option<std::time::Instant>,
+        steps: &mut WeakSteps,
+    ) {
         // The data the live weak collections own, which the lists fix with their side effects
         let mut owned_data = rustc_hash::FxHashSet::default();
         let mut next_weak_set = self.weak_set_list;
@@ -1180,12 +1243,15 @@ impl GarbageCollector {
         let to_space = self.to_space_start_ptr..self.alloc_ptr;
         let permanent_space = self.new_permanent_space_bounds.clone();
 
+        let armed = steps.armed;
         for swept in weak_rules::swept_spaces() {
             let space = match swept {
                 SweptSpace::NewPerm => permanent_space.clone(),
                 SweptSpace::To => to_space.clone(),
             };
 
+            // Heap items this walk visits, counted only for the log; the walk itself is unchanged.
+            let mut items = 0usize;
             for_each_heap_item(space, |item| {
                 let kind = item.shape().kind();
                 let owned = owned_data.contains(&(item.as_ptr() as usize));
@@ -1214,8 +1280,26 @@ impl GarbageCollector {
                     SweepAction::Skip => {}
                 }
 
+                if armed {
+                    items += 1;
+                }
+
                 byte_size_for_kind(item, kind)
             });
+
+            // The two swept spaces, in order: the new permanent space then the to-space. One clock
+            // read each, so `sweep_perm` covers the owned-data build and the permanent walk and
+            // `sweep_to` the to-space walk.
+            match swept {
+                SweptSpace::NewPerm => {
+                    steps.items_perm = items;
+                    steps.sweep_perm = tick(mark);
+                }
+                SweptSpace::To => {
+                    steps.items_to = items;
+                    steps.sweep_to = tick(mark);
+                }
+            }
         }
     }
 
@@ -1384,11 +1468,14 @@ impl GarbageCollector {
 
     /// Visit live CacheArrays and fix weak references that are still live. Prune caches that
     /// contain any dead weak references.
-    fn prune_weak_cache_arrays(&mut self) {
+    fn prune_weak_cache_arrays(&mut self, steps: &mut WeakSteps) {
         // Walk all live CacheArrays in the list
         let mut next_cache_array = self.cache_array_list;
         while let Some(mut cache_array) = next_cache_array {
             next_cache_array = cache_array.next_cache_array();
+            if steps.armed {
+                steps.cache_arrays += 1;
+            }
 
             for cache in cache_array.as_mut_slice() {
                 if !self.fix_cache(cache) {
@@ -1411,11 +1498,14 @@ impl GarbageCollector {
 
     /// Visit live PolymorphicCacheArrays and fix weak references that are still live. Prune caches
     /// that contain any dead weak references and compress the remaining array of live caches.
-    fn prune_weak_polymorphic_cache_arrays(&mut self) {
+    fn prune_weak_polymorphic_cache_arrays(&mut self, steps: &mut WeakSteps) {
         // Walk all live PolymorphicCacheArrays in the list
         let mut next_polymorphic_cache_array = self.polymorphic_cache_array_list;
         while let Some(mut polymorphic_cache_array) = next_polymorphic_cache_array {
             next_polymorphic_cache_array = polymorphic_cache_array.next_cache_array();
+            if steps.armed {
+                steps.poly_cache_arrays += 1;
+            }
 
             let caches = polymorphic_cache_array.as_mut_slice();
 
@@ -1452,6 +1542,50 @@ enum WeakResolution {
     Live(HeapPtr<AnyHeapItem>),
     /// The target was garbage collected.
     Dead,
+}
+
+/// The per-step milliseconds and visit counts of the weak phase, reported on the `jsweak` line.
+/// Filled only while `gc_log` is on: `armed` mirrors that switch, and every count is guarded by it,
+/// so an unlogged collection leaves these at zero and never reads the clock (`tick`) nor allocates.
+#[derive(Default)]
+struct WeakSteps {
+    armed: bool,
+
+    interned: f64,
+    trans: f64,
+    sweep_perm: f64,
+    sweep_to: f64,
+    caches: f64,
+    polycaches: f64,
+    lazy: f64,
+    src: f64,
+    refs: f64,
+    sets: f64,
+    maps: f64,
+    vecs: f64,
+    finreg: f64,
+
+    items_perm: usize,
+    items_to: usize,
+    cache_arrays: usize,
+    poly_cache_arrays: usize,
+    lazy_entries: usize,
+    map_entries: usize,
+}
+
+/// Read one clock when the collection log is on, returning the milliseconds since the previous read
+/// and advancing the mark; when off (`None`), read nothing and return zero. The same `Option<Instant>`
+/// discipline as the `lap` closure in `GarbageCollector::run`.
+fn tick(mark: &mut Option<std::time::Instant>) -> f64 {
+    match mark {
+        Some(m) => {
+            let now = std::time::Instant::now();
+            let ms = (now - *m).as_secs_f64() * 1000.0;
+            *m = now;
+            ms
+        }
+        None => 0.0,
+    }
 }
 
 /// The weak-holder class of a heap item kind, which the pure decisions of `weak_rules` are named

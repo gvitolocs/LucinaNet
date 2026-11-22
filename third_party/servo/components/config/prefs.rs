@@ -419,6 +419,10 @@ pub struct Preferences {
     /// The user-agent to use for Servo. This can also be set via [`UserAgentPlatform`] in
     /// order to set the value to the default value for the given platform.
     pub user_agent: String,
+    /// What `navigator.platform` answers. Empty means the build target's own default
+    /// (`navigatorinfo::Platform`); an embedder that builds its user-agent from the same
+    /// platform table sets both, so the two never disagree.
+    pub navigator_platform: String,
     /// Whether or not the viewport meta tag is enabled.
     pub viewport_meta_enabled: bool,
     pub log_filter: String,
@@ -619,6 +623,7 @@ impl Preferences {
             thread_pool_webrender_workers_max: 4,
             webgl_testing_context_creation_error: false,
             user_agent: String::new(),
+            navigator_platform: String::new(),
             viewport_meta_enabled: false,
             expose_servointernals_globally: false,
         }

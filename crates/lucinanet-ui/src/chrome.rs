@@ -13,7 +13,7 @@ pub enum Mode {
     Glass,
 }
 
-/// The default per platform: glass on the macOS desktop build (the window the owner looks at), classic on Juno and every other
+/// The default per platform: glass on the macOS desktop build (the window its user looks at), classic on Juno and every other
 /// build until the laptop measurement says otherwise.
 pub const DEFAULT_MACOS: Mode = Mode::Glass;
 pub const DEFAULT_OTHER: Mode = Mode::Classic;
@@ -68,7 +68,7 @@ impl Settings {
 }
 
 /// How long a blur may take, in milliseconds, before the bar is drawn on a plain tinted capsule instead (one frame at 60 Hz is
-/// 16.7 ms; the bar has to leave room for the page). A starting value, unmeasured on Juno: see docs/specs/glass-chrome-slice1.md.
+/// 16.7 ms; the bar has to leave room for the page). A starting value, unmeasured on Juno: see the glass chrome spec.
 pub const BLUR_BUDGET_MS: f32 = 12.0;
 /// After a blur ran over budget the next ones are skipped, and one in this many page changes tries again.
 pub const REPROBE_EVERY: u32 = 8;

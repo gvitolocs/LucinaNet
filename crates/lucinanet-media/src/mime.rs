@@ -7,7 +7,7 @@
 //! The original is the GStreamer backend's `can_play_type` (servo-media `registry_scanner.rs`): a container it has a demuxer for,
 //! and every codec in `codecs=` one it has a decoder for, is "probably"; a known container with no `codecs=` is "maybe"; anything else
 //! "". Here the lists are the decoders LucinaOS has (`lucina_video_play::decode`, `lucina_audio_decode`), measured on the laptop
-//! (`docs/research/juno-media.md`), and Opus through opus1. H.265 is only the video block's (Venus), so it is offered only where
+//! (the LucinaOS media measurements), and Opus through opus1. H.265 is only the video block's (Venus), so it is offered only where
 //! `/dev/lucina-venus` exists.
 //!
 //! Formats above Juno's measured smooth limits are refused as well, so that YouTube's format choice stays within them: it asks

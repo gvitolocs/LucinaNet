@@ -24,7 +24,7 @@
 //! `<profile>/errors.jsonl`, capped by the library at 256 KiB per generation and 500 lines per
 //! session. `about:errors` also carries the controls that empty it: one host's `Clear` and a
 //! `Clear all`, each of which asks first with a token only this run can mint, because a link on any
-//! web page can reach an `about:` address in this build (see `docs/specs/wiring-errlog.md`). On Juno
+//! web page can reach an `about:` address in this build (see the errlog wiring spec). On Juno
 //! every event is also one `browser.*` line on the semantic event hub; `LUCINANET_ERRLOG_JUNO=0`
 //! skips that and keeps the file.
 

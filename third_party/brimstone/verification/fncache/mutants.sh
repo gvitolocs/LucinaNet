@@ -3,9 +3,9 @@
 # of the file, and Verus must refuse every mutant.
 #   verification/fncache/mutants.sh <name> <path of the shipped file>        (needs `verus` on PATH, or VERUS=...)
 # Normally started by verification/fncache/run.sh <name>, which copies the file and this script into a directory of their own and runs
-# them on the proof host (`verus-remote`), or on the build host (FALLBACK=1). Names: disk_rules, patch_rules, prov_rules, wire, partition.
+# them with Verus. Names: disk_rules, patch_rules, prov_rules, wire, partition.
 # MUTANTS_STRICT=1: exit 1 if any mutant was refused without a verification run (a compile error, not a disproof).
-# No argument: proof disk_rules, its shipped file read from the repo root, which is how lucina-ci mutants-precheck runs this script;
+# No argument: proof disk_rules, its shipped file read from the repo root, which is how the CI proof precheck runs this script;
 # then only disk_rules mutants are checked, for the other four names pass the name (each is its own run of the script).
 set -uo pipefail
 verus=${VERUS:-verus}
@@ -14,7 +14,7 @@ rules=${2:-src/js/runtime/bytecode/fncache/$name.rs}
 work=$(mktemp -d "${TMPDIR:-/tmp}/fncache-mutants.XXXXXX")
 trap 'rm -rf "${work:?}"' EXIT
 
-# What Verus reads from the shipped file: the mechanical steps of LucinaOS scripts/verify-shipped.sh.
+# What Verus reads from the shipped file: the mechanical steps of scripts/verify-shipped.sh.
 make_verus_input() {
     local body
     body=$(sed -E -e '/\/\/@omit$/d' -e 's/-> (.*[^ ]) \/\/@ret$/-> (ret: \1)/' -e 's/^( *)\/\/@ ?/\1\/*proof*\/ /' "$1")

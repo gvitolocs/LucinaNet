@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shows that raster/rules/src/lib.rs (or, with TARGET=blit.rs, blit.rs) can fail: each line plants one bug in a copy of the shipped file, and Verus must
-# refuse it. Run on the build host from the repository root, through the verification script: raster/rules/mutants.sh
+# refuse it. Run from the repository root: raster/rules/mutants.sh (needs Verus; see raster/verify.sh)
 set -uo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 shipped=$root/raster/rules/src/${TARGET:-lib.rs}

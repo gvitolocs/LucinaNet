@@ -52,5 +52,16 @@ fn collect_servo_sizes() {
         let mut sizes = std::mem::zeroed();
         assert!(CollectServoSizes(context, &mut sizes, None));
         assert!(sizes.gcHeapUsed > 0, "measured an empty GC heap");
+        // The default minimum heap of a context without a parent runtime — this one — is 256 MB on macOS and Linux
+        // x86_64 (mozjs-sys `default_min_heap_mb`), so the free semispace here is about 127 MB even after what this test
+        // allocated; the bar sits at 64 MB, above what the engine's own 64 MB default leaves (about 31 MB) and far below
+        // what a correct build gives. Elsewhere the default is not raised and there is nothing to check.
+        if cfg!(any(target_os = "macos", all(target_os = "linux", target_arch = "x86_64"))) {
+            assert!(
+                sizes.gcHeapUnused > 64 << 20,
+                "expected the 256 MB default minimum heap, gcHeapUnused {} MB",
+                sizes.gcHeapUnused >> 20
+            );
+        }
     }
 }

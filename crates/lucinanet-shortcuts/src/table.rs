@@ -4,7 +4,7 @@
 
 // The shortcut tables, read from the two browsers' own sources at the pinned revisions (PORTING.md holds the
 // records, and every entry says where it comes from). One group per command, in the order of `Command`; a
-// command's first entry is the one its menu shows, so `binding_for` gives the shortcut the owner expects.
+// command's first entry is the one its menu shows, so `binding_for` gives the shortcut the user expects.
 //
 // Two rules the sources force on a physical-key matcher, both explained by the entries that follow:
 // Firefox names the *character* of a key (`key="+"`) and Chromium names its *keycode* (`VKEY_OEM_PLUS`), so a

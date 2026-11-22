@@ -13,7 +13,8 @@ use devtools_traits::{DevtoolScriptControlMsg, ScriptToDevtoolsControlMsg};
 use embedder_traits::user_contents::UserContentManagerId;
 use embedder_traits::{
     AnimationState, FocusSequenceNumber, JSValue, JavaScriptEvaluationError,
-    JavaScriptEvaluationId, MediaSessionEvent, ScriptToEmbedderChan, ViewportDetails, WakeLockType,
+    JavaScriptEvaluationId, MediaSessionEvent, PageText, PageTextId, ScriptToEmbedderChan,
+    ViewportDetails, WakeLockType,
 };
 use encoding_rs::Encoding;
 use euclid::default::Size2D as UntypedSize2D;
@@ -864,6 +865,8 @@ pub enum ScriptToConstellationMessage {
         JavaScriptEvaluationId,
         Result<JSValue, JavaScriptEvaluationError>,
     ),
+    /// The text of a pipeline's document, answering a `RequestPageText`.
+    FinishPageText(PageTextId, PageText),
     /// Forward a keyboard scroll operation from an `<iframe>` to a parent pipeline.
     ForwardKeyboardScroll(PipelineId, KeyboardScroll),
     /// Notify the Constellation of the screenshot readiness of a given pipeline.

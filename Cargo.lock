@@ -3473,6 +3473,7 @@ version = "0.1.0"
 name = "lucinanet-historydb"
 version = "0.1.0"
 dependencies = [
+ "lucinanet-bookmarks",
  "serde",
  "serde_json",
 ]
@@ -3544,6 +3545,7 @@ dependencies = [
  "lucinanet-ax",
  "lucinanet-bookmarks",
  "lucinanet-errlog",
+ "lucinanet-find",
  "lucinanet-history",
  "lucinanet-historydb",
  "lucinanet-media",
@@ -3551,6 +3553,7 @@ dependencies = [
  "lucinanet-settings",
  "lucinanet-ui",
  "lucinanet-zoom",
+ "mozjs_sys",
  "rustls",
  "rustls-graviola",
  "servo",
@@ -3586,7 +3589,9 @@ dependencies = [
  "libc",
  "lucina-app",
  "lucina-glass",
+ "lucinanet-find",
  "lucinanet-omnibox",
+ "lucinanet-settings",
  "lucinanet-shortcuts",
  "lucinanet-zoom",
  "png 0.18.1",

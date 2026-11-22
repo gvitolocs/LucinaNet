@@ -1,4 +1,4 @@
-//! Juno's home: the approved laptop concept (`docs/design/phone-concept.md`, "Variants", Juno) as the real desktop, drawn from
+//! Juno's home: the laptop concept (`docs/design/phone-concept.md`, "Variants", Juno) as the real desktop, drawn from
 //! [`HomeData`] and nothing else.
 //!
 //! - **Layout.** Three columns over 1280 x 720 dp (1920 x 1080 at 1.5 px/dp) and a dock. Cards stack down each column through the
@@ -2031,7 +2031,7 @@ pub fn read_raw(path: &std::path::Path, w: u32, h: u32, k: f32) -> Option<Canvas
     }
     let mut c = Canvas::new(w, h, k);
     // SAFETY: the u32 pixels are plain memory with no invalid bit patterns; the byte view covers exactly their storage and is
-    // only written through by `read_exact`. Juno and every build host are little-endian, which `raw_bytes` writes.
+    // only written through by `read_exact`. Juno and the desktops we build on are little-endian, which `raw_bytes` writes.
     let bytes = unsafe { std::slice::from_raw_parts_mut(c.px.as_mut_ptr().cast::<u8>(), n * 4) };
     f.read_exact(bytes).ok()?;
     if cfg!(target_endian = "big") {

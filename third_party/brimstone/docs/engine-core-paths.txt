@@ -1,4 +1,4 @@
-# Engine core: a change to any of these needs a second-family review record (see docs/engine-invariants.md). The glue repository's engine/** is core too but lives in another repository.
+# Engine core: a change to any of these needs a second-family review record (see docs/engine-invariants.md). The glue workspace's js/mozjs-sys/src/engine/** is core too but is a separate workspace.
 # One glob per line, relative to the repository root. Lines starting with # are comments.
 #
 # Generator and VM. This includes bytecode/fncache/**, the function cache that stores bytecode.

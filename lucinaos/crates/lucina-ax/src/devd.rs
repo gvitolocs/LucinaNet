@@ -39,8 +39,8 @@ pub fn effect(tool: &str, reply: &Value, id: Option<&str>) -> &'static str {
     }
 }
 
-/// The hash a decision is bound to: SHA-256 of `{"tool": "ui_act", "args": args}` in serde_json's order, as stage C and the
-/// server compute theirs.
+/// The hash a decision is bound to: SHA-256 of `{"tool": "ui_act", "args": args}` in serde_json's order, as the
+/// intents path and the server compute theirs.
 pub fn call_hash(tool: &str, args: &Value) -> String {
     use sha2::{Digest, Sha256};
     let canonical = serde_json::to_string(&json!({"tool": tool, "args": args})).unwrap_or_default();

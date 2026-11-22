@@ -216,7 +216,7 @@ impl Surface for Screen {
             *gpu = None;
         }
         self.last_gpu_rects = shown;
-        // The present report (docs/research/juno-desk.md, stage D): which rectangles are on the screen now, sent after the copy
+        // The present report: which rectangles are on the screen now, sent after the copy
         // has ended so that a reader sees whole frames. One cached check when nobody listens.
         if !rects.is_empty() {
             self.frames += 1;

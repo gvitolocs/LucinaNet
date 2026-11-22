@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shows that Verus can fail on js/mozjs-sys/src/boundary: each line plants one bug in a copy of a shipped file, and
-# js/scripts/verify-shipped.sh must refuse it. Run on the build host from the repo root, through the verification script:
+# js/scripts/verify-shipped.sh must refuse it. Run from the js workspace root, through the verification script:
 #   js/scripts/boundary-mutants.sh
 set -uo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)

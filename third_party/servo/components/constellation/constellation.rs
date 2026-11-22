@@ -113,8 +113,9 @@ use embedder_traits::{
     GenericEmbedderProxy, InputEvent, InputEventAndId, InputEventOutcome, JSValue,
     JavaScriptEvaluationError, JavaScriptEvaluationId, KeyboardEvent, MediaSessionActionType,
     MediaSessionEvent, MediaSessionPlaybackState, MouseButtonAction, MouseButtonEvent,
-    NewWebViewDetails, PaintHitTestResult, Theme, ViewportDetails, WakeLockDelegate, WakeLockType,
-    WebDriverCommandMsg, WebDriverLoadStatus, WebDriverScriptCommand,
+    NewWebViewDetails, PageText, PageTextId, PaintHitTestResult, Theme, ViewportDetails,
+    WakeLockDelegate, WakeLockType, WebDriverCommandMsg, WebDriverLoadStatus,
+    WebDriverScriptCommand,
 };
 use euclid::default::Size2D as UntypedSize2D;
 use fonts::SystemFontServiceProxy;
@@ -480,6 +481,11 @@ pub struct Constellation<STF, SWF> {
     /// Navigation requests from script awaiting approval from the embedder.
     pending_approval_navigations: PendingApprovalNavigations,
 
+    /// Page text requests sent to a pipeline's script thread and not answered yet, with the
+    /// pipeline asked. An answer from a pipeline that is no longer the shown one, or a pipeline
+    /// that exits first, is answered with an empty `PageText` and never with that page's text.
+    pending_page_text: FxHashMap<PageTextId, PipelineId>,
+
     /// Bitmask which indicates which combination of mouse buttons are
     /// currently being pressed.
     pressed_mouse_buttons: MouseButtons,
@@ -745,6 +751,7 @@ where
                     webxr_registry: state.webxr_registry,
                     canvas: OnceCell::new(),
                     pending_approval_navigations: Default::default(),
+                    pending_page_text: Default::default(),
                     pressed_mouse_buttons: MouseButtons::empty(),
                     active_keyboard_modifiers: Modifiers::empty(),
                     hard_fail,
@@ -1411,6 +1418,9 @@ where
             ) => {
                 self.handle_evaluate_javascript(webview_id, evaluation_id, script);
             },
+            EmbedderToConstellationMessage::RequestPageText(webview_id, page_text_id, limit) => {
+                self.handle_request_page_text(webview_id, page_text_id, limit);
+            },
             EmbedderToConstellationMessage::CreateMemoryReport(sender) => {
                 self.mem_profiler_chan.send(ProfilerMsg::Report(sender));
             },
@@ -1608,6 +1618,76 @@ where
                 Err(JavaScriptEvaluationError::InternalError),
             );
         }
+    }
+
+    /// Ask the script thread of the pipeline shown in `webview_id` for its document's text. The
+    /// embedder always gets exactly one answer: the text, or an empty `PageText` when there is no
+    /// such pipeline, its script thread is gone, or the pipeline is replaced or exits first.
+    #[servo_tracing::instrument(skip_all)]
+    fn handle_request_page_text(
+        &mut self,
+        webview_id: WebViewId,
+        page_text_id: PageTextId,
+        limit: usize,
+    ) {
+        let browsing_context_id = BrowsingContextId::from(webview_id);
+        let Some(pipeline) = self
+            .browsing_contexts
+            .get(&browsing_context_id)
+            .and_then(|browsing_context| self.pipelines.get(&browsing_context.pipeline_id))
+        else {
+            self.send_page_text(page_text_id, PageText::default());
+            return;
+        };
+        let pipeline_id = pipeline.id;
+        if pipeline
+            .event_loop
+            .send(ScriptThreadMessage::RequestPageText(
+                webview_id,
+                pipeline_id,
+                page_text_id,
+                limit,
+            ))
+            .is_err()
+        {
+            self.send_page_text(page_text_id, PageText::default());
+            return;
+        }
+        self.pending_page_text.insert(page_text_id, pipeline_id);
+    }
+
+    /// The answer of a script thread. It is passed on only if the request is still pending and
+    /// the answering pipeline is still the one shown by the webview; otherwise it is dropped and
+    /// the embedder gets an empty `PageText`.
+    #[servo_tracing::instrument(skip_all)]
+    fn handle_finish_page_text(
+        &mut self,
+        webview_id: WebViewId,
+        source_pipeline_id: PipelineId,
+        page_text_id: PageTextId,
+        page_text: PageText,
+    ) {
+        let Some(asked) = self.pending_page_text.remove(&page_text_id) else {
+            // Already answered (the pipeline exited first): nothing more to send.
+            return;
+        };
+        let shown = self
+            .browsing_contexts
+            .get(&BrowsingContextId::from(webview_id))
+            .map(|browsing_context| browsing_context.pipeline_id);
+        if asked == source_pipeline_id && shown == Some(source_pipeline_id) {
+            self.send_page_text(page_text_id, page_text);
+        } else {
+            self.send_page_text(page_text_id, PageText::default());
+        }
+    }
+
+    fn send_page_text(&self, page_text_id: PageTextId, page_text: PageText) {
+        self.constellation_to_embedder_proxy
+            .send(ConstellationToEmbedderMsg::FinishPageText(
+                page_text_id,
+                page_text,
+            ));
     }
 
     #[servo_tracing::instrument(skip_all)]
@@ -2027,6 +2107,14 @@ where
             },
             ScriptToConstellationMessage::FinishJavaScriptEvaluation(evaluation_id, result) => {
                 self.handle_finish_javascript_evaluation(evaluation_id, result)
+            },
+            ScriptToConstellationMessage::FinishPageText(page_text_id, page_text) => {
+                self.handle_finish_page_text(
+                    webview_id,
+                    source_pipeline_id,
+                    page_text_id,
+                    page_text,
+                );
             },
             ScriptToConstellationMessage::ForwardKeyboardScroll(pipeline_id, scroll) => {
                 if let Some(pipeline) = self.pipelines.get(&pipeline_id)
@@ -2982,6 +3070,18 @@ where
         let Some(pipeline) = self.pipelines.remove(&pipeline_id) else {
             return;
         };
+
+        // A page text request waiting on this pipeline is answered now, empty.
+        let unanswered: Vec<PageTextId> = self
+            .pending_page_text
+            .iter()
+            .filter(|(_, asked)| **asked == pipeline_id)
+            .map(|(id, _)| *id)
+            .collect();
+        for page_text_id in unanswered {
+            self.pending_page_text.remove(&page_text_id);
+            self.send_page_text(page_text_id, PageText::default());
+        }
 
         // Let the embedding layer release resources it is holding on this pipeline's behalf.
         self.constellation_to_embedder_proxy

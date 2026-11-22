@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Verus on the functions that ship, not on a model of them, as LucinaOS scripts/verify-shipped.sh: a shipped
+# Verus on the functions that ship, not on a model of them, as scripts/verify-shipped.sh does: a shipped
 # file is plain Rust with its proof in `//@` lines, and what Verus reads is made by mechanical steps only, checked by
 # undoing them:
 #   `-> T //@ret`  becomes `-> (ret: T)`;   `... //@omit` is dropped;   `//@ proof` becomes `proof`.
-# Run on the build host through the verification script: raster/verify.sh
+# Run from the repository root: raster/verify.sh (needs Verus: put it on PATH or set VERUS to its binary).
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
-verus=${VERUS:-/home/user/tools/verus/verus-x86-linux/verus}
+verus=${VERUS:-verus}
+command -v "$verus" >/dev/null 2>&1 || { echo "error: Verus not found; put verus on PATH or set VERUS=/path/to/verus" >&2; exit 1; }
 read -r -a files <<< "${FILES:-raster/rules/src/lib.rs raster/rules/src/blit.rs raster/rules/src/span.rs}"
 work=$(mktemp -d "${TMPDIR:-/tmp}/raster-verify.XXXXXX")
 trap 'rm -rf "$work"' EXIT

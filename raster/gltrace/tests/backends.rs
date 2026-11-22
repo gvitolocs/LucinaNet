@@ -41,11 +41,11 @@ fn compare(trace: &Path) -> std::collections::BTreeMap<String, usize> {
     ops
 }
 
-/// The recorded session of `page` (`$GLTRACE_TRACES/<page>/trace-*.bin`, by default the scratch directory the
-/// capture script writes).
+/// The recorded session of `page` (`$GLTRACE_TRACES/<page>/trace-*.bin`: set `GLTRACE_TRACES` to the
+/// directory `raster/capture-traces.sh` wrote).
 fn page_trace(page: &str) -> PathBuf {
     let root = std::env::var_os("GLTRACE_TRACES").map_or_else(
-        || std::env::temp_dir().join("lucinanet-raster/traces"),
+        || std::env::temp_dir().join("gltrace-traces"),
         PathBuf::from,
     );
     let dir = root.join(page);

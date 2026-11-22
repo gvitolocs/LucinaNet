@@ -1,9 +1,9 @@
 //! Inventory of what real sites find missing at run time, computed from their logs.
 //!
 //! Pure post-processor: it reads the `lucinanet --render` stderr logs of the browser and the
-//! `LUCINANET_JS_MISSING_LOG` files the glue writes, and writes the two tables of docs/missing.md
-//! section 3. No engine, no mozjs, no network. The output is deterministic (files by path, rows by
-//! rank then text), so diffs between runs stay small.
+//! `LUCINANET_JS_MISSING_LOG` files the glue writes, and writes the two `missing-runtime` tables. No
+//! engine, no mozjs, no network. The output is deterministic (files by path, rows by rank then text),
+//! so diffs between runs stay small.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Write;

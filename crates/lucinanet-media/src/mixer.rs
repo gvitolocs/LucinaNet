@@ -14,7 +14,7 @@
 //! clock a `<video>` follows.
 //!
 //! The device is opened when something plays and let go 2 s after the last sound, so the Video app or the music player can have it.
-//! Where there is no device (the build host, QEMU, the device taken by another program) a stand-in plays at real time to nowhere, so the clock
+//! Where there is no device (a Linux desktop, QEMU, the device taken by another program) a stand-in plays at real time to nowhere, so the clock
 //! and everything that follows it behave the same; `LUCINANET_MEDIA_WAV=<path>` also writes what is mixed to a WAV file, for tests.
 //! `LUCINANET_MEDIA_SINK=none` takes that stand-in from the start, without asking any device for a stream, which is how a headless run
 //! of a page with sound keeps the room quiet.

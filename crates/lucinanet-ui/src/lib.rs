@@ -12,6 +12,7 @@ pub mod frametimeline;
 pub mod glass;
 pub mod keymap;
 pub mod onebar;
+pub mod platform;
 pub mod scrollbench;
 pub mod shot;
 pub mod tabs;
@@ -73,7 +74,25 @@ pub enum Cmd {
     /// The star: bookmark the shown page, or remove its bookmarks if it has any. The engine answers with
     /// [`News::Bookmarked`] (and a [`News::Note`] when it refused).
     ToggleBookmark,
+    /// The local history for the history panel (Ctrl+H): the pages last visited, newest first, at most `limit` of them and
+    /// never more than [`HISTORY_LIST_MAX`]. The engine answers with [`News::HistoryList`] and the same id; it reads the
+    /// local store only and sends no request.
+    ListHistory { id: u64, limit: usize },
+    /// The local bookmarks for the bookmarks panel (Ctrl+Shift+O, Ctrl+B): the bookmarks last added first, at most `limit` of
+    /// them and never more than [`BOOKMARK_LIST_MAX`]. The engine answers with [`News::BookmarkList`] and the same id; it
+    /// reads the local store only and sends no request.
+    ListBookmarks { id: u64, limit: usize },
+    /// The find bar (Ctrl+F) wants the shown page's text: the engine asks the page for it (a walk of its own, no script runs
+    /// in the page) and answers with [`News::PageText`] and the same id. The text goes to the find bar only.
+    PageText { id: u64 },
 }
+
+/// The most bookmarks one [`Cmd::ListBookmarks`] is answered with, cut before the answer is built.
+pub const BOOKMARK_LIST_MAX: usize = 200;
+
+/// The most pages one [`Cmd::ListHistory`] is answered with: a panel shows a few at a time and the store holds up to twenty
+/// thousand, so the answer is cut before it is built.
+pub const HISTORY_LIST_MAX: usize = 200;
 
 #[derive(Debug)]
 pub enum News {
@@ -115,6 +134,16 @@ pub enum News {
     /// Whether the shown tab's page is bookmarked, sent whenever its address changes, another tab is shown or the star was
     /// pressed.
     Bookmarked(bool),
+    /// The answer to [`Cmd::ListHistory`]: the visited pages by last visit, newest first, with the title (possibly empty),
+    /// the address and the time of the last visit in microseconds since the Unix epoch. Empty without a history.
+    HistoryList { id: u64, entries: Vec<lucinanet_omnibox::HistoryEntry> },
+    /// The answer to [`Cmd::ListBookmarks`]: the bookmarks, the last added first, with the title (possibly empty) and the
+    /// address. Not [`News::BookmarkHits`]: that one is the address bar's and never carries a list for the panel.
+    BookmarkList { id: u64, entries: Vec<lucinanet_omnibox::BookmarkEntry> },
+    /// The answer to [`Cmd::PageText`]: the shown page's text as blocks of runs, for the find bar and nothing else. `partial`
+    /// when the engine's byte limit cut the text short. Empty when the page went away before it was walked. The text is
+    /// never logged, never kept but by the open find bar, and dropped with it.
+    PageText { id: u64, blocks: Vec<lucinanet_find::Block>, partial: bool },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -259,6 +288,7 @@ impl Waker {
 
 /// The quiet window and the longest wait, in milliseconds, from the two settings (None = unset): a quiet window of 0
 /// keeps the old fixed 800 ms, and the longest wait is never shorter than the quiet window.
+#[cfg(feature = "harness")]
 fn settle_windows(quiet: Option<u64>, max: Option<u64>) -> (u64, u64) {
     let quiet = quiet.unwrap_or(1500);
     if quiet == 0 {
@@ -268,6 +298,7 @@ fn settle_windows(quiet: Option<u64>, max: Option<u64>) -> (u64, u64) {
 }
 
 /// Whether a loaded page has settled: no frame for `quiet` ms, or `max` ms since load.
+#[cfg(feature = "harness")]
 fn settled(since_last_frame_ms: u64, since_load_ms: u64, quiet: u64, max: u64) -> bool {
     since_last_frame_ms >= quiet || since_load_ms >= max
 }
@@ -276,6 +307,7 @@ fn settled(since_last_frame_ms: u64, since_load_ms: u64, quiet: u64, max: u64) -
 ///
 /// `LUCINANET_SCALE` is the device pixels per CSS pixel: a window on a screen gets that from the toolkit, and
 /// an offscreen run has no toolkit to ask, so the benchmark says (1.0 when unset, as it always was).
+#[cfg(feature = "harness")]
 pub fn render(start: Start, url: &str, out: &str, width: u32, height: u32, dump: Option<&str>) {
     let started = std::time::Instant::now();
     let scale = scrollbench::parse_scale(std::env::var("LUCINANET_SCALE").ok().as_deref());
@@ -448,7 +480,7 @@ pub fn render(start: Start, url: &str, out: &str, width: u32, height: u32, dump:
         eprintln!("scroll-bench: LUCINANET_SCROLL_BENCH={raw} is not <steps> or <steps>x<delta CSS px>, so nothing was measured");
     }
     // `LUCINANET_LOADS=<file>`: a line each, in turn, with the memory it leaves: a URL, `back`, `forward`, `click <x> <y>`
-    // (a press and release of the left button), `typed <url>` (a load that counts as typed in the history), `newtab <url>` (a tab with that address, shown at once), `bookmark` (the star on the shown page: adds it, or removes it if it is bookmarked), `wait <ms>`. A line `timing` turns on the timing output: per step one line
+    // (a press and release of the left button), `typed <url>` (a load that counts as typed in the history), `newtab <url>` (a tab with that address, shown at once), `bookmark` (the star on the shown page: adds it, or removes it if it is bookmarked), `pagetext` (the find bar's page text, printed as counts), `wait <ms>`. A line `timing` turns on the timing output: per step one line
     // `timing step=N cmd=.. arg=.. phase=cold|warm url_ms=.. frame_ms=.. complete_ms=.. loading=0|1 timed_out=0|1 rss_mib=..
     // load1=..` (ms from the command to the first URL news, the first frame and the load-complete signal; `-` where it
     // never came, as for a Back from the cache, which sends no Loading signal), and no fixed settle after a step.
@@ -485,6 +517,24 @@ pub fn render(start: Start, url: &str, out: &str, width: u32, height: u32, dump:
                         }
                     }
                     eprintln!("render: bookmark {step} on {on:?}");
+                    continue;
+                },
+                // `pagetext`: the same request Ctrl+F makes; waits for the answer and prints its counts, never its text
+                // (`render: pagetext blocks=N runs=M partial=B`). For `tests/web/page-text-unobserved.sh`.
+                "pagetext" => {
+                    step += 1;
+                    engine.send(Cmd::PageText { id: step as u64 });
+                    let limit = std::time::Instant::now() + Duration::from_secs(5);
+                    let mut counts = None;
+                    while counts.is_none() && std::time::Instant::now() < limit {
+                        if let Ok(News::PageText { blocks, partial, .. }) = rx.recv_timeout(Duration::from_millis(50)) {
+                            counts = Some((blocks.len(), blocks.iter().map(|b| b.runs.len()).sum::<usize>(), partial));
+                        }
+                    }
+                    match counts {
+                        Some((blocks, runs, partial)) => eprintln!("render: pagetext blocks={blocks} runs={runs} partial={partial}"),
+                        None => eprintln!("render: pagetext no answer"),
+                    }
                     continue;
                 },
                 "newtab" => match words.next().map(Url::parse) {
@@ -598,6 +648,7 @@ pub fn render(start: Start, url: &str, out: &str, width: u32, height: u32, dump:
 /// The steps are paced at the nominal 60 Hz, which is what a hand asks of a page. With
 /// `LUCINANET_SCROLL_BENCH_PACE=0` the next step goes as soon as a frame has been presented, which is the same
 /// scroll at the machine's own pace: the run then says how fast the engine can go, not how well it holds 60 Hz.
+#[cfg(feature = "harness")]
 fn scroll_bench(engine: &dyn Engine, rx: &std::sync::mpsc::Receiver<News>, meta: scrollbench::Meta) {
     use scrollbench::{Frame, Line, NOMINAL_MS};
     // The wheel counts device pixels; the page moves by that many over the scale, in CSS pixels. The point is
@@ -722,6 +773,7 @@ fn scroll_bench(engine: &dyn Engine, rx: &std::sync::mpsc::Receiver<News>, meta:
 }
 
 /// What one step of `LUCINANET_LOADS` showed, each as the time since the command.
+#[cfg(feature = "harness")]
 struct Seen {
     url: Option<Duration>,
     frame: Option<Duration>,
@@ -731,6 +783,7 @@ struct Seen {
 
 /// Waits for a step to show itself: the load-complete signal (and a frame, up to a second after it), or, when no load began
 /// (a Back from the cache sends no Loading signal; a load always waits for its signal), the first frame and 300 ms without news about the navigation.
+#[cfg(feature = "harness")]
 fn watch_step(rx: &std::sync::mpsc::Receiver<News>, sent: std::time::Instant, limit: Duration, expect_load: bool) -> Seen {
     let mut seen = Seen { url: None, frame: None, complete: None, timed_out: false };
     let mut loading = false;
@@ -777,6 +830,7 @@ fn watch_step(rx: &std::sync::mpsc::Receiver<News>, sent: std::time::Instant, li
 }
 
 /// Reads and drops the news until `quiet` has passed without any, or `max` has.
+#[cfg(feature = "harness")]
 fn quiet(rx: &std::sync::mpsc::Receiver<News>, quiet: Duration, max: Duration) {
     let end = std::time::Instant::now() + max;
     let mut last = std::time::Instant::now();
@@ -787,6 +841,7 @@ fn quiet(rx: &std::sync::mpsc::Receiver<News>, quiet: Duration, max: Duration) {
     }
 }
 
+#[cfg(feature = "harness")]
 fn load_average() -> String {
     std::fs::read_to_string("/proc/loadavg")
         .ok()
@@ -796,6 +851,7 @@ fn load_average() -> String {
 
 /// One parseable line per step (see `LUCINANET_LOADS`).
 #[allow(clippy::too_many_arguments)]
+#[cfg(feature = "harness")]
 fn step_line(
     step: u32,
     cmd: &str,
@@ -837,32 +893,94 @@ pub fn exit_now() -> ! {
     unsafe { libc::_exit(0) }
 }
 
-/// An engine's `main`:`<bin> --render <url> <out.png> [WxH] [dump.json]`, or the browser.
+/// What the command line asks for (see [`parse_mode`]).
+#[derive(Debug, PartialEq, Eq)]
+pub enum Mode<'a> {
+    /// `--version`: the version line, then exit.
+    Version,
+    /// `--render <url> <out.png> [WxH] [dump.json]`: a harness run, no window (harness builds only).
+    #[cfg(feature = "harness")]
+    Render { url: &'a str, out: &'a str, width: u32, height: u32, dump: Option<&'a str> },
+    /// A `--option` this build does not have: exit with an error and start nothing (normal builds only).
+    #[cfg(not(feature = "harness"))]
+    Refused(&'a str),
+    /// The browser; the first argument, if any, is the start address or `--desktop`.
+    Browser(Option<&'a str>),
+}
+
+/// The flag of the unattended page load. Compared as data (`black_box`), not folded into an integer compare, so a harness
+/// binary holds the string and `tests/harness-gate/check-release-binary.sh` can tell it from a build without the door.
+#[cfg(feature = "harness")]
+const RENDER_FLAG: &str = "--render";
+
+/// Reads the command line: which mode, and nothing else (no engine is started and no variable is read).
+pub fn parse_mode(args: &[String]) -> Mode<'_> {
+    match args.get(1).map(String::as_str) {
+        Some("--version") => Mode::Version,
+        #[cfg(feature = "harness")]
+        Some(flag) if args.len() >= 4 && flag == std::hint::black_box(RENDER_FLAG) => {
+            let (width, height) = args
+                .get(4)
+                .and_then(|s| s.split_once('x'))
+                .map_or((1920, 1000), |(w, h)| (w.parse().unwrap(), h.parse().unwrap()));
+            Mode::Render { url: &args[2], out: &args[3], width, height, dump: args.get(5).map(String::as_str) }
+        },
+        // A normal build has no `--option` of its own besides `--desktop` and `--version`: any other is refused, so `--render` or a
+        // probe flag is not taken for an address either (that would be a search request). A harness build reads the line as before.
+        #[cfg(not(feature = "harness"))]
+        Some(option) if option.starts_with("--") && option != "--desktop" => Mode::Refused(option),
+        // The launcher always puts `--desktop` first, so the arguments after it are read the same way.
+        #[cfg(not(feature = "harness"))]
+        Some("--desktop") if args.get(2).is_some_and(|option| option.starts_with("--")) => Mode::Refused(&args[2]),
+        first => Mode::Browser(first),
+    }
+}
+
+/// The version line `--version` prints. A harness build says so, with the marker that tools/release, the packagers and the
+/// scripts that need the doors look for in a binary (`LUCINANET-HARNESS-BUILD`).
+#[cfg(not(feature = "harness"))]
+pub const VERSION_LINE: &str = concat!("lucinanet ", env!("CARGO_PKG_VERSION"));
+#[cfg(feature = "harness")]
+pub const VERSION_LINE: &str = concat!(
+    "lucinanet ",
+    env!("CARGO_PKG_VERSION"),
+    " harness build (LUCINANET-HARNESS-BUILD: for tests and measurements, never to be installed or shipped)"
+);
+
+/// The window's title: a harness build says what it is, so it cannot be taken for the browser.
+#[cfg(not(feature = "harness"))]
+pub const WINDOW_TITLE: &str = "LucinaNet";
+#[cfg(feature = "harness")]
+pub const WINDOW_TITLE: &str = "LucinaNet (harness)";
+
+/// An engine's `main`: the browser, `--version`, or in a harness build `<bin> --render <url> <out.png> [WxH] [dump.json]`.
 pub fn main(start: Start) -> ! {
     install_crash_report();
     // Before any engine thread starts: a font directory the list missed is a page of boxes.
     fonts::ensure_font_env();
     let args: Vec<String> = std::env::args().collect();
-    match args.get(1).map(String::as_str) {
-        Some("--render") if args.len() >= 4 => {
-            let (w, h) = args
-                .get(4)
-                .and_then(|s| s.split_once('x'))
-                .map_or((1920, 1000), |(w, h)| (w.parse().unwrap(), h.parse().unwrap()));
-            render(start, &args[2], &args[3], w, h, args.get(5).map(String::as_str));
+    match parse_mode(&args) {
+        Mode::Version => {
+            println!("{VERSION_LINE}");
+            exit_now()
+        },
+        #[cfg(not(feature = "harness"))]
+        Mode::Refused(option) => {
+            eprintln!("lucinanet: unknown option {option}");
+            std::process::exit(2)
+        },
+        #[cfg(feature = "harness")]
+        Mode::Render { url, out, width, height, dump } => {
+            render(start, url, out, width, height, dump);
             exit_now()
         },
         #[cfg(feature = "desktop")]
-        first => {
-            let first = first
-                .filter(|a| *a != "--desktop")
-                .or(args.get(2).map(String::as_str))
-                .and_then(address::to_url)
-                .unwrap_or_else(|| Url::parse("https://example.com").expect("a valid URL"));
+        Mode::Browser(first) => {
+            let first = address::start_url(first.filter(|a| *a != "--desktop").or(args.get(2).map(String::as_str)));
             desktop::run(first, start)
         },
         #[cfg(not(feature = "desktop"))]
-        first => run("lucinanet", first, start),
+        Mode::Browser(first) => run("lucinanet", first, start),
     }
 }
 
@@ -909,21 +1027,38 @@ pub fn install_crash_report() {
     }
 }
 
-/// The window, until it ends. `LUCINANET_SCRIPT=<file>` replays test input (`Browser::script`): one command
-/// a line, `wait <ms>` between them.
+/// The test script's file (`LUCINANET_SCRIPT=<file>`, a harness build only) from `get`, the environment as a lookup so a test
+/// can stand in for it.
+#[cfg(feature = "harness")]
+fn script_door(get: impl Fn(&str) -> Option<std::ffi::OsString>) -> Option<std::ffi::OsString> {
+    get("LUCINANET_SCRIPT")
+}
+
+/// Without `harness` the variable is not read: its name is not in the program.
+#[cfg(not(feature = "harness"))]
+fn script_door(_get: impl Fn(&str) -> Option<std::ffi::OsString>) -> Option<std::ffi::OsString> {
+    None
+}
+
+/// The window, until it ends. In a harness build `LUCINANET_SCRIPT=<file>` replays test input (`Browser::script`): one
+/// command a line, `wait <ms>` between them.
 pub fn run(name: &str, first: Option<&str>, start: Start) -> ! {
-    let first = first
-        .and_then(address::to_url)
-        .unwrap_or_else(|| Url::parse("https://example.com").expect("a valid URL"));
+    let first = address::start_url(first);
     lucina_app::run(name, |tx| {
-        if let Some(path) = std::env::var_os("LUCINANET_SCRIPT") {
+        // `None` unless this is a harness build (see `script_door`); the thread itself is not built otherwise.
+        let script_file = script_door(|name| std::env::var_os(name));
+        #[cfg(feature = "harness")]
+        if let Some(path) = script_file {
             let tx = tx.clone();
             std::thread::spawn(move || script(path, tx));
         }
+        #[cfg(not(feature = "harness"))]
+        let _ = script_file;
         browser::Browser::new(tx, first, start)
     })
 }
 
+#[cfg(feature = "harness")]
 fn script(path: std::ffi::OsString, tx: lucina_app::Sender<browser::Msg>) {
     let Ok(text) = std::fs::read_to_string(path) else {
         return;
@@ -938,10 +1073,11 @@ fn script(path: std::ffi::OsString, tx: lucina_app::Sender<browser::Msg>) {
     }
 }
 
-/// What both engines say they are. Chromium's form, because sites serve Chromium's form the working page.
-pub const USER_AGENT: &str = "Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36 LucinaNet/0.1";
+/// What both engines say they are (Chromium's form, the platform token from the build target: `platform.rs`).
+pub use platform::USER_AGENT;
 
 /// CPU ticks so far per thread name, adding up threads with the same name.
+#[cfg(feature = "harness")]
 fn thread_ticks() -> std::collections::HashMap<String, u64> {
     let mut ticks = std::collections::HashMap::new();
     for task in std::fs::read_dir("/proc/self/task").into_iter().flatten().flatten() {
@@ -972,7 +1108,7 @@ pub fn phase(name: &str) {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "harness"))]
 mod settle_tests {
     use super::{settle_windows, settled};
 
@@ -1026,5 +1162,84 @@ mod security_tests {
         for (url, want) in TABLE {
             assert_eq!(security_of(url), want, "{url}");
         }
+    }
+}
+
+/// the doors that start a request or run script from the command line or the environment exist only in a
+/// `harness` build. The environment is a lookup here, so no test sets a variable.
+#[cfg(test)]
+mod door_tests {
+    use super::{Mode, VERSION_LINE, WINDOW_TITLE, parse_mode, script_door};
+
+    fn argv(args: &[&str]) -> Vec<String> {
+        args.iter().map(|a| (*a).to_owned()).collect()
+    }
+
+    /// F5: `LUCINANET_SCRIPT`.
+    #[cfg(not(feature = "harness"))]
+    #[test]
+    fn without_harness_the_script_variable_does_nothing() {
+        assert_eq!(script_door(|_| Some("planted/script".into())), None);
+    }
+
+    #[cfg(feature = "harness")]
+    #[test]
+    fn with_harness_the_script_variable_names_the_script() {
+        let get = |name: &str| (name == "LUCINANET_SCRIPT").then(|| std::ffi::OsString::from("planted/script"));
+        assert_eq!(script_door(get), Some("planted/script".into()));
+        assert_eq!(script_door(|_| None), None);
+    }
+
+    /// F6: `--render`, and with it `LUCINANET_LOADS` and `LUCINANET_RENDER_HOLD`, which are read inside it.
+    #[cfg(not(feature = "harness"))]
+    #[test]
+    fn without_harness_render_is_refused_not_taken_for_an_address() {
+        let args = argv(&["lucinanet", "--render", "http://127.0.0.1:9/", "out.png"]);
+        assert_eq!(parse_mode(&args), Mode::Refused("--render"));
+        // Through the launcher (`--desktop` first) it is refused the same way, not taken for an address.
+        let args = argv(&["lucinanet", "--desktop", "--render", "http://127.0.0.1:9/", "out.png"]);
+        assert_eq!(parse_mode(&args), Mode::Refused("--render"));
+    }
+
+    #[cfg(feature = "harness")]
+    #[test]
+    fn with_harness_render_is_parsed_as_before() {
+        let args = argv(&["lucinanet", "--render", "http://127.0.0.1:9/", "out.png", "800x600", "dump.json"]);
+        assert_eq!(
+            parse_mode(&args),
+            Mode::Render { url: "http://127.0.0.1:9/", out: "out.png", width: 800, height: 600, dump: Some("dump.json") }
+        );
+        let args = argv(&["lucinanet", "--render", "http://127.0.0.1:9/", "out.png"]);
+        assert_eq!(
+            parse_mode(&args),
+            Mode::Render { url: "http://127.0.0.1:9/", out: "out.png", width: 1920, height: 1000, dump: None }
+        );
+    }
+
+    /// F7 (the diagnostic subcommands of the binary crate reach `main` here when it does not take them): any other
+    /// `--option` is refused in a normal build, so none becomes a search.
+    #[cfg(not(feature = "harness"))]
+    #[test]
+    fn without_harness_an_unknown_option_is_refused() {
+        for option in ["--netprobe", "--udpdns", "--dnsprobe", "--whatever"] {
+            assert_eq!(parse_mode(&argv(&["lucinanet", option, "example.org"])), Mode::Refused(option));
+        }
+    }
+
+    #[test]
+    fn an_address_a_desktop_flag_and_no_argument_still_start_the_browser() {
+        assert_eq!(parse_mode(&argv(&["lucinanet"])), Mode::Browser(None));
+        assert_eq!(parse_mode(&argv(&["lucinanet", "--desktop", "https://example.org/"])), Mode::Browser(Some("--desktop")));
+        assert_eq!(parse_mode(&argv(&["lucinanet", "https://example.org/"])), Mode::Browser(Some("https://example.org/")));
+        assert_eq!(parse_mode(&argv(&["lucinanet", "--version"])), Mode::Version);
+    }
+
+    /// A harness build says so in its version line (and its window title); a normal build does not.
+    #[test]
+    fn the_version_line_says_harness_only_in_a_harness_build() {
+        assert_eq!(VERSION_LINE.contains("harness"), cfg!(feature = "harness"));
+        assert_eq!(VERSION_LINE.contains("LUCINANET-HARNESS-BUILD"), cfg!(feature = "harness"));
+        assert_eq!(WINDOW_TITLE.contains("harness"), cfg!(feature = "harness"));
+        assert!(VERSION_LINE.starts_with("lucinanet "));
     }
 }

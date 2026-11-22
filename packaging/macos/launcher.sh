@@ -15,12 +15,16 @@ here=$(cd "$(dirname "$0")" && pwd)
 bin="$here/@BIN_NAME@"
 [ -x "$bin" ] || { echo "lucinanet: $bin is missing or not executable" >&2; exit 127; }
 
-# Page errors and missing JS features of each run, kept on this machine only.
+# The caller's environment is not the engine's: every LUCINA* and LUCINANET_* variable is removed here, first, so a
+# profile, an rc file or `launchctl setenv` cannot hand the engine a user script, preferences, a start script or any other
+# experiment (docs/harness-doors.md). What this launcher sets itself comes after the loop: it is the whole allow-list.
+for v in $(env | sed -n 's/^\(LUCINA[A-Za-z0-9_]*\)=.*/\1/p'); do unset "$v"; done
+
+# Page errors of each run, kept on this machine only.
 logs="$HOME/Library/Logs/LucinaNet"
 stamp=$(date +%Y%m%d-%H%M%S)
 if mkdir -p "$logs" 2>/dev/null; then
 	export LUCINANET_CONSOLE=1
-	export LUCINANET_JS_MISSING_LOG="$logs/missing-$stamp.log"
 	exec "$bin" --desktop "$@" >> "$logs/session-$stamp.log" 2>&1
 fi
 exec "$bin" --desktop "$@"

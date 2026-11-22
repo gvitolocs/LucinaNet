@@ -1,14 +1,13 @@
 # LucinaJS Intl (ECMA-402) design
 
-Status: scoping and measurement, 2026-11-11. No engine source was changed. Throwaway spike crates and raw numbers live under `$WORK_DIR` (a temporary working directory) at
-`$WORK_DIR/lucinanet/intl-spike/` on the build host; they are not committed.
+Status: scoping and measurement, 2026-11-11. No engine source was changed. Throwaway spike crates and raw numbers were kept in
+a temporary working directory outside this tree; they are not committed.
 
 Naming: LucinaNet is the browser, LucinaEngine the web engine, LucinaJS the JavaScript engine. "Upstream Brimstone" means the
-project LucinaJS was forked from. The fork repo is `/home/user/Projects/Lucina/LucinaNet-brimstone` (main `75b28e46` when this
-was started), the glue repo is `/home/user/Projects/Lucina/LucinaNet-js`. Fork paths below are relative to `src/js/` of the fork
-unless they start with another repo name.
+project LucinaJS was forked from. The fork is this tree's `third_party/brimstone` (main `75b28e46` when this
+was started), the glue is `js/`. Fork paths below are relative to `src/js/` of the fork unless they start with another name.
 
-Evidence tags: **[src]** read from source, **[meas]** measured on the build host, **[docs]** from docs.rs, crates.io files in the cargo
+Evidence tags: **[src]** read from source, **[meas]** measured on the reference Linux development machine, **[docs]** from docs.rs, crates.io files in the cargo
 registry or the spec, **[inf]** inference or estimate.
 
 ## 0. Summary
@@ -28,12 +27,12 @@ registry or the spec, **[inf]** inference or estimate.
   time zone names and display names, not by number or list formatting.
 - Locale decision (2026-11-12): the default build ships English, Danish and Italian (en, da, it); see section 10. Cost of everything in one
   binary, from section 3: three = 1,716,304 B (~1.7 MB), common20 = 5,585,416 B (~5.6 MB), all = 14,512,224 B (~14.5 MB).
-- ICU4X pin decision (2026-11-12, owner via the project lead), in two moves:
+- ICU4X pin decision (2026-11-12), in two moves:
   1. Collator + `localeCompare` and NumberFormat decimal land first on the present 2.1 pins; nothing delays them.
-  2. Then one change moves ICU4X to the 2.3 line — the line Boa's tables are written against (boa-review section 3) — alone in its commit/branch: every `icu_*` pin
+  2. Then one change moves ICU4X to the 2.3 line — the line Boa's tables are written against — alone in its commit/branch: every `icu_*` pin
      moved together, the data crate regenerated for en, da and it, the binary-size delta reported per locale set, test262 `intl402` counts reported before and after,
      and the Mac and Juno builds checked.
-  3. After it: compact notation from the stable `icu_decimal` `CompactDecimalFormatter` (stable since 2.2, boa-review section 3), and currency from the
+  3. After it: compact notation from the stable `icu_decimal` `CompactDecimalFormatter` (stable since 2.2), and currency from the
      `icu_experimental` release that matches 2.3, written in the fork (Boa has none), USD first because example-site.com formats
      `Intl.NumberFormat("en-US",{style:"currency",currency:"USD"})`.
   Rule: never two generations of ICU4X in one engine — no `icu_experimental` 0.4 beside the 2.1 core crates.
@@ -62,7 +61,7 @@ ICU data setup [src]: `icu/generate_data.sh` runs `icu4x-datagen 2.1.1 --format 
 text. `common/icu.rs:23` fixes `DEFAULT_LOCALE = en` and `common/icu.rs:181` builds the whole `ICU` struct in one `LazyLock`.
 The engine's Cargo pins are `icu_casemap =2.1.1, icu_collator =2.1.2, icu_collections =2.1.1, icu_locale =2.1.1, icu_normalizer =2.1.1,
 icu_properties =2.1.2, icu_provider =2.3.1, icu_provider_baked =2.1.0, icu_provider_adapters =2.1.1, zerotrie =0.2.5, zerovec =0.11.8`
-(`LucinaNet-brimstone/Cargo.toml`, workspace section).
+(`third_party/brimstone/Cargo.toml`, workspace section).
 
 ### 1.2 Date and time zones in the fork today [src]
 
@@ -71,7 +70,7 @@ icu_properties =2.1.2, icu_provider =2.3.1, icu_provider_baked =2.1.0, icu_provi
 - Temporal does have time zones: `runtime/context.rs:150,203,543` holds `temporal_provider: CompiledTzdbProvider` (crate
   `timezone_provider` 0.2.1 with feature `tzif`, bundled IANA data from `jiff-tzdb`), and `Temporal.Now.timeZoneId` reads the system zone
   through `temporal_rs::sys` -> `iana_time_zone::get_timezone()` (`temporal_now_object.rs:55-64`).
-- The glue repo's test262 runner never sets a time zone. [src]
+- The glue's test262 runner (`tools/lucinanet-test262`) never sets a time zone. [src]
 
 ### 1.3 How builtin objects are registered (the pattern a new `Intl` follows) [src]
 
@@ -105,7 +104,7 @@ Not present anywhere in the fork: `SharedArrayBuffer`, `Atomics` (no match in `r
 
 Spec checked: ECMA-402 14th edition draft (ECMAScript 2027 Internationalization API, draft 2026-10-23), https://tc39.es/ecma402/. [docs]
 Versions below are the ones in the local cargo registry that resolve together with the fork's pins; the fork pins `icu_*` 2.1.x and
-`icu_locale_core` resolves to 2.3.0 (`LucinaNet-brimstone/Cargo.lock`). [src, docs]
+`icu_locale_core` resolves to 2.3.0 (`third_party/brimstone/Cargo.lock`). [src, docs]
 
 | ECMA-402 piece | ICU4X crate (version used in the spike) | Status | Gaps we must write ourselves |
 |---|---|---|---|
@@ -138,7 +137,7 @@ may break the API. The registry also holds ICU4X 2.2, 2.3 and 2.4 releases; thos
 
 ### 3.1 Method [meas]
 
-- Spike crate `$WORK_DIR/lucinanet/intl-spike/spike`: one `main.rs`, one cargo feature per row of the table (`f_decimal`, `f_plurals`, `f_list`,
+- Spike crate (not committed): one `main.rs`, one cargo feature per row of the table (`f_decimal`, `f_plurals`, `f_list`,
   `f_datetime` = date and time fields, `f_datetime_zone` = date, time and all time zone name styles, `f_reltime` = relative time in long, short and narrow
   for all 8 units, `f_numext` = currency + percent + unit + compact decimal long and short, `f_displaynames` = region + language + script, `f_segmenter` =
   word + sentence + grapheme + line, `f_collator` = two collators, `f_locale` = canonicalizer + expander + directionality, `f_base` = parse a locale
@@ -182,7 +181,7 @@ How to read: every row except `f_base` is a **delta in bytes over `f_base`** (37
 locale set. Each row is its own single-feature binary; features share code and data with each other, so the "Everything" row (all of them in one binary) is well
 below the sum of the rows.
 
-**What the owner can choose.** Total cost of all eight stage-1 and stage-2 features, from the "Everything" row: **three locales (en, da, it) + 1,716,304 B (~1.7 MB)**,
+**What can be chosen.** Total cost of all eight stage-1 and stage-2 features, from the "Everything" row: **three locales (en, da, it) + 1,716,304 B (~1.7 MB)**,
 **common20 + 5,585,416 B (~5.6 MB)**, or **full CLDR (`all`) + 14,512,224 B (~14.5 MB)**. Segmenter model note: for `en` and `three` there are no dictionary/LSTM
 models to carry (the 138,320 row is the rule engines only); the common20 and `all` Segmenter rows include the `recommended` models (LSTM for th/lo/my/km,
 dictionaries for ja/zh).
@@ -213,8 +212,7 @@ data from section 3.
 
 ## 5. Staging plan
 
-Order inside stage 1 follows what real pages call first. Source: `$WORK_DIR/lucinanet/intl-spike/intl-calls.md`, produced 2026-11-11 by the
-call-frequency worker from 19 page logs (bbc, github, google sign-in and sign-up, hn, mdn, example-site, reddit, wikipedia, youtube start and watch, plus SpiderMonkey
+Order inside stage 1 follows what real pages call first. Source: a call-frequency count produced 2026-11-11 from 19 page logs (bbc, github, google sign-in and sign-up, hn, mdn, example-site, reddit, wikipedia, youtube start and watch, plus SpiderMonkey
 reference runs). It counts calls up to about 7.5 s after load; pages that aborted on the first throw are lower bounds. [meas]
 
 Calls seen in that probe (pages, calls):
@@ -237,7 +235,7 @@ Order (provisional beyond the probe: only 19 page logs, calls after 7.5 s not co
 4. **Collator** (+ `localeCompare` wired, `sensitivity`, `numeric`, `caseFirst`, `ignorePunctuation`) and **`toLocaleLowerCase/UpperCase`** with language tags.
 5. **Locale** (constructor, getters that have data, `maximize/minimize`, `toString`).
 6. **PluralRules**, **ListFormat**.
-7. **RelativeTimeFormat** (not seen in the probe; kept in stage 1 as the brief asks).
+7. **RelativeTimeFormat** (not seen in the probe; kept in stage 1 all the same).
 
 | Stage 1 item | New files (fork, under `runtime/intrinsics/intl/` unless noted) | Estimate (worker-days) [inf] |
 |---|---|---|
@@ -286,8 +284,8 @@ Risks (stage 2): Segmenter dictionary/LSTM data is the biggest single piece of "
 
 ### 5.3 Conformance runner
 
-`tools/lucinanet-test262` (glue repo) skips every `intl402/` file unless `--with-intl` is passed (`main.rs:137`); `--with-intl` only changes what is selected. There is no other Intl
-hook in `exec.rs`, so tests run against the engine as is. How to run it with the queue: `lucinanet-test262 --test262 $WORK_DIR/test262-real
+`tools/lucinanet-test262` skips every `intl402/` file unless `--with-intl` is passed (`main.rs:137`); `--with-intl` only changes what is selected. There is no other Intl
+hook in `exec.rs`, so tests run against the engine as is. How to run it with the queue: `lucinanet-test262 --test262 /path/to/test262
 --filter intl402 --with-intl --jobs 2 --timeout-ms 30000 --out intl402.jsonl --summary intl402-summary.json`. The `--baseline` file (`tools/lucinanet-test262/baseline-failures.txt`) lists the
 default (non-Intl) run only; a separate Intl baseline file should be added when stage 1 starts so Intl progress is gated the same way.
 
@@ -342,10 +340,10 @@ The existing pins stay as they are (`icu_provider =2.3.1`, `icu_provider_baked =
 (`spike/Cargo.lock`). `icu/generate_data.sh` already pins `ICU_VERSION=2.1.1` for datagen: the new script must use the same version, and `--features experimental` is needed for the
 relative time, display names, currency, percent, units and compact decimal markers (the default datagen build refuses them: "This marker requires the `experimental` Cargo feature").
 
-### 6.3 `docs/upstreams.toml` entry
+### 6.3 `third_party/UPSTREAMS.toml` entry
 
-The LucinaOS `docs/upstreams.toml` is not reachable under `/home/user/Projects/Lucina/LucinaOS`; the format below is copied from `/home/user/Projects/Lucina/LucinaNet/docs/upstreams.toml`
-(same keys as our other apps). The pin is the last upstream commit I could not read offline, so `pin` is left as the crate release and must be filled from the tag when merging.
+The format below follows `third_party/UPSTREAMS.toml` in this tree (same keys as our other upstreams). The pin is the last upstream
+commit that could not be read offline, so `pin` is left as the crate release and must be filled from the tag when merging.
 
 ```toml
 [[upstream]]
@@ -359,7 +357,7 @@ track = "releases"
 pin = "icu4x-2.3.0"
 pin_date = "2026-11-11"
 paths = ["components/decimal", "components/plurals", "components/list", "components/datetime", "components/calendar", "components/time", "components/segmenter", "components/collator", "components/locale", "components/experimental"]
-ours = [{ repo = "/home/user/Projects/Lucina/LucinaNet-brimstone", path = "src/js/runtime/intrinsics/intl", base = "main" }]
+ours = [{ repo = "third_party/brimstone", path = "src/js/runtime/intrinsics/intl", base = "main" }]
 licence_upstream = "Unicode-3.0"
 licence_ours = "MIT"
 relation = "vendored"
@@ -368,17 +366,17 @@ rely_on = ["icu_* 2.1.x stable API incl. the _unstable provider constructors", "
 notes = "Used as a library (crates.io), not copied. Design: docs/lucinajs-intl-design.md. Moving the pins means moving icu_provider, icu_locale and the data together and regenerating icu/data and the Intl data module."
 ```
 
-The code that lives in the fork is MIT: `LucinaNet-brimstone/LICENSE` is the MIT licence.
+The code that lives in the fork is MIT: `third_party/brimstone/LICENSE` is the MIT licence.
 
 This entry's `pin` and `paths` change with the ICU4X 2.3 bump (section 0), and that bump has moved: the glue pinned the fork at `d48f9b706c` on 2026-11-12 and has since moved to
 `1f065a160e` (2026-11-13, `Intl.DateTimeFormat` and `Intl.Locale`), which brings `icu_datetime` and `icu_time` in at the same 2.3.0, so the pin stays
-the 2.3 release tag and `paths` follow the crates that moved, compact decimal coming from `components/decimal` instead of `components/experimental`. For the Boa upstream block
-see `docs/lucinajs-intl-boa-review.md` section 10; its relation there is `reference`, and because Boa carries no per-file licence headers the notice duty is the fork's
+the 2.3 release tag and `paths` follow the crates that moved, compact decimal coming from `components/decimal` instead of `components/experimental`. The Boa upstream
+block's relation is `reference`, and because Boa carries no per-file licence headers the notice duty is the fork's
 third-party notices plus a comment at each port site.
 
 ## 7. Atomics (and SharedArrayBuffer)
 
-State [src]: no `Atomics`, no `SharedArrayBuffer`. SpiderMonkey in this checkout does not have `Atomics` either (per the project lead's probe). The call-frequency probe saw no use on the
+State [src]: no `Atomics`, no `SharedArrayBuffer`. SpiderMonkey in this checkout does not have `Atomics` either. The call-frequency probe saw no use on the
 19 logged pages (including Google sign-in, YouTube start and watch). [meas]
 
 What uses it on the web [docs, inf]:
@@ -407,8 +405,9 @@ the browser does not provide yet. Level 1 (plain `Atomics`, 3 days) is cheap and
 Command, run through the queue [meas]:
 
 ```
-bash -c 'cd .../intl-spike/baseline && $WORK_DIR/lucinanet/js-engine/target-perf/release/lucinanet-test262 \
-  --test262 $WORK_DIR/test262-real --filter intl402 --with-intl --jobs 2 --timeout-ms 30000 --out intl402.jsonl --summary intl402-summary.json'
+R=/path/to/test262   # the checkout at the commit in tools/lucinanet-test262/test262.sha
+cargo run --release --manifest-path tools/lucinanet-test262/Cargo.toml --bin lucinanet-test262 -- \
+  --test262 "$R" --filter intl402 --with-intl --jobs 2 --timeout-ms 30000 --out intl402.jsonl --summary intl402-summary.json
 ```
 
 The runner binary is the existing build from 2026-11-11 18:02 (its engine revision is not recorded in the binary); the corpus is test262 at `227d9055...` (matches `test262.sha`).
@@ -455,11 +454,11 @@ The 2952 Temporal passes are tests that do not touch Intl; the 1106 failing Temp
 1. Land the Intl core + data provider + NumberFormat + DateTimeFormat + `Date` time zones first (the probe shows NumberFormat on 6 pages and DateTimeFormat with 105 calls on 3).
 2. Then Collator/`localeCompare`, `toLocaleLowerCase/UpperCase`, Locale, PluralRules, ListFormat, RelativeTimeFormat.
 3. The default build ships the en, da and it locales (the project's decision, section 10 item 1). Zone names and display names stay a build feature (`tz-names`, `display-names`)
-   that is off in stage 1 unless the owner asks; zone ids and the offset forms work without them.
+   that is off by default in stage 1; zone ids and the offset forms work without them.
 4. Stage 2: Segmenter, DisplayNames, formatRange, NumberFormat v3, then DurationFormat when `icu_experimental` allows.
 5. `Atomics` level 1 after stage 1; `SharedArrayBuffer` sharing with Workers.
 
-## 10. Open questions for the owner
+## 10. Open questions
 
 1. Which locale set ships by default — **answered**.
 
@@ -480,4 +479,4 @@ The 2952 Temporal passes are tests that do not touch Intl; the 1106 failing Temp
 6. Move all ICU4X pins to a newer release (the registry has 2.2 to 2.4), or stay on 2.1.x until Intl stage 1 lands? — **Answered 2026-11-12**: the bump to the 2.3 line
    comes after the first two pieces. Collator/`localeCompare` and NumberFormat decimal land on the present 2.1 pins, then one change moves every `icu_*` pin together;
    see the pin decision in section 0.
-7. Is a separate crate for the baked Intl data (so the engine does not recompile it) acceptable, given the `icu/` directory is currently in the fork repo?
+7. Is a separate crate for the baked Intl data (so the engine does not recompile it) acceptable, given the `icu/` directory is currently in the fork?

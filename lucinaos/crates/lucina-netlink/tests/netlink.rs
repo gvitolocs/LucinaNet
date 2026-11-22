@@ -1,4 +1,4 @@
-//! lucina-netlink against the original: on the build host, the C library's own `getifaddrs` over the same kernel is the
+//! lucina-netlink against the original: on a Linux desktop, the C library's own `getifaddrs` over the same kernel is the
 //! oracle; hand-made messages cover what a host may not have (a point-to-point link, a label, cut-short messages).
 
 use lucina_netlink::{Builder, SockAddr, Step, interfaces, netmask};

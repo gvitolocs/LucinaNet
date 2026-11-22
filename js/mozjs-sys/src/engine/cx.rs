@@ -410,6 +410,21 @@ impl Host for ServoHost {
     }
 }
 
+/// The minimum heap for a new context, in MB: `LUCINANET_JS_MIN_HEAP_MB` when it parses, else 256 on macOS and Linux
+/// x86_64 for a context that has no parent runtime, else None — the engine default (64 MB). `has_parent` is true only for
+/// a dedicated worker (Servo's `Runtime::new_with_parent`): twenty workers must not reserve twenty windows of about
+/// 126 MB. Shared and service workers and worklets arrive with a NULL parent, so the glue cannot tell them from the
+/// document script thread and they take the same default.
+fn default_min_heap_mb(env: Option<usize>, has_parent: bool) -> Option<usize> {
+    env.or_else(|| {
+        if !has_parent && cfg!(any(target_os = "macos", all(target_os = "linux", target_arch = "x86_64"))) {
+            Some(256)
+        } else {
+            None
+        }
+    })
+}
+
 /// Gated: a thread whose context was poisoned gets no new one (null); it is meant to unwind (docs/edge-wrap.md).
 #[super::poison::engine_shim]
 pub unsafe extern "C" fn JS_NewContext(_maxbytes: u32, parent: *mut JSRuntime) -> *mut JSContext {
@@ -419,7 +434,10 @@ pub unsafe extern "C" fn JS_NewContext(_maxbytes: u32, parent: *mut JSRuntime) -
         // Worker runtimes: each gets its own context and heap, as with SpiderMonkey; nothing is shared with the parent.
     }
     // Engine options from the environment, for A/B runs:
-    // - LUCINANET_JS_MIN_HEAP_MB: start with a semispace this large, so a page load runs with few or no collections;
+    // - LUCINANET_JS_MIN_HEAP_MB: start with a semispace this large, so a page load runs with few or no collections; unset
+    //   means 256 on macOS and Linux x86_64 for a context without a parent runtime and the engine's 64 elsewhere and for
+    //   dedicated workers (`default_min_heap_mb`): fewer collections while a page loads, and it is address space only —
+    //   the pages are touched as the heap grows, so a light page costs nothing. `64` restores the old behaviour anywhere.
     // - LUCINANET_JS_LAZY=0: generate every function's bytecode when its script is compiled (lazy generation keeps each
     //   script's parse tree alive for its uncalled functions: less compile time, more memory);
     // - LUCINANET_JS_GC_RELEASE=0: keep the free semispace's pages after each collection instead of handing them back to
@@ -434,7 +452,10 @@ pub unsafe extern "C" fn JS_NewContext(_maxbytes: u32, parent: *mut JSRuntime) -
     //   knows of it beside it (`dump_failed`); unset keeps it off.
     super::dump_failed::configure();
     let mut builder = ContextBuilder::new();
-    let min_heap_mb = ::std::env::var("LUCINANET_JS_MIN_HEAP_MB").ok().and_then(|v| v.parse::<usize>().ok());
+    let min_heap_mb = default_min_heap_mb(
+        ::std::env::var("LUCINANET_JS_MIN_HEAP_MB").ok().and_then(|v| v.parse::<usize>().ok()),
+        !parent.is_null(),
+    );
     // LUCINANET_JS_MAX_HEAP_MB: cap the heap (default 1 GiB), so heap exhaustion can be reached quickly (the edge wrap's
     // out-of-memory test, docs/edge-wrap.md).
     let max_heap_mb = ::std::env::var("LUCINANET_JS_MAX_HEAP_MB").ok().and_then(|v| v.parse::<usize>().ok());
@@ -579,22 +600,102 @@ pub(super) unsafe fn sync_wasm_enabled(cx: *mut Cx) {
     embed::set_wasm_enabled(unsafe { (*cx).bs }, enabled);
 }
 
-/// The structural per-function bytecode cache (fork `bytecode/fncache`), from the environment:
-/// - LUCINANET_JS_FN_CACHE_DIR=<dir>: turn the cache on with its disk store in <dir> (LucinaNet sets <profile>/js-fn-cache);
+/// What the embedder asks of the structural per-function bytecode cache (fork `bytecode/fncache`): see
+/// [`set_function_cache_config`].
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FunctionCacheConfig {
+    /// The directory of the disk store. Compiled function records are loaded from it and run, so it must be a directory the
+    /// embedder owns (LucinaNet: `<profile>/js-fn-cache`), never one named by a launch environment.
+    pub dir: ::std::path::PathBuf,
+    /// The disk store's size cap in MB.
+    pub max_mb: u64,
+    /// `false` keeps the cache off although a directory is given (A/B runs).
+    pub enabled: bool,
+}
+
+/// Why [`set_function_cache_config`] refused.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum FunctionCacheConfigError {
+    /// A configuration was set already; the first one stays.
+    AlreadySet,
+    /// A context was created already; the cache is configured as a context is created, so a later call would not apply to it.
+    ContextExists,
+}
+
+impl ::std::fmt::Display for FunctionCacheConfigError {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        match self {
+            Self::AlreadySet => f.write_str("the function cache configuration was set already"),
+            Self::ContextExists => f.write_str("a context exists already; the function cache can no longer be configured"),
+        }
+    }
+}
+
+impl ::std::error::Error for FunctionCacheConfigError {}
+
+struct CacheConfigState {
+    config: Option<FunctionCacheConfig>,
+    context_created: bool,
+}
+
+static FUNCTION_CACHE_CONFIG: Mutex<CacheConfigState> = Mutex::new(CacheConfigState { config: None, context_created: false });
+
+/// Turn the structural function cache on (or keep it off) for every context of this process. This is the only way to name the
+/// cache directory in a normal build: the directory is a place compiled function records are loaded from and run, so the process
+/// environment must not be able to choose it (the `env-config` feature, for tests, is the exception).
+///
+/// Call it once, before the first context is created. A second call returns [`FunctionCacheConfigError::AlreadySet`] and a call
+/// after a context exists returns [`FunctionCacheConfigError::ContextExists`]; either way nothing changes. Without a call the
+/// cache is off.
+pub fn set_function_cache_config(config: FunctionCacheConfig) -> Result<(), FunctionCacheConfigError> {
+    let mut state = FUNCTION_CACHE_CONFIG.lock().unwrap_or_else(|e| e.into_inner());
+    if state.config.is_some() {
+        return Err(FunctionCacheConfigError::AlreadySet);
+    }
+    if state.context_created {
+        return Err(FunctionCacheConfigError::ContextExists);
+    }
+    state.config = Some(config);
+    Ok(())
+}
+
+/// The configuration a context gets, and the mark that a context exists from now on.
+fn function_cache_config_for_new_context() -> Option<FunctionCacheConfig> {
+    let mut state = FUNCTION_CACHE_CONFIG.lock().unwrap_or_else(|e| e.into_inner());
+    state.context_created = true;
+    #[cfg(feature = "env-config")]
+    if state.config.is_none() {
+        return function_cache_config_from_env();
+    }
+    state.config.clone()
+}
+
+/// `env-config` only (tests): the old environment behaviour, exactly:
+/// - LUCINANET_JS_FN_CACHE_DIR=<dir>: turn the cache on with its disk store in <dir>;
 /// - LUCINANET_JS_FN_CACHE_MB=<n>: the disk store's size cap (default 64 MB);
 /// - LUCINANET_JS_FN_CACHE=0: keep it off even when a directory is set (A/B runs).
-/// Debug builds also run the verify mode: every hit is generated again and compared.
+#[cfg(feature = "env-config")]
+fn function_cache_config_from_env() -> Option<FunctionCacheConfig> {
+    let dir = ::std::env::var_os("LUCINANET_JS_FN_CACHE_DIR").filter(|d| !d.is_empty())?;
+    if ::std::env::var("LUCINANET_JS_FN_CACHE").is_ok_and(|v| v == "0") {
+        return None;
+    }
+    let max_mb = ::std::env::var("LUCINANET_JS_FN_CACHE_MB").ok().and_then(|v| v.parse::<u64>().ok()).unwrap_or(64);
+    Some(FunctionCacheConfig { dir: ::std::path::PathBuf::from(dir), max_mb, enabled: true })
+}
+
+/// The structural per-function bytecode cache, from the process-wide [`FunctionCacheConfig`] only (no environment read in a normal
+/// build). Debug builds also run the verify mode: every hit is generated again and compared.
 fn configure_function_cache(bs: brimstone_core::runtime::Context) {
-    let Some(dir) = ::std::env::var_os("LUCINANET_JS_FN_CACHE_DIR").filter(|d| !d.is_empty()) else {
+    let Some(config) = function_cache_config_for_new_context() else {
         return;
     };
-    if ::std::env::var("LUCINANET_JS_FN_CACHE").is_ok_and(|v| v == "0") {
+    if !config.enabled || config.dir.as_os_str().is_empty() {
         return;
     }
-    let mb = ::std::env::var("LUCINANET_JS_FN_CACHE_MB").ok().and_then(|v| v.parse::<u64>().ok()).unwrap_or(64);
     embed::set_function_cache_enabled(bs, true);
-    embed::set_function_cache_dir(bs, Some(::std::path::PathBuf::from(dir)));
-    embed::set_function_cache_max_disk_bytes(bs, mb.saturating_mul(1 << 20));
+    embed::set_function_cache_dir(bs, Some(config.dir));
+    embed::set_function_cache_max_disk_bytes(bs, config.max_mb.saturating_mul(1 << 20));
     embed::set_function_cache_verify(bs, cfg!(debug_assertions));
 }
 
@@ -853,3 +954,31 @@ pub unsafe extern "C" fn JS_GetSecurityCallbacks(cx: *mut JSContext) -> *const J
 /// Servo's memory reporter hook (`WantToMeasure`): there is no SpiderMonkey heap census to feed it, so it is kept and unused.
 #[super::poison::engine_shim]
 pub unsafe extern "C" fn glue__InitializeMemoryReporter(_wtm: crate::glue::WantToMeasure) {}
+
+#[cfg(test)]
+mod tests {
+    use super::default_min_heap_mb;
+
+    /// Whether this target gets the 256 MB default: the desktop builds the measurement was taken on.
+    const DESKTOP: bool = cfg!(any(target_os = "macos", all(target_os = "linux", target_arch = "x86_64")));
+
+    #[test]
+    fn the_environment_always_wins() {
+        for has_parent in [false, true] {
+            // 64 is what restores today's behaviour on a target that defaults to 256.
+            assert_eq!(default_min_heap_mb(Some(64), has_parent), Some(64));
+            assert_eq!(default_min_heap_mb(Some(1024), has_parent), Some(1024));
+        }
+    }
+
+    #[test]
+    fn unset_gives_256_only_without_a_parent_and_on_the_desktop_targets() {
+        assert_eq!(default_min_heap_mb(None, false), if DESKTOP { Some(256) } else { None });
+    }
+
+    #[test]
+    fn a_child_context_keeps_the_engine_default() {
+        // A dedicated worker (the only caller that passes a parent) must not reserve its own 256 MB window.
+        assert_eq!(default_min_heap_mb(None, true), None);
+    }
+}

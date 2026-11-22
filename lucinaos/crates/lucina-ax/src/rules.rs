@@ -9,7 +9,7 @@
 
 /// At most this many nodes in one app's tree; the rest are cut and the tree says so.
 pub const MAX_NODES: u32 = 4096;
-/// A web page's tree (LucinaNet, stage F) may hold more: pages are bigger than apps. With [`NODE_BYTES`] and the text limit this
+/// A web page's tree (LucinaNet) may hold more: pages are bigger than apps. With [`NODE_BYTES`] and the text limit this
 /// is exactly what fits in [`MAX_REPLY_BYTES`].
 pub const MAX_WEB_NODES: u32 = 8192;
 /// Nodes nested deeper than this are not recorded.

@@ -23,7 +23,7 @@ const MAX_REQUEST: u64 = 64 * 1024;
 pub enum Request {
     Tree,
     Act {
-        /// The node id (16 hex digits). `node` is the same, as stage F's Servo socket names it.
+        /// The node id (16 hex digits). `node` is the same, as LucinaNet's Servo socket names it.
         #[serde(alias = "node")]
         id: String,
         action: String,
@@ -34,7 +34,7 @@ pub enum Request {
         #[serde(default)]
         source: Option<String>,
     },
-    /// An app intent (stage C, docs/research/juno-intents.md): `call` is a `lucina_intents::spec::Call`, the reply its `Reply`.
+    /// An app intent (`lucina-intents`): `call` is a `lucina_intents::spec::Call`, the reply its `Reply`.
     /// It may come after frames have run, through [`Server::take_request`] and [`Waiting::reply`].
     Intent { call: Value },
 }

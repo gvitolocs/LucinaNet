@@ -2,12 +2,12 @@
 # Runs LucinaNet's Verus proofs (verification/*.rs) with the Verus LucinaOS pins. Run it through the
 # verification script, one verification at a time. VERIFY_ONLY names one file, including a model.
 #
-# verification/servo-ax.rs proves our Servo fork's accessibility rules where the fork is checked out
-# next to LucinaNet (../LucinaNet-servo). LUCINANET_SERVO points it at another checkout (a worktree).
+# verification/servo-ax.rs proves our Servo fork's accessibility rules from the fork this tree carries
+# (third_party/servo). LUCINANET_SERVO points it at another checkout (a worktree).
 set -u
 root=$(cd "$(dirname "$0")/.." && pwd)
 source "$root/scripts/verus-pin.sh"   # resolves `verus`, prints it, and refuses a version other than verification/verus.version
-servo=${LUCINANET_SERVO:-$root/../LucinaNet-servo}
+servo=${LUCINANET_SERVO:-$root/third_party/servo}
 status=0
 # By default every top-level proof; VERIFY_ONLY names exactly one file, including verification/<dir>/model.rs.
 if [ -n "${VERIFY_ONLY:-}" ]; then
@@ -20,10 +20,10 @@ fi
 for proof in "${proofs[@]}"; do
     name=${proof#"$root"/}
     file=$proof
-    if grep -q '\.\./\.\./LucinaNet-servo/' "$proof"; then
+    if grep -q '\.\./third_party/servo/' "$proof"; then
         # Point the #[path] at the chosen Servo checkout, in a copy next to the original.
         file=$(mktemp "$root/verification/verify_tmp_XXXXXX.rs")
-        sed "s#\.\./\.\./LucinaNet-servo/#$servo/#" "$proof" > "$file"
+        sed "s#\.\./third_party/servo/#$servo/#" "$proof" > "$file"
     fi
     echo "== $name"
     if out=$("$verus" "$file" 2>&1); then

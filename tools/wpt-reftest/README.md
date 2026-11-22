@@ -63,12 +63,12 @@ Asking for `--include fonts/` selects zero tests and exits 2.
 | var | default | meaning |
 | --- | --- | --- |
 | `BIN` | `target/probe/lucinanet-servo` | the renderer to test |
-| `SERVO` | `/home/user/Projects/Lucina/LucinaNet-servo` | the fork holding `tests/wpt/` |
+| `SERVO` | `third_party/servo` | a Servo checkout holding `tests/wpt/` (the corpus is not vendored here) |
 | `MANIFEST` | `$SERVO/tests/wpt/meta/MANIFEST.json` | the v9 manifest |
 | `OUT` | `$WORK_DIR/lucinanet/health/wpt-reftest` | results, PNGs, logs, config |
 | `PORT` | `8123` | localhost http port; an already-running server there is reused |
 | `CARGO_TARGET_DIR` | `$WORK_DIR/lucinanet/health/target-wpt` | scratch build dir, never the worktree |
-| `CARGO_BUILD_JOBS` | `3` | capped; do not raise it on this box |
+| `CARGO_BUILD_JOBS` | `3` | capped; raise it only on a machine that can take it |
 | `FONT_DIRS` | `$WORK_DIR/lucinanet/fonts` | `LUCINANET_FONT_DIRS` |
 | `MAX_C` | `90` | Tctl pause threshold; `0` disables the gate |
 | `BUILD` | `0` | `1` forces a rebuild |
@@ -90,7 +90,7 @@ The tool can also be run directly against an already-running server:
 
 ```sh
 $WORK_DIR/lucinanet/health/target-wpt/release/wpt-reftest \
-  --manifest /home/user/Projects/Lucina/LucinaNet-servo/tests/wpt/meta/MANIFEST.json \
+  --manifest "$SERVO/tests/wpt/meta/MANIFEST.json" \
   --bin target/probe/lucinanet-servo \
   --out $WORK_DIR/lucinanet/health/wpt-reftest \
   --base-url http://localhost:8123 --include css/css-masking/ --limit 8
@@ -199,17 +199,17 @@ The tool reads `/sys/class/hwmon/*/name` for `k10temp` and pauses 20 s at a time
 `temp1_input / 1000 >= --max-c` (default 90), before **every** render — the same gate as
 `tests/media/wpt.sh`'s `cool()`. The wrapper runs the same check before starting the server.
 
-`--jobs` defaults to **1**. Renders are heavy; do not raise it on this box. `--jobs > 2` prints a
+`--jobs` defaults to **1**. Renders are heavy; raise it only on a machine that can take it. `--jobs > 2` prints a
 warning. With `--jobs N`, reference renders are deduplicated through a condvar so parallel workers
 never render the same reference twice.
 
 On a host with no `k10temp` (or with `--max-c 0`) the gate is a no-op: **the caller must then wrap the
-run in the project's heatpause guard**, e.g. the `systemd-run --user --scope -p CPUQuota=200%` form
-above plus `$WORK_DIR/lucinanet/health/heatpause`.
+run in the heatpause guard (`js/tools/heatpause`)**, e.g. the `systemd-run --user --scope -p CPUQuota=200%` form
+above plus a built `heatpause`.
 
 ## Limitations — read before scoring anything
 
-- **Localhost only.** the build host has no `web-platform.test` host entries, and the config serves http on one
+- **Localhost only.** a machine with no `web-platform.test` host entries fails the cross-origin subtests, and the config serves http on one
   port with `check_subdomains: false` and no https/ws/h2 ports. **Cross-origin subtests will fail here
   and must not be counted as engine bugs.** `.https.`, `.h2.`, `.http2.` and `.webtransport.` variants
   are excluded by default for that reason (`--no-default-excludes` puts them back). That is the whole

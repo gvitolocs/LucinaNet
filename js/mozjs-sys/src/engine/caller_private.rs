@@ -3,9 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 //! `JS_GetScriptedCallerPrivate`, which Servo's `active_script_fetch_info`
-//! (`LucinaNet-servo/components/script/event_loop/timers.rs:1122`) calls when `setTimeout` or `setInterval` is handed a
-//! *string*: the private value of the script that is running, in which Servo keeps the initiating script's fetch options and
-//! base URL (a `Rc<BaseScript>` as a `PrivateValue`, set with `JS::SetScriptPrivate`).
+//! (`third_party/servo/components/script/event_loop/timers.rs:1122`) calls when `setTimeout` or
+//! `setInterval` is handed a *string*: the private value of the script that is running, in which Servo
+//! keeps the initiating script's fetch options and base URL (a `Rc<BaseScript>` as a `PrivateValue`, set
+//! with `JS::SetScriptPrivate`).
 //!
 //! **What the C++ does.** The glue declaration (`mozjs-sys/bindgen/gluebindings.rs:1326`, `JS_GetScriptedCallerPrivate(cx,
 //! dest)`) carries no doc text, so here is the function it is a wrapper for, `JS::GetScriptedCallerPrivate`, from

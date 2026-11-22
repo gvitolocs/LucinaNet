@@ -6,7 +6,7 @@ edition.workspace = true
 publish.workspace = true
 
 [dependencies]
-# Semantic events and the present report (stage D of docs/research/juno-ai-native.md): apps reach them as `lucina_app::events`.
+# Semantic events and the present report (`lucina-events`): apps reach them as `lucina_app::events`.
 lucina-events = { path = "../lucina-events" }
 # Which row a key moves to in a list: pure and proved by Verus (verification/juno-files-keys).
 lucina-nav = { path = "../lucina-nav" }

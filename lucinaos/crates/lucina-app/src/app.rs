@@ -713,7 +713,7 @@ fn run_headless<A: App>(
 }
 
 /// What one paint changed in the tree, as events: a node each for a few, one `view.changed` for a new view. Held-back values and
-/// text are in no tree (stage B), so none can reach an event.
+/// text are in no tree (`lucina-ax`), so none can reach an event.
 fn tree_events(changes: &[lucina_ax::tree::Change]) {
     const NODES_AT_MOST: usize = 12;
     if changes.is_empty() {
@@ -821,7 +821,7 @@ fn run_inner<A: App>(name: &str, build: impl FnOnce(Sender<A::Msg>) -> A) -> std
     let mut evs = Vec::new();
     // Hi-res wheel remainder, in units, kept across batches so slow motion is not lost.
     let mut scroll_rem = (0i64, 0i64);
-    // The last tree, while a reader wants tree events (stage D): each paint after it says what changed.
+    // The last tree, while a reader wants tree events (`lucina-events`): each paint after it says what changed.
     let mut last_tree: Option<lucina_ax::tree::Snapshot> = None;
     let mut first_frame_shown = false;
     let scale = if Theme::new(w, h).k >= 1.25 { 2 } else { 1 };

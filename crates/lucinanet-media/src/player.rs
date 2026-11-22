@@ -1314,7 +1314,7 @@ impl Presenter {
             let _ = writeln!(pts, "{} {:.3}", self.counts.shown - 1, pic.pts_us() as f64 / 1000.0);
         }
         // Flushed every picture, not only when the Presenter drops: `--render` leaves through `lucinanet_ui::exit_now`, which
-        // calls `libc::_exit`, so no destructor runs and the writer still holds the tail (the owner's Mac: the last of 96 frames
+        // calls `libc::_exit`, so no destructor runs and the writer still holds the tail (seen on macOS: the last of 96 frames
         // short by 320 bytes, and the `.pts` empty). It is a diagnostic, so the cost of the write is not the concern.
         self.flush_dump();
         if let Some(r) = &self.renderer {

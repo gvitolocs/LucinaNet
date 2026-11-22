@@ -47,7 +47,7 @@ pub fn available() -> bool {
 /// Whether planes may be handed over: BGRA only for `LUCINANET_MEDIA_YUV=0`, and planes everywhere else (unset, `1`,
 /// anything that is not `0`) on every platform.
 ///
-/// Planes were off by default for flaw a tracked flaw — a scaled video came out as vertical colour bars, one source row
+/// Planes were off by default for the scaled-video flaw — a scaled video came out as vertical colour bars, one source row
 /// repeated over every output row, because the media planes' uv rect was handed to WebRender's software rasterizer
 /// unflipped. The engine commit 40c0ff93c fixed that; `0` stays as the way to force BGRA frames when debugging.
 fn yuv_enabled(env: Option<&str>) -> bool {

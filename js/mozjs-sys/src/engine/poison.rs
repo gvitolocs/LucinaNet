@@ -83,7 +83,7 @@ struct HookSeen {
 /// A panic payload held for `take_payload`, whose `Drop` never runs the payload's own `Drop`. A payload that nobody
 /// re-raises stays in this thread's slot until the thread exits; letting the slot drop it there would run foreign code
 /// (the payload's `Drop`) outside any `catch_unwind`, at thread teardown — precisely what the wrap promises never to do
-/// (docs/edge-wrap.md section d: "Payloads are never dropped by the wrap (stored or forgotten)"; review change 6). So
+/// (docs/edge-wrap.md section d: "Payloads are never dropped by the wrap (stored or forgotten)"). So
 /// the destructor `forget`s it: a payload that outlives its thread is leaked, which is safe (the thread is going away,
 /// its context is already poisoned, and the allocation is a single boxed panic message) and is never a double panic.
 struct Undropped(Option<Box<dyn Any + Send>>);
@@ -105,7 +105,7 @@ thread_local! {
     /// What the glue's panic hook saw of this thread's latest panic below a shim.
     static LAST_HOOK: RefCell<Option<HookSeen>> = const { RefCell::new(None) };
     /// The panic waiting to be re-raised in a Rust frame of the embedder (`take_payload`). Also used by `mozjs::panic`.
-    /// Its `Drop` forgets any payload still held rather than running it (`Undropped`, review change 6).
+    /// Its `Drop` forgets any payload still held rather than running it (`Undropped`).
     static PAYLOAD: RefCell<Undropped> = const { RefCell::new(Undropped(None)) };
 }
 
@@ -149,7 +149,7 @@ pub fn take_payload() -> Option<Box<dyn Any + Send>> {
 
 /// Keep `payload` for `take_payload`. The first one waiting wins: it is the root cause. A later one is forgotten, not
 /// dropped, since dropping a payload runs foreign code that may panic again (an abort outside a catch). A payload that
-/// is never taken is forgotten at thread exit too, by `Undropped`'s `Drop` (review change 6), never dropped.
+/// is never taken is forgotten at thread exit too, by `Undropped`'s `Drop`, never dropped.
 pub fn store_payload(payload: Box<dyn Any + Send>) {
     let rest = PAYLOAD.try_with(|p| match p.try_borrow_mut() {
         Ok(mut slot) if slot.0.is_none() => {
@@ -403,8 +403,8 @@ pub fn run_gated<R, D: FnOnce() -> R, F: FnOnce() -> R>(site: &'static Site, fai
 #[inline(always)]
 pub fn run_gc<R, F: FnOnce() -> R>(site: &'static Site, body: F) -> R {
     // A `gc` shim is never gated: a collection started in an engine frame above may still be running, and a skipped
-    // tracer would free live objects under it. So the body runs even on an already-poisoned thread (it must still trace,
-    // review change 8b); a thread poisoned before this body started gets its value returned, since that poisoning
+    // tracer would free live objects under it. So the body runs even on an already-poisoned thread (it must still
+    // trace); a thread poisoned before this body started gets its value returned, since that poisoning
     // predates this shim and is handled where it happened. What must not happen is a poisoning that arose DURING this
     // body: see the epilogue below.
     let clean_at_entry = STATE.with(|s| s.get()) == CLEAN;
@@ -415,8 +415,8 @@ pub fn run_gc<R, F: FnOnce() -> R>(site: &'static Site, body: F) -> R {
         Ok(v) => {
             // A gated shim nested inside this body caught a panic, poisoned the thread and returned its failure value;
             // the collection has since been tracing over a heap the engine no longer trusts. Continue only by aborting,
-            // the same as a panic in the body itself: the record is written before the abort (review change 4,
-            // project lead decision 4, docs/edge-wrap.md section d).
+            // the same as a panic in the body itself: the record is written before the abort
+            // (docs/edge-wrap.md section d).
             if clean_at_entry && STATE.with(|s| s.get()) != CLEAN {
                 gc_poisoned_abort(site);
             }
@@ -445,7 +445,7 @@ fn gc_poisoned_abort(site: &'static Site) -> ! {
 #[cold]
 #[inline(never)]
 fn on_panic(site: &'static Site, payload: Box<dyn Any + Send>, fatal: bool) {
-    // Poison the thread FIRST, before anything that allocates or can panic (review change 2). The message is computed
+    // Poison the thread FIRST, before anything that allocates or can panic. The message is computed
     // below and `static_message` allocates; a panic from that allocation would otherwise unwind out of this
     // `extern "C"` frame with the flag still `CLEAN` and abort the process. `STATE.with` on an alive thread-local only
     // reads and writes a `Cell<u8>`, so setting it here is the last step that allocates nothing. The reason is refined

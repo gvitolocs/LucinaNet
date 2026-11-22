@@ -11,11 +11,11 @@
 #   tests/wpt/run-reftests.sh --include css/css-masking/ --include css/css-fonts/ --include svg/
 #
 # Everything after the wrapper's own env vars is passed straight to the tool; run it with --help for
-# the full flag list. Run it capped on the build host:
+# the full flag list. Run it capped on a Linux desktop:
 #   systemd-run --user --scope -p CPUQuota=200% tests/wpt/run-reftests.sh --include css/css-masking/
 # The tool also pauses while k10temp Tctl >= MAX_C (default 90), like wpt.sh's cool().
 #
-# Only localhost: the build host has no web-platform.test host entries, so cross-origin subtests fail here and
+# Only localhost: a machine with no web-platform.test host entries fails the cross-origin subtests here, so they
 # must not be counted as engine bugs. http only, no https/h2/ws ports, check_subdomains off.
 set -u
 # Set WORK_DIR to a scratch directory for the results, the tool build and the fonts.
@@ -24,7 +24,8 @@ WORK_DIR=${WORK_DIR:-$(mktemp -d)}
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../.." && pwd)
 bin=${BIN:-target/probe/lucinanet-servo}
-servo=${SERVO:-/home/user/Projects/Lucina/LucinaNet-servo}
+# The WPT corpus is not vendored here (`third_party/UPSTREAMS.toml` omits `tests/wpt`): set SERVO to a Servo checkout.
+servo=${SERVO:-$root/third_party/servo}
 out=${OUT:-$WORK_DIR/lucinanet/health/wpt-reftest}
 port=${PORT:-8123}
 target=${CARGO_TARGET_DIR:-$WORK_DIR/lucinanet/health/target-wpt}
@@ -47,7 +48,7 @@ if [ ! -x "$tool" ] || [ "${BUILD:-0}" = 1 ]; then
     ) || { echo "run-reftests: build failed" >&2; exit 3; }
 fi
 
-# the build host's owner limit: background CPU work waits while the CPU is at or above 90 C (k10temp Tctl).
+# the machine's own thermal limit: background CPU work waits while the CPU is at or above 90 C (k10temp Tctl).
 cool() {
     local h
     for h in /sys/class/hwmon/hwmon*; do

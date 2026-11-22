@@ -2,14 +2,15 @@
 
 > 2026-11-11: the Rust rasterizer is the default backend of LucinaNet; `LUCINANET_RASTER=swgl` selects the C++ oracle (swgl stays in the build as the oracle and the benchmark).
 
-The Rust rasterizer that replaces swgl, WebRender's software OpenGL in C++, in LucinaNet. The choice and its measurements
-are in LucinaOS `docs/research/lucinanet.md`, section "The rasterizer". This file is the map every porter follows.
+The Rust rasterizer that replaces swgl, WebRender's software OpenGL in C++, in LucinaNet. The choice and its
+measurements are in `raster/CHOICE.md` and `raster/PERF.md`. This file is the map every porter follows.
 
 ## The original is the source of truth
 
-`swgl/` in this repository (swgl 0.70.0 with `patches/swgl`) and WebRender's GLSL in `swgl/res/` define the behaviour,
-including blend modes, dithering, clears, delayed clears, AA edges, `clear_caches_with_quads` and the span fast paths
-(`swgl_ext.h`). We copy behaviour, not structure (our porting guidelines), but for this port the
+`swgl/` in this repository (swgl 0.70.0, our patches marked `LucinaNet:` in its source) and WebRender's GLSL in
+`swgl/res/` define the behaviour, including blend modes, dithering, clears, delayed clears, AA edges,
+`clear_caches_with_quads` and the span fast paths
+(`swgl_ext.h`). We copy behaviour, not structure, but for this port the
 structure is kept close on purpose: one Rust module per C++ file, the same function names in `snake_case`, the same
 argument order, so a reviewer can read the two side by side and the per-draw trace diff (below) can point at one function.
 

@@ -10,7 +10,7 @@
 //! `ffmpeg -i <clip> -an -f framemd5 -pix_fmt yuv420p`): the decoders are exact, so the frames must be too, in display order, none
 //! missing and none repeated.
 //!
-//! Clips (`tests/media/`): synthetic, made on the build host with FFmpeg's `testsrc2` and `sine` (no one's footage):
+//! Clips (`tests/media/`): synthetic, made with FFmpeg's `testsrc2` and `sine` (no one's footage):
 //!   h264-aac.mp4             640x360 24 fps 4 s, x264 high, AAC 48 kHz, moov first
 //!   h264-aac-moov-at-end.mp4 the same, moov last (the player must fetch the end first and come back)
 //!   vp9-vorbis.webm          640x360 24 fps 4 s, libvpx-vp9, Vorbis 44.1 kHz
@@ -233,8 +233,8 @@ impl Drop for Run {
 }
 
 /// The dump and its `.pts` sidecar, read with the player still running and never dropped first: `--render` leaves through
-/// `lucinanet_ui::exit_now`, which calls `libc::_exit` and runs no destructors, so what the writers still hold is lost (the
-/// owner's Mac: 96 frames minus the last 320 bytes, the sidecar empty). By `EndOfStream` the file must be a whole number of
+/// `lucinanet_ui::exit_now`, which calls `libc::_exit` and runs no destructors, so what the writers still hold is lost (seen on
+/// macOS: 96 frames minus the last 320 bytes, the sidecar empty). By `EndOfStream` the file must be a whole number of
 /// frames and the sidecar must have exactly one `<index> <pts_ms>` line for each, the index counting up.
 fn read_dump(dump: &Path, frame: usize) -> (Vec<u8>, Vec<f64>) {
     use std::io::BufRead;
@@ -324,7 +324,7 @@ fn plays_to_the_end_like_ffmpeg(name: &str, framemd5: &str) {
     let _ = std::fs::remove_file(dump.with_extension("pts"));
     assert_eq!(total, 96);
     assert_eq!(same, shown, "every picture shown equal to FFmpeg's at its time");
-    // Dropped only when the CPU fell behind: on the build host that is none or a few, under load.
+    // Dropped only when the CPU fell behind: on Linux x86_64 that is none or a few, under load.
     assert!(shown >= 88, "only {shown} of 96 shown");
 }
 
