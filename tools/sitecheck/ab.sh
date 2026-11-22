@@ -16,7 +16,7 @@ spec=
 sites=$here/sites.txt
 only=
 rounds=5
-out=${WORK_DIR:-$(mktemp -d)}/lucinanet/health/ab
+out= # --out DIR, else $WORK_DIR/lucinanet/health/ab (resolved where it is used)
 size=1280x800
 cold_seconds=90  # one load in a new process
 warm_seconds=150 # two loads in one process
@@ -31,7 +31,8 @@ usage: ab.sh --bin PATH --env 'NAME=A,NAME=B' [--sites FILE] [--only name,name]
   --sites FILE  `name url` lines, # comments (default: sites.txt beside this script)
   --only LIST   comma separated subset of the names in the site list
   --rounds N    passes over the whole list, arm order flipped each pass (5)
-  --out DIR     where ab.md, the per-run stderr and the profiles go
+  --out DIR     where ab.md, the per-run stderr and the profiles go (without it,
+                under $WORK_DIR, else $TMPDIR: one of the two is then required)
   --size WxH    viewport (default 1280x800)
 
 Per site and arm, every round, in this order:
@@ -159,9 +160,10 @@ done
 [ ${#sel_names[@]} -gt 0 ] || { printf 'ab.sh: no site selected\n' >&2; exit 2; }
 sel_csv=$(IFS=,; printf '%s' "${sel_names[*]}")
 
+[ -n "$out" ] || out=${WORK_DIR:-${TMPDIR:?set TMPDIR to a scratch directory (not /tmp)}}/lucinanet/health/ab
 mkdir -p -- "$out/profiles" || exit 2
 out=$(cd -- "$out" && pwd)
-work=$(mktemp -d "${TMPDIR:-/tmp}/sitecheck-ab.XXXXXX") || exit 2
+work=$(mktemp -d "${TMPDIR:?set TMPDIR to a scratch directory (not /tmp)}/sitecheck-ab.XXXXXX") || exit 2
 trap 'rm -rf -- "$work"' EXIT
 png=$work/render.png # one path, overwritten: only the timings are read back
 : >"$work/ok.tsv"    # kind  site  arm  ms

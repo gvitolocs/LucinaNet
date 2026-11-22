@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-//! The `LUCINANET_JS_MISSING_LOG` site log of docs/missing.md section 3: the two line kinds, the error
-//! cap, and that a log which cannot be opened changes nothing.
+//! The `LUCINANET_JS_MISSING_LOG` site log of the missing-feature inventory: the two line kinds, the
+//! error cap, and that a log which cannot be opened changes nothing.
 //!
 //! Its own process, and one test in it, because the target is read once per process (the `OnceLock`
 //! that makes the unset case free) and because `missing()` itself aborts: what is tested here is the

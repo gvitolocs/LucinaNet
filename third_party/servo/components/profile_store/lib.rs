@@ -228,7 +228,7 @@ impl Store {
     /// A new file's name, and the names of the directories above it, are made durable by syncing
     /// each directory up to the root: POSIX promises a new name only then. Linux's ext4 happens to commit the name with
     /// the file's own fsync; Juno's ext4 does not, and on QEMU power cuts every store created on
-    /// `/data` came back missing (LucinaOS `qemu-juno-disk.sh`, part `store`, 2026-11-04).
+    /// `/data` came back missing (2026-11-04).
     ///
     /// Those syncs are the flusher's, like the commits it makes durable: within [`FLUSH_DELAY`],
     /// or at once by [`Store::flush`] and [`Store::write_durable`]. Each is a journal commit on

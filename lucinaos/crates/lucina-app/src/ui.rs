@@ -209,7 +209,7 @@ impl UiState {
         self.typing_secret = self.typing_secret_now;
         let mut changed = self.modal_prev != self.modal_now;
         if changed {
-            // Lucina follows a dialog by event, not by watching the screen (stage D). Nothing is sent with nobody listening.
+            // Lucina follows a dialog by event, not by watching the screen. Nothing is sent with nobody listening.
             lucina_events::emit(if self.modal_now {
                 "dialog.opened"
             } else {

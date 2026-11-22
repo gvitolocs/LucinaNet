@@ -35,5 +35,5 @@ Exit codes: 0 table printed; 1 `--max-tofu` exceeded; 2 an error (arguments, fil
 Dependencies: `image` (png feature only) and `serde_json`, both already locked in `tools/wpt-reftest/Cargo.lock`; this
 tool's `Cargo.lock` is that file with the root package replaced.
 
-Build: `cargo build --release --locked --manifest-path tools/font-tofu-check/Cargo.toml` (on the build host);
+Build: `cargo build --release --locked --manifest-path tools/font-tofu-check/Cargo.toml`;
 tests: `cargo test --locked --manifest-path tools/font-tofu-check/Cargo.toml`.

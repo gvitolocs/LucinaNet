@@ -2,7 +2,7 @@
 
 > 2026-11-11: the Rust rasterizer is the default backend of LucinaNet; `LUCINANET_RASTER=swgl` selects the C++ oracle (swgl stays in the build as the oracle and the benchmark).
 
-One thread on the build host (CPU 5), the strict gltrace binary (`SWGL_STRICT_FP=1`, both backends in one binary), default
+One thread on the reference Linux development machine (CPU 5), the strict gltrace binary (`SWGL_STRICT_FP=1`, both backends in one binary), default
 release profile (opt-level 3, no LTO), 2026-11-04. Measured with `LUCINANET_SWGL_PROFILE=1`: swgl's timer
 (`swgl/src/lucina_prof.h`) and its Rust twin (`raster/core/src/prof.rs`, same keys and output), summed over all windows
 of one replay. The table is made by `gltrace perf-table <cxx.prof> <rust.prof> --page <page>`.
@@ -119,9 +119,9 @@ wiki cxx 79.881 ms rust 135.837 ms speed 0.59x frames 70 identical 70 within 0 w
 Default release profile on the same day, example-site: 0.38x. Not met yet: Rust >= 1.0x. The biggest per-program gaps on
 the profile table are `ps_quad_gradient` (4.4x the C++ time a pixel on example-site, 12x on wiki), `ps_quad_mask_FAST_PATH`
 (3.1x), `ps_quad_repeat` (3.1x), `ps_text_run` (2-3.5x) and `Composite` blend 0 on wiki (2.6x); their machine code
-has not been read yet (step 2 of task O).
+has not been read yet.
 
-## Causes found and fixed (task O, steps 2-3)
+## Causes found and fixed
 
 1. **An environment lookup in the gradient span loop** (027ea11). `commit_linear_gradient_from_stops` called
    `std::env::var_os("XTRACE")` once per sub-span, a debug leftover that takes libc's environment lock and scans
@@ -137,7 +137,7 @@ has not been read yet (step 2 of task O).
    No gain beyond the noise, and the build took twice as long.
 
 example-site, one thread, after both fixes: 0.56x -> 0.58-0.64x of strict swgl. Repeated runs on the same binary vary
-by about 15%, because the build host runs at Tctl 95 °C. All 7 pages stay identical.
+by about 15%, because the reference Linux development machine runs at Tctl 95 °C. All 7 pages stay identical.
 
 ```
 bbc cxx 69.646 ms rust 107.427 ms speed 0.65x frames 28 identical 28 within 0 worse 0 PASS
@@ -191,7 +191,7 @@ The output is unchanged: `raster/compare.sh` gives identical frames on all seven
 Left over: on growth with contents, the copy briefly holds the old block and the touched part of the new one,
 where glibc's `realloc` `mremap`s large blocks in place. It doesn't show at the peak on these traces.
 
-## Round 3: 8 threads on small pages (2026-11-04, after merging rust-raster d2ab5ed)
+## Round 3: 8 threads on small pages (2026-11-04, after d2ab5ed)
 
 Wiki, Rust at 1 thread against 8, with the profiler (`gltrace perf-table w1.prof w8.prof`): the keys that lost on
 8 threads were `ps_text_run_ALPHA_PASS_TEXTURE_2D` (18.7 -> 22.5 ms, 50 draws of many ~400-pixel glyphs) and
@@ -206,7 +206,7 @@ Two costs of a split draw came on top of its pixels:
    more work than a glyph's pixels. A draw is split only if its primitives average at least
    `RASTER_SPLIT_MIN_PRIMITIVE_PIXELS` (1024). 4096 lost example-site's 8-thread gain (1134 -> 1401 ms).
 
-compare.sh at 8 threads, then 1 thread, final binary (load average 12 on the build host, so single runs vary by 30% or more):
+compare.sh at 8 threads, then 1 thread, final binary (load average 12 on the reference Linux development machine, so single runs vary by 30% or more):
 
 ```
 bbc cxx 51.500 ms rust 43.986 ms speed 1.17x frames 28 identical 28 within 0 worse 0 PASS
@@ -304,15 +304,15 @@ text_run (dual source) 2.30, mask_FAST_PATH 1.59, page 1.50.
 AArch64: not run here (no qemu). The static oracle test binaries, built from this source as
 tests/oracle/README.md describes, for the laptop:
 ```
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/ext_signatures-b3127e639743e377
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/lucinanet_raster-1b5bdacef8524537
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/oracle_blend-5592b1fabe973c91
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/oracle_composite-4e0b76c553beb16f
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/oracle_ext-bac0530ccabbaae5
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/oracle_gl-0432d58281019c3d
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/oracle_glsl-204e27585328b2db
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/oracle_texture-4047d4e8a3727a1b
-<work-dir>/lucinanet-raster/target-o-a64t/aarch64-unknown-linux-musl/release/deps/rasterize_flat-74399b3763281ab5
+target-a64/aarch64-unknown-linux-musl/release/deps/ext_signatures-b3127e639743e377
+target-a64/aarch64-unknown-linux-musl/release/deps/lucinanet_raster-1b5bdacef8524537
+target-a64/aarch64-unknown-linux-musl/release/deps/oracle_blend-5592b1fabe973c91
+target-a64/aarch64-unknown-linux-musl/release/deps/oracle_composite-4e0b76c553beb16f
+target-a64/aarch64-unknown-linux-musl/release/deps/oracle_ext-bac0530ccabbaae5
+target-a64/aarch64-unknown-linux-musl/release/deps/oracle_gl-0432d58281019c3d
+target-a64/aarch64-unknown-linux-musl/release/deps/oracle_glsl-204e27585328b2db
+target-a64/aarch64-unknown-linux-musl/release/deps/oracle_texture-4047d4e8a3727a1b
+target-a64/aarch64-unknown-linux-musl/release/deps/rasterize_flat-74399b3763281ab5
 ```
 
 Left: ps_text_run (2.3x on github), ps_quad_repeat (2.3x on example-site), and the AArch64 timings on the laptop.
@@ -342,7 +342,7 @@ shifts (`sshl`/`ushl` by `-n`), `zip2Low`/`zip2High`, `YUVMatrix::From` and `con
 double-to-int16 conversions. The R16/RG16 samplers pass oracle_texture on the laptop, and the 8-bit YUV cases pass.
 No AArch64 machine or emulator here (docker gives "exec format error"), so it is not fixed. To bisect, run on the
 laptop oracle_ext built from 3c3ca4f (before round 5's NEON):
-<work-dir>/lucinanet-raster/target-bisect-a64/aarch64-unknown-linux-musl/release/deps/oracle_ext-ff9d01de1139c416
+target-bisect-a64/aarch64-unknown-linux-musl/release/deps/oracle_ext-ff9d01de1139c416
 If it fails the same way, the bug predates round 5, because the laptop had not run oracle_ext before.
 
 Round 8 (2026-11-05): the bisect binary from 3c3ca4f fails the same way, so this predates round 5's NEON. Narrowed
@@ -395,7 +395,7 @@ Not done: repeat, mask_FAST_PATH, cs_blur, gradient, opacity, text_run; no lapto
   loop; the Rust aarch64 rlib calls it). No x86 gain; it needs a laptop A/B first.
 The laptop timings of rounds 9 and 10 are still to be taken.
 
-## Round 11 (2026-11-07, task SP-sp1): ps_quad_box_shadow and cs_blur
+## Round 11 (2026-11-07): ps_quad_box_shadow and cs_blur
 
 Baseline on x86 (strict gltrace, fat LTO, one codegen unit, `LUCINANET_SWGL_PROFILE=1`, CPU 5, example-site):
 `ps_quad_box_shadow` C++ 704.17 ms / Rust 1135.25 ms (1.61x), bench 49.79 / 62.95 (1.26x);
@@ -446,7 +446,7 @@ per-chunk `run_func` -> `pattern_fragment` call with the `vec4` result through t
 (`run` -> `pattern_fragment`), and the blend commit.
 
 Not done: laptop (AArch64) timings of this round; the AArch64 gltrace built from this commit is at
-`<work-dir>/lucinanet-raster/target-sp1-a64/aarch64-unknown-linux-musl/release/gltrace`.
+`target-a64/aarch64-unknown-linux-musl/release/gltrace` (a separate `CARGO_TARGET_DIR`).
 
 ## Round 11 (2026-11-07): brush_opacity
 
@@ -470,8 +470,8 @@ per 4-pixel chunk against clang's ~50 in the C++ `blendTextureLinearFast` inline
   per load and nothing touches the stack.
 - **A bounds check per texel load** (`at32`'s compares and its cold partial-load branch, twice per chunk). swgl's
   fast filters read unchecked, trusting the dispatch's `inside` cap of `(width - swgl_StepSize) *
-  swgl_LinearQuantizeScale`. A first version of this round did the same with `tex_signed_unchecked`; the unsafe
-  review (2026-11-07) refused it: `inside` bounds the right edge only, and a span that starts left of `min_uv`
+  swgl_LinearQuantizeScale`. A first version of this round did the same with `tex_signed_unchecked`, but that is unsound:
+  `inside` bounds the right edge only, and a span that starts left of `min_uv`
   (when the `before` block does not cover it) reads before the row. The loads stay checked (`tex_signed`); a
   per-span bounds check hoisted out of the loop is the open follow-up.
 
@@ -490,7 +490,7 @@ clippy `-D warnings` clean.
 Not done: the blend-key switch inside the chunk loop (clang unswitches it out of the C++ loop; LLVM keeps the
 compares and their spilled reloads in the Rust one, ~10 instructions a chunk).
 
-## Round 11 baseline at low load (2026-11-07, rust-raster 5d27193)
+## Round 11 baseline at low load (2026-11-07, commit 5d27193)
 
 Earlier x86 round-11 numbers were taken at load 34-60, where the C++ side alone swung 207-491 ms across identical
 replays; they understated the gap. Measured again at load ~25, both backends of one strict LTO gltrace pinned to
@@ -501,18 +501,18 @@ cs_blur 1.65-2.07; Clear, BlitFramebuffer and Composite at parity. The C++ shim 
 baseline ISA (clang `-O2`, no `-march`; Rust default target), so this is a code-generation gap in the span loops,
 not an ISA one. The AArch64 numbers on the laptop decide; x86 is the guide.
 
-Branch `raster-sp4` (reviewed): one exact bounds check per span for the fast and downscale linear
+An experiment: one exact bounds check per span for the fast and downscale linear
 filters (`rules::linear_reads_in_bounds`, Verus-proved, 5 planted bugs refused), unchecked loads under it. Every
 page identical at 1 and 8 threads, but brush_opacity on x86 is unchanged (275-292 ms against 276-288), so the
-per-load check is not where the time goes. Not merged until AArch64 shows a gain.
+per-load check is not where the time goes. Held back until AArch64 shows a gain.
 
-## Round 11 on the laptop (AArch64, 2026-11-07, rust-raster 5d27193)
+## Round 11 on the laptop (AArch64, 2026-11-07, commit 5d27193)
 
 Laptop (SC7180), no other sharers, strict swgl vs Rust, `LUCINANET_SWGL_PROFILE=1`, one replay each.
 
 - Oracles: texture 8/8, blend 7/7, composite 7/7, glsl 14/14, gl 6/6, rasterize_flat 14/14 pass. oracle_ext printed
-  `validate_and_state ... ok`, then the laptop reset during its other six tests (all CPUs busy); juno-crash-recovery
-  is reading that boot's crash record and runs an A/B with it.
+  `validate_and_state ... ok`, then the laptop reset during its other six tests (all CPUs busy); that boot's crash
+  record is being read and used for an A/B run.
 - Frames: bench 4, wiki 70, example-site 26, all byte-identical to swgl at 1 and 8 threads (md5 per frame).
 - Per-shader totals (Rust/C++): example-site 1.06 at 1 thread, 0.98 at 8; wiki 1.04 at 1 thread, 1.13 at 8.
 - AArch64 gap is much smaller than x86 (gradient 1.46, box_shadow 1.22, brush_opacity 1.08, textured 0.91 at 1 thread).
@@ -520,9 +520,9 @@ Laptop (SC7180), no other sharers, strict swgl vs Rust, `LUCINANET_SWGL_PROFILE=
   but small draws lose (text, brush_image, blur ~1.8-2.9x), so the split overhead on small draws and the six slow
   Silver cores are the next targets.
 
-## Round 12 (2026-11-13, task raster-neon): a tracked flaw, scaled YUV on AArch64, under qemu
+## Round 12 (2026-11-13): a scaled-YUV flaw on AArch64, under qemu
 
-The flaw (docs/media.md "aarch64 macOS: planes off by default"): a video WebRender scales, drawn from I420 planes by
+The flaw (docs/media.md, the aarch64 macOS case where planes start off): a video WebRender scales, drawn from I420 planes by
 the Rust image path, comes out as vertical colour bars; the same page with BGRA frames and the 1:1 compositor-surface
 path are correct; x86_64 is correct. `surfaces.rs` starts BGRA on that platform until this is fixed.
 
@@ -555,8 +555,8 @@ What qemu cannot cover, and where the bug therefore still lives:
   intrinsic whose result real M1 hardware differs on) is invisible here. The Mac build is clang's own, on a different
   LLVM version, for `aarch64-apple-darwin`.
 - memory layout and allocator: the plane buffers here are Rust `Vec`s with a 0xA5 guard; on the Mac the planes are
-  decoder-owned bytes under jemalloc, so an out-of-row or out-of-plane read gets *those* bytes. As the scoping report
-  put it, a clean qemu run does not exonerate suspect #2 (an edge tap reading bytes that are zero only here) - it only
+  decoder-owned bytes under jemalloc, so an out-of-row or out-of-plane read gets *those* bytes. A clean qemu run does
+  not exonerate the edge-tap suspect (reading bytes that are zero only under these allocations) - it only
   says the code path itself agrees across the ISAs. Rounds 7 and 8 chased exactly such a difference (the AArch64 C++
   of a 1-texel-wide linear plane) and round 10 closed it as the allocator's bytes, not the port.
 - the plane geometry the media path actually hands the sampler: a decoder's padded rows, chroma at half a padded luma
@@ -564,11 +564,12 @@ What qemu cannot cover, and where the bug therefore still lives:
 - libc: macOS zero-fill and page behaviour differ from musl, so a read of uninitialized plane bytes shows different
   contents there.
 
-The two deciding runs are the scoping report's, on the Mac, with the planes forced back on (`surfaces.rs` now starts
+The two deciding runs are on the Mac, with the planes forced back on (`surfaces.rs` now starts
 BGRA there by default, so the pages must say `LUCINANET_MEDIA_YUV=1`):
 
+    here=$(cd tests/media && pwd)
     LUCINANET_MEDIA_YUV=1 LUCINANET_CONSOLE=1 LUCINANET_RENDER_HOLD=12 LUCINANET_PROFILE_DIR=none \
-      ./lucinanet --render "http://127.0.0.1:$PORT/video-size/page/page.html" out/a2.png            # A2
+      ./lucinanet --render "file://$here/scaled-planes.html" out/a2.png                             # A2
     LUCINANET_RASTER=swgl ... same ... out/a5.png                                                  # A5
 
 A2 (Rust rasterizer, scaled page, `LUCINANET_RASTER_THREADS=1` to rule the 32-row thread stripes out) says whether the
@@ -577,9 +578,9 @@ kernel or the bytes are to blame. Both barred → the plane geometry or its memo
 A5 clean → the Rust aarch64 kernels as Apple clang builds them; A2 clean → the flaw is already gone or was never in
 `raster/`, and `surfaces.rs`'s exception should be re-measured and dropped.
 
-> Note (2026-11-13, task yuv-on-again), on the wording above: the BGRA default that made these runs pass
-> `LUCINANET_MEDIA_YUV=1` was an interim for `a tracked flaw` and is reverted. It was neither the aarch64 kernels nor the plane
-> geometry nor the allocator: the media planes' uv rect was handed to the sampler unflipped. The engine pinned at `40c0ff93c`
-> hands it flipped, and with it `tests/media/scaled-planes.sh` passes on the build host x86_64 as on the owner's Mac, so planes are
+> Note (2026-11-13): the BGRA default that made these runs pass `LUCINANET_MEDIA_YUV=1` was an interim for the flaw
+> above and is reverted. It was neither the aarch64 kernels nor the plane geometry nor the allocator: the media
+> planes' uv rect was handed to the sampler unflipped. The engine pinned at `40c0ff93c`
+> hands it flipped, and with it `tests/media/scaled-planes.sh` passes on the reference Linux development machine (x86_64) as on the Mac, so planes are
 > the default on every platform again. `LUCINANET_MEDIA_YUV=1` in the commands above is now needed only against an older
 > build; `=0` is what asks for BGRA.

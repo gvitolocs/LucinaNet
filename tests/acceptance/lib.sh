@@ -43,3 +43,26 @@ check_trace() {
   echo "trace ok: $label ($n lines; $props)"
   return 0
 }
+
+# the test and measurement scripts drive the browser through doors that only a `harness` build has (`--render`, the
+# environment's user script, style sheet and preferences: docs/harness-doors.md). Against a normal build those variables are
+# not read and `--render` is refused, so a run would silently measure nothing. A harness build carries this marker in its
+# version line (crates/lucinanet-ui/src/lib.rs VERSION_LINE).
+HARNESS_MARKER=LUCINANET-HARNESS-BUILD
+
+# is_harness_binary <binary>: true when the file holds the marker.
+is_harness_binary() {
+  [ -f "$1" ] && grep -aqF -- "$HARNESS_MARKER" "$1"
+}
+
+# require_harness_binary <binary> [label]: returns 0 for a harness build; otherwise prints one "STEP-FAILED: <label>: ..." line
+# that says how to build one (tools/build-harness.sh) and returns 1.
+require_harness_binary() {
+  local bin=$1 label=${2:-harness}
+  if [ ! -f "$bin" ]; then echo "STEP-FAILED: $label: no binary at $bin"; return 1; fi
+  if ! is_harness_binary "$bin"; then
+    echo "STEP-FAILED: $label: $bin is not a harness build, so --render and the LUCINANET_USER_JS / _USER_CSS / _PREFS doors do nothing in it; build one with tools/build-harness.sh --run (tests/acceptance/README.md)"
+    return 1
+  fi
+  return 0
+}

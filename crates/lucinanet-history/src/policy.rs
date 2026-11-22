@@ -1,6 +1,6 @@
 // How many pages LucinaNet keeps alive behind Back and Forward. Pure integer rules: inputs are the machine's total memory, what is
 // available, a pressure level and the ages of the entries, so a system-provided pressure signal can replace the polling later
-// (docs/specs/history-depth.md). Verus checks this very file: `//@` lines hold the proof, see raster/verify.sh and
+// (the history-depth spec). Verus checks this very file: `//@` lines hold the proof, see raster/verify.sh and
 // crates/lucinanet-history/mutants.sh. Numbers and their sources are in the spec.
 #![allow(clippy::needless_return)] //@omit
 
@@ -12,7 +12,7 @@ pub const VIEWER_WINDOW: u32 = 3;
 /// Chromium's cache limit under moderate memory pressure for the foreground tab (back_forward_cache_impl.cc,
 /// foreground_cache_size_on_moderate_pressure = 3); under critical pressure it is 0, as Firefox's memory-pressure eviction.
 pub const LOW_PRESSURE_ENTRIES: u32 = 3;
-/// What one kept page costs, MiB. Measured on the build host: 115 MiB (example.com) to 560 MiB (YouTube) peak RSS; a middling page.
+/// What one kept page costs, MiB. Measured on a Linux x86_64 desktop: 115 MiB (example.com) to 560 MiB (YouTube) peak RSS; a middling page.
 pub const PAGE_COST_MIB: u64 = 250;
 /// Memory always left to the current page and the system, MiB; the engine frees its caches below this (`FREE_CACHES_MIB`).
 pub const RESERVE_MIN_MIB: u64 = 500;

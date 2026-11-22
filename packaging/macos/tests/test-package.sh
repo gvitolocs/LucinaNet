@@ -127,9 +127,12 @@ ncheck "no iconset directory left in the bundle" ls -d "$OUT/Contents"/*.iconset
 check "launcher names the staged engine"   grep -qF 'bin="$here/lucinanet-bin"' "$L" # $here is literal in the launcher
 ncheck "no placeholder left in launcher"   grep -q '@[A-Z][A-Z_]*@' "$L"
 for v in LUCINANET_FRAME_LOG LUCINANET_RENDER_STATS LUCINANET_WR_PHASES LUCINANET_LAYOUT_PHASES \
-         LUCINANET_RENDERING_REASON LUCINANET_JS_GC_LOG LUCINANET_CHROME_LOG; do
+         LUCINANET_RENDERING_REASON LUCINANET_JS_GC_LOG LUCINANET_CHROME_LOG LUCINANET_JS_MISSING_LOG; do
   ncheck "launcher exports no $v"          grep -E "^[[:space:]]*export $v=" "$L"
 done
+# the launcher scrubs the caller's LUCINA* / LUCINANET_* before it sets its own, so the engine sees only
+# LUCINANET_CONSOLE. The planted variables are the doors of docs/harness-doors.md (and one that was never one).
+check "launcher scrubs LUCINA* variables"  grep -qF "unset" "$L"
 cp "$L" "$T/launch/lucinanet"
 printf '#!/bin/sh\nprintf "%%s\\n" "$*" > "%s/argv"\n' "$T" > "$T/launch/lucinanet-bin"
 chmod 0755 "$T/launch/lucinanet-bin"
@@ -139,6 +142,16 @@ check "a URL argument reaches the engine"  test "$(cat "$T/argv")" = "--desktop 
 HOME="$T/home" "$T/launch/lucinanet" >/dev/null 2>&1
 check "no argument still means desktop"    test "$(cat "$T/argv")" = "--desktop"
 check "session log goes under HOME"        ls "$T/home/Library/Logs/LucinaNet"/session-*.log
+printf '#!/bin/sh\nenv | grep "^LUCINA" | sort | tr "\\n" " " > "%s/env"\n' "$T" > "$T/launch/lucinanet-bin"
+HOME="$T/home" LUCINANET_USER_JS=/x.js LUCINANET_USER_CSS=/x.css LUCINANET_PREFS=a=b LUCINANET_SCRIPT=/x.script \
+  LUCINANET_AX=/x.sock LUCINANET_LOADS=/x.loads LUCINANET_RENDER_HOLD=3 LUCINANET_JS_MISSING_LOG=/x.log LUCINA_ELSE=1 \
+  "$T/launch/lucinanet" >/dev/null 2>&1
+check "planted LUCINA*/LUCINANET_* variables never reach the engine; only LUCINANET_CONSOLE does" \
+  test "$(cat "$T/env")" = "LUCINANET_CONSOLE=1 "
+for v in LUCINANET_USER_JS LUCINANET_USER_CSS LUCINANET_PREFS LUCINANET_SCRIPT LUCINANET_AX LUCINANET_LOADS \
+         LUCINANET_RENDER_HOLD LUCINANET_JS_MISSING_LOG LUCINA_ELSE; do
+  ncheck "the engine does not see a planted $v" grep -q "$v=" "$T/env"
+done
 rm -f "$T/launch/lucinanet-bin"
 out=$(HOME="$T/home" "$T/launch/lucinanet" 2>&1); rc=$?
 check "a missing engine fails loudly"      test $rc -ne 0
@@ -209,6 +222,22 @@ wait "$CONC_PID" 2>/dev/null
 if [ "$CONC_RC" -ne 0 ]; then ok "a concurrently created output is refused"; else bad "a concurrently created output is refused" "packager exited 0 despite concurrent creation"; fi
 ncheck "no bundle was written over the concurrent dir" test -e "$T/stage/concurrent.app/Contents"
 rmdir "$T/stage/concurrent.app" 2>/dev/null
+
+# ---------------------------------------------------------------- a harness build is never packaged
+# A stub that is a valid arm64 Mach-O in every other way but carries the marker the harness version line carries
+# (crates/lucinanet-ui/src/lib.rs VERSION_LINE): without the marker it would package, with it nothing may be written.
+cp "$T/lucinanet-servo-arm64" "$T/harness-arm64"
+printf 'lucinanet 0.1.0 harness build (LUCINANET-HARNESS-BUILD: for tests and measurements, never to be installed or shipped)\n' >> "$T/harness-arm64"
+want_fail "a harness build is refused"          "harness build" \
+  --executable "$T/harness-arm64" --fonts "$T/fonts" --output "$T/harness-out.app" --version 0.1.0 --source s
+check "the harness refusal wrote no bundle"     test ! -e "$T/harness-out.app" -a ! -e "$T/harness-out.app.manifest.txt"
+mkdir -p "$T/home/Applications"
+want_fail "a harness build over an installed app path is refused, and says so" "installed app path" \
+  --executable "$T/harness-arm64" --fonts "$T/fonts" --output "$T/home/Applications/LucinaNet.app" --version 0.1.0 --source s
+check "nothing was written into the installed apps" test ! -e "$T/home/Applications/LucinaNet.app"
+want_fail "a harness build over /Applications is refused, and says so" "installed app path" \
+  --executable "$T/harness-arm64" --fonts "$T/fonts" --output /Applications/LucinaNet-harness-test.app --version 0.1.0 --source s
+check "nothing was written into /Applications"   test ! -e /Applications/LucinaNet-harness-test.app
 
 # ---------------------------------------------------------------- failure cases
 want_fail "a missing executable is refused"   "no readable engine binary" \

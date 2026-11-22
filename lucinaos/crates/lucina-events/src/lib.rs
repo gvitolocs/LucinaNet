@@ -1,4 +1,4 @@
-//! Juno's semantic events (docs/research/juno-ai-native.md, layer 3; stage D).
+//! Juno's semantic events.
 //!
 //! Programs say what changed, in words and ids, so that Lucina follows the machine without watching the screen: an app finished
 //! an action or opened a dialog, the shell put an app in front, the kernel saw a program exit or the network go down.

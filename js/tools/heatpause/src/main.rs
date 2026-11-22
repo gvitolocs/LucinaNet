@@ -1,6 +1,6 @@
 //! heatpause: freeze a systemd user unit while the CPU is hot, thaw it when it cools.
 //!
-//! the build host rule (2026-10-26): background CPU work pauses at Tctl >= 90 °C. Run the work as a
+//! the thermal rule for background work (2026-10-26): background CPU work pauses at Tctl >= 90 °C. Run the work as a
 //! unit (`systemd-run --user --unit=<name> -p CPUQuota=... <cmd>`), then `heatpause --unit <name>`.
 //! It exits when the unit is gone. No dependencies: reads k10temp from /sys/class/hwmon.
 

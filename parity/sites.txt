@@ -1,4 +1,4 @@
-# The parity set: one URL a line. Reading first, then interactive, then heavy. Secretary (owner's app) needs a login; see parity/README.
+# The parity set: one URL a line. Reading first, then interactive, then heavy.
 https://example.com/
 https://en.wikipedia.org/wiki/Rust_(programming_language)
 https://en.wikipedia.org/wiki/Main_Page

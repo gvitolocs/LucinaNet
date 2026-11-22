@@ -1,6 +1,6 @@
 # LucinaNet engine acceptance
 
-Run from LucinaNet-js:
+Run from the js workspace root:
 
 ```sh
 cargo run --locked --offline --manifest-path tools/lucinanet-engine-check/Cargo.toml

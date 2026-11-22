@@ -86,7 +86,7 @@ impl WorkerNavigatorMethods<crate::DomTypeHolder> for WorkerNavigator {
 
     /// <https://html.spec.whatwg.org/multipage/#dom-navigator-platform>
     fn Platform(&self) -> DOMString {
-        navigatorinfo::Platform()
+        navigatorinfo::Platform(&pref!(navigator_platform))
     }
 
     /// <https://html.spec.whatwg.org/multipage/#dom-navigator-useragent>

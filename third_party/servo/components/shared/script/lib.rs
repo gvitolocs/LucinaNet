@@ -20,7 +20,7 @@ use devtools_traits::ScriptToDevtoolsControlMsg;
 use embedder_traits::user_contents::{UserContentManagerId, UserContents};
 use embedder_traits::{
     EmbedderControlId, EmbedderControlResponse, FocusSequenceNumber, InputEvent, InputEventAndId,
-    JavaScriptEvaluationId, MediaSessionActionType, MouseButton, PaintHitTestResult,
+    JavaScriptEvaluationId, MediaSessionActionType, MouseButton, PageTextId, PaintHitTestResult,
     ScriptToEmbedderChan, Theme, ViewportDetails, WebDriverScriptCommand,
 };
 use euclid::{Scale, Size2D};
@@ -316,6 +316,9 @@ pub enum ScriptThreadMessage {
     /// Evaluate the given JavaScript and return a result via a corresponding message
     /// to the Constellation.
     EvaluateJavaScript(WebViewId, PipelineId, JavaScriptEvaluationId, String),
+    /// Collect the text of the pipeline's document as blocks, at most the given number of
+    /// bytes of text, and return it as a `FinishPageText` to the Constellation.
+    RequestPageText(WebViewId, PipelineId, PageTextId, usize),
     /// A new batch of keys for the image cache for the specific pipeline.
     SendImageKeysBatch(PipelineId, Vec<ImageKey>),
     /// Preferences were updated in the parent process.

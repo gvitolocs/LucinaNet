@@ -723,7 +723,7 @@ unsafe fn blend_texture_linear_upscale<const BLEND: bool, const CH: usize, S: Sa
     let fracy = computeFracY(frac).0[0];
     let fy = V16::splat(fracy);
     // Checked loads: swgl reads these taps unchecked, relying on the dispatch's `inside`, but `inside` does not
-    // bound a span that starts left of `min_uv` (review 2026-11-07), so the port keeps the bounds check.
+    // bound a span that starts left of `min_uv`, so the port keeps the bounds check.
     let at = |r: i32, x: i32| P::tex_signed(c, r.wrapping_add(x));
     let mut src = lerp_lanes(at(row0, i.x.0[0]), at(row1, i.x.0[0]), fy);
 

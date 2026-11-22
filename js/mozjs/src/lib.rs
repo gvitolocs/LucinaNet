@@ -55,7 +55,7 @@ pub mod error;
 pub mod gc;
 pub mod offthread;
 pub mod panic;
-/// LucinaNet: the engine edge wrap's poisoned state and crash record (docs/edge-wrap.md of the glue repository).
+/// LucinaNet: the engine edge wrap's poisoned state and crash record (docs/edge-wrap.md).
 pub mod poison {
     pub use mozjs_sys::engine::poison::{
         poison_count, poison_records, poisoned, thread_poisoned, PoisonInfo, PoisonReason, OUT_OF_MEMORY_MESSAGE,

@@ -1,5 +1,5 @@
-//! Renders the Juno home over the night sky with the values the laptop showed on 2026-11-09 at 00:25 (run4's fb0 capture: the
-//! owner's calendar week, tasks, decisions, agents and the reset notice), for the review set while the laptop is busy. The
+//! Renders the Juno home over the night sky with the values a real laptop showed on 2026-11-09 at 00:25 (its framebuffer
+//! capture: the owner's calendar week, tasks, decisions, agents and the reset notice). The
 //! words are the sources' own, copied from that capture; the shell itself never draws this.
 //!
 //! `cargo run --release -p lucina-glass --example home_snapshot -- <out.png>`

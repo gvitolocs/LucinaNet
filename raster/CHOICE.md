@@ -2,9 +2,7 @@
 
 > 2026-11-11: the Rust rasterizer is the default backend of LucinaNet; `LUCINANET_RASTER=swgl` selects the C++ oracle (swgl stays in the build as the oracle and the benchmark).
 
-Copied into LucinaOS `docs/research/lucinanet.md`, section "The rasterizer". Logs and images: `evidence/raster/`.
-
-All runs on the build host (x86, Ryzen, 12 threads), pinned to CPUs 4-11, LucinaNet `juno` profile (swgl at O3), 1920x1080. The
+All runs on the reference Linux development machine (x86, Ryzen, 12 threads), pinned to CPUs 4-11, LucinaNet `juno` profile (swgl at O3), 1920x1080. The
 machine was hot and busy throughout (load 47-61, Tctl 95-97 °C), so absolute times are high and multi-thread scaling
 could not be measured fairly; the comparisons are within one run of each tool. [run]
 
@@ -52,12 +50,12 @@ bug to fix.
 | **Rust port of swgl's behaviour**: the C++ runtime ported module by module, and WebRender's 78 GLSL programs translated to Rust by a fork of `glsl-to-cxx` that emits Rust | **adopt** | Same pixels as swgl by construction, so parity pages and WebRender's own invariants hold. Keeps WebRender: its picture cache, render-task graph, `SwCompositor`, and the scroll-root, animation and diagnostics patches. And it can use all 8 cores: >98% of swgl's time is per-pixel work, which splits by rows with each pixel still written by one thread in order (`raster/DESIGN.md`). Work: about 15k lines of C++ runtime plus the emitter (glsl-to-cxx's `hir.rs` is kept) |
 | WebRender display lists painted by `vello_cpu` / `vello_hybrid` (through anyrender or tiny-skia) | **reference** | Faster per core today, but 30% of pixels differ from swgl on a paint-only page, so "matches swgl on the parity pages" is unreachable. It replaces WebRender's renderer, not swgl: picture caching, invalidation and compositing would be rebuilt, and the patches the `lucinanet` session made to WebRender lost. Blitz already ships this route and stays in the parity run. Reference for: vello_cpu's strip-based threading and its box-blur shortcut, if the Rust port needs faster shadows later (only behind a switch, since it changes pixels) |
 | `vello_hybrid` | **reject** | Needs a GPU backend (wgpu or WebGL2); Juno has neither |
-| Rust GPU paths on the Adreno 618 through `/dev/lucina-gpu` | **reject for rasterizing, reference for compositing** | No shader compiler exists or can run on Juno: each of WebRender's 78 programs would be compiled by Mesa's IR3 on the build host and pasted in, as the one quad pipeline was. The GPU cannot draw into buffers yet, only the screen and one surface (LucinaOS `docs/research/juno-gpu.md`). Nothing runs on the build host, so no pixel parity loop. Compositing finished tiles on the GPU stays the documented next step for scrolling, independent of this choice |
+| Rust GPU paths on the Adreno 618 through `/dev/lucina-gpu` | **reject for rasterizing, reference for compositing** | No shader compiler exists or can run on Juno: each of WebRender's 78 programs would be compiled by Mesa's IR3 on the reference Linux development machine and pasted in, as the one quad pipeline was. The GPU cannot draw into buffers yet, only the screen and one surface. Nothing runs on that machine, so no pixel parity loop. Compositing finished tiles on the GPU stays the documented next step for scrolling, independent of this choice |
 
-## Existing Rust work on swgl or WebRender's GL path (checked 2026-11-04, at the owner's request)
+## Existing Rust work on swgl or WebRender's GL path (checked 2026-11-04)
 
 No Rust port of swgl or of WebRender's renderer exists: Servo uses vello only for canvas, and WebRender 0.70 still
-ships swgl. Two crates came up; sources read on the build host in `<work-dir>/lucinanet-raster/leads/`, nothing built or run.
+ships swgl. Two crates came up; their sources were read, nothing built or run.
 
 | Crate | What it is | Verdict | Why |
 |---|---|---|---|
@@ -70,5 +68,5 @@ Neither saves work, so the port continues.
 
 1. One thread: byte-identical to swgl on every replayed trace of the parity pages (only FMA contraction may differ; see DESIGN).
 2. Eight threads: a measured, reported difference that is only the last bit at stripe starts.
-3. Faster than swgl on example-site idle frames and Wikipedia and example-site scrolling, on the laptop, with an installed generation.
+3. Faster than swgl on example-site idle frames and Wikipedia and example-site scrolling, on real hardware, with an installed generation.
 4. swgl's C++ out of the Juno binary.

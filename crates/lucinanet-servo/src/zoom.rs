@@ -1,5 +1,5 @@
 //! The per-site zoom the engine keeps: `lucinanet-zoom`'s rules over the profile's `zoom.json`
-//! (docs/specs/wiring-shortcuts-zoom.md). Nothing here touches Servo, so the glue is tested on its own; the engine
+//! (the shortcuts/zoom wiring spec). Nothing here touches Servo, so the glue is tested on its own; the engine
 //! asks [`ZoomState`] which level a page gets and applies it with `WebView::set_page_zoom`.
 
 use std::io::Write;

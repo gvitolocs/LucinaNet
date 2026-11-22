@@ -3,16 +3,16 @@
 # shipped file, turned into what Verus reads by the mechanical steps below, and Verus must refuse every mutant.
 #   verification/gc-sizing/mutants.sh <path to sizing.rs>          (needs `verus` on PATH, or VERUS=...)
 # MUTANTS_STRICT=1: exit 1 if any mutant was refused without a verification run (a compile error, not a disproof).
-# No argument: the shipped file below is read from the repo root, which is how lucina-ci mutants-precheck runs this script.
+# No argument: the shipped file below is read from the repo root, which is how the CI proof precheck runs this script.
 # Normally started by verification/gc-sizing/run.sh, which copies sizing.rs and this script into a directory of their own and
-# runs them on the proof host (`verus-remote`), or on the build host (FALLBACK=1).
+# runs Verus on them.
 set -uo pipefail
 verus=${VERUS:-verus}
 rules=${1:-src/js/runtime/gc/sizing.rs}
 work=$(mktemp -d "${TMPDIR:-/tmp}/gc-sizing-mutants.XXXXXX")
 trap 'rm -rf "${work:?}"' EXIT
 
-# What Verus reads from the shipped file: the mechanical steps of LucinaOS scripts/verify-shipped.sh.
+# What Verus reads from the shipped file: the mechanical steps of scripts/verify-shipped.sh.
 make_verus_input() {
     local body
     body=$(sed -E -e '/\/\/@omit$/d' -e 's/-> (.*[^ ]) \/\/@ret$/-> (ret: \1)/' -e 's/^( *)\/\/@ ?/\1\/*proof*\/ /' "$1")

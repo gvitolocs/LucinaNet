@@ -20,8 +20,8 @@ use embedder_traits::user_contents::{
 };
 use embedder_traits::{
     EmbedderControlId, EmbedderControlResponse, InputEventAndId, JavaScriptEvaluationId,
-    MediaSessionActionType, NewWebViewDetails, PaintHitTestResult, Theme, TraversalId, UrlRequest,
-    ViewportDetails, WebDriverCommandMsg,
+    MediaSessionActionType, NewWebViewDetails, PageTextId, PaintHitTestResult, Theme, TraversalId,
+    UrlRequest, ViewportDetails, WebDriverCommandMsg,
 };
 pub use from_script_message::*;
 use malloc_size_of_derive::MallocSizeOf;
@@ -101,6 +101,10 @@ pub enum EmbedderToConstellationMessage {
     /// Evaluate a JavaScript string in the context of a `WebView`. When execution is complete or an
     /// error is encountered, a correpsonding message will be sent to the embedding layer.
     EvaluateJavaScript(WebViewId, JavaScriptEvaluationId, String),
+    /// Ask for the text of the document shown in a `WebView`, as blocks, at most the given
+    /// number of bytes of text (LucinaNet find bar). The answer is a `FinishPageText` to the
+    /// embedder; the page text is never logged.
+    RequestPageText(WebViewId, PageTextId, usize),
     /// Create a memory report and return it via the [`GenericCallback`]
     CreateMemoryReport(GenericCallback<MemoryReportResult>),
     /// Sends the generated image key to the image cache associated with this pipeline.

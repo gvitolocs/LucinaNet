@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # The global non-vacuity list: each mutation weakens shipped code or strengthens a claim into a false one, and Verus must REJECT the
 # mutant. Brimstone keeps no mutations here: every mutant lives with the unit it attacks, as a `try` line of
-# verification/<unit>/mutants.sh, which is what verification/<unit>/run.sh runs. This script exists because `lucina-ci inventory`
-# reads it as the `mutations/global` unit (the inventory note that described it is not part of this snapshot); the list below is
+# verification/<unit>/mutants.sh, which is what verification/<unit>/run.sh runs. This script exists because the proof inventory
+# reads it as the `mutations/global` unit; the list below is
 # the remainder, and it is empty.
-# On the build host run it through the verification script: scripts/verify-mutations.sh
+# Run it through the verification script: scripts/verify-mutations.sh
 set -euo pipefail
 
 root=$(cd "$(dirname "$0")/.." && pwd)

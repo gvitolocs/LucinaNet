@@ -195,7 +195,6 @@ JS__MaybeRunNurseryCollection
 JS__MinorGcToJSON
 JS__MonthFromTime
 JS__NativeObjectHasOwnProperties
-JS__NewArrayBufferWithUserOwnedContents
 JS__NewFunctionFromSpec
 JS__NewFunctionFromSpec1
 JS__NewMappedArrayBufferWithContents
@@ -314,7 +313,6 @@ glue__JS_ValueSetNull
 glue__JS_ValueToBoolean
 glue__JS_ValueToDouble
 glue__JS_ValueToNumber
-glue__NewExternalArrayBuffer
 glue__RUST_SET_JITINFO
 glue__RunScriptEnvironmentPreparerClosure
 glue__SetBuildId

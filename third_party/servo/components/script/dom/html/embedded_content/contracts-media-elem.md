@@ -15,9 +15,9 @@ tells the player to run or to stop.
 The rule, in one line: **the player is commanded by the element's stops — `paused`, ended playback,
 stopped due to errors, a block for content or interaction — and want of data is not a stop.** An
 engine running under a block is left running; an engine stopped under a block the page still wants
-played is started. That is finding 1 (a pause sent into a block silences the only signal that can end
-it) and finding 2 (the specification's `#blocked-media-element` has no seeking term, so a seek out of
-data is the same state as an underrun) at once.
+played is started. That is the frozen-play case — a pause sent into a block silences the only signal
+that can end it — together with the specification's `#blocked-media-element` having no seeking term, so
+a seek out of data is the same state as an underrun.
 
 ## The inputs
 
@@ -32,8 +32,7 @@ data is the same state as an underrun) at once.
 | `buffered_at_position` | the position lying inside a `player.buffered()` range | `#dom-media-buffered` |
 | `error` | `self.error.get().is_some()` | `#stopped-due-to-errors` |
 
-Four derived predicates, each one a specification clause and not a fourth of a mixture
-(finding 5):
+Four derived predicates, each one a specification clause and not a fourth of a mixture:
 
 * `blocked_for_want_of_data()` = `!ready_state.has_future_data()` — the data term of
   `#blocked-media-element`, and the same term `is_potentially_playing()` reads. The `buffered` ranges
@@ -89,21 +88,22 @@ line:
 element-contract-1…04 from it. `the_trace_line_carries_the_fixed_fields_in_the_fixed_order` pins the exact
 text; `every_event_names_itself_the_way_the_checker_reads_it` pins the vocabulary.
 
-## The tests, and how findings 3 and 4 are tested at all
+## The tests, and how the element-side rules are tested at all
 
 33 tests, all in `media_command.rs`'s `mod tests`. The decision-side properties run over the
 enumeration (7 flags × 5 ready levels = 640 snapshots, 2560 of them states an element can actually be
 in) and over seeded random event sequences (xorshift64\*, `Rng::next_u64`, no new dependency) driving
 a model player.
 
-Findings 3 and 4 are about `htmlmediaelement.rs`, and the setup used could not compile it: `servo-script`
-depends on `servo-script-bindings`, whose build script needs a Python that setup lacks (see
-`REPORT.md`). The rules those lines implement are therefore transcribed in the test module —
+The element-side rules are about `htmlmediaelement.rs`, and the setup used could not compile it:
+`servo-script` depends on `servo-script-bindings`, whose build script needs a Python that setup lacks.
+The rules those lines implement are therefore transcribed in the test module —
 `Stage::{Before, RoundOne, After}` with `buffering`, `playing`, `waiting_fires`, `ready_state_events`,
 `backwards_end`, `fatal_steps`, each naming the working-tree line it stands for — and every contract
 that lives in the element side is asserted twice, against the old transcription and the new. Those
-transcriptions are the evidence; the build gate has to confirm them against the code, and
-`REPORT-round2.md` says which claim rests on that. A transcription cannot fail on a deleted call
+transcriptions are the evidence; the build gate has to confirm them against the code, and a claim that
+rests on a transcription rather than on the compiled element is read that way. A transcription cannot
+fail on a deleted call
 site, so the last assumption of 07 and of 08 states which half of those two contracts only the
 run-time trace carries.
 
@@ -138,8 +138,9 @@ and "When a media element is not potentially playing, audio must not play for th
    `potentially_playing` true is not a state the property is asked to keep.
 3. The one window is beyond any command's reach from here, and it cuts both ways. A blocked element
    whose engine is running prints `potentially_playing=0 … cmd=none`; a blocked element whose engine
-   the page asked to play prints `potentially_playing=0 … cmd=play`. Pausing into agreement is what
-   froze frozen-play and what finding 1's seek did to this branch's own round one, because a paused engine
+   the page asked to play prints `potentially_playing=0 … cmd=play`. Pausing into agreement is the
+   frozen-play freeze, and it is what the seek pause did in the intermediate stage, because a paused
+   engine
    sends no `PlaybackState::Playing` — the fork's only signal that raises the ready state above
    `HAVE_CURRENT_DATA` (`playback_state_changed`'s Playing arm). 05 owns the window; the checker's
    reading of it is at the end of this file.
@@ -161,15 +162,15 @@ redundant or not, ever commands a stop over an element that is potentially playi
 `media_elem_02_holds_over_random_event_sequences`. It **fails against the pre-fix decision**:
 `media_elem_02_fails_for_the_pre_fix_decision` and
 `the_random_sequences_break_media_elem_02_before_the_fix` — the first state that breaks it is
-`event=play` over `potentially_playing=1, player_playing=1` returning `Pause`, which is first-fix's bug
-in one line.
+`event=play` over `potentially_playing=1, player_playing=1` returning `Pause`, which is the bug in one
+line.
 
 *Spec.* `#internal-play-steps` step 3 runs "If the media element's `paused` attribute is true"; step 4
 covers the rest — "Otherwise … take pending play promises and … resolve them with the result. *The
 media element is already playing.*" A player that is already running has nothing to be told.
 
 *Assumptions.*
-1. The precondition is part of the id (finding 6). Round 1 wrote 02 as the checker's bare shape,
+1. The precondition is part of the id. The first pass wrote 02 as the checker's bare shape,
    `event=play && player_playing=1 ⇒ cmd=none`, and the function does not keep that without it: a play
    over an element that has *ended* playback, or whose playback stopped due to an error, answers with
    the pause those states already asked for. That pause is element-contract-3's subject, not the play
@@ -179,7 +180,7 @@ media element is already playing.*" A player that is already running has nothing
    The shape needs the play steps to reach the decision with the mirror still running, which the end of
    this file records as a divergence rather than a workaround.
 3. `play-redundant` (the same call with `paused` already false) is stamped distinctly so the log can
-   show the second `play()` of the first-fix sequence; the tool's 02 reads `event=play` only, and the
+   show the second `play()` of the two-play sequence; the tool's 02 reads `event=play` only, and the
    redundant line answers `cmd=none` as well.
 
 ## element-contract-3
@@ -195,8 +196,8 @@ seek or out of one; every other state answers `cmd=none`.
 `media_elem_03_a_seek_that_left_nothing_to_decode_pauses_nothing`,
 `media_elem_03_holds_over_random_event_sequences`, with `ordered_pause()` as the list stated over the
 snapshot. **Pre-fix it fails**: `media_elem_03_fails_for_the_pre_fix_decision`,
-`the_random_sequences_break_media_elem_03_before_the_fix`, and the same test's red half against this
-branch's own round one, which paused all three seek events over a seek with nothing decoded.
+`the_random_sequences_break_media_elem_03_before_the_fix`, and the same test's red half against the
+intermediate stage, which paused all three seek events over a seek with nothing decoded.
 
 *Spec.* the four causes: `#internal-pause-steps` ("Set the `paused` attribute to true" — the page or
 the element asked); `#ended-playback` with `#reaches-the-end`; `#stopped-due-to-errors` with
@@ -205,11 +206,12 @@ conditions. `#dom-media-seek` is deliberately *not* a cause: step 12 says "Wait 
 has established whether or not the media data for the new playback position is available, and, if it
 is, until it has decoded enough data to play back that position", which is a wait for data, not a stop
 for the engine, and step 11's note points at the `waiting` event — the same ready-state step as a plain
-stall — for what happens instead (finding 2).
+stall — for what happens instead.
 
 *Assumptions.*
-1. Round 1's third cause ("a seek the specification pauses for") is withdrawn. `#blocked-media-element`
-   has no seeking term, and the pause that went with it is the freeze finding 1 names.
+1. The third cause first written here — "a seek the specification pauses for" — is withdrawn.
+   `#blocked-media-element` has no seeking term, and the pause that went with it is the frozen-play
+   freeze.
 2. A block for user interaction or in-band content is a cause, prints
    `paused=0 ended=0 seeking=0 cmd=pause`, and is unreachable today because both predicates are
    constant `false`; `element_can_be` documents what that does to the enumeration, and the tool's
@@ -233,7 +235,7 @@ page ordered outranks the block.
 `finding_1_a_seek_that_runs_out_of_data_starts_the_engine_again` is the same property as a round trip.
 **Pre-fix it fails**: `the_random_sequences_break_media_elem_04_before_the_fix` prints the trail of the
 sequence it breaks in, ending `play pp=1 … buffered=1 mirror=1 -> pause`;
-`the_play2_trace_before_and_after` prints the first-fix pair, and
+`the_play2_trace_before_and_after` prints the before-and-after pair, and
 `the_nav05_play2_sequence_keeps_the_player_running` keeps that as a named regression. The WPT is
 `tests/wpt/mozilla/tests/mozilla/play-while-playing.html`.
 
@@ -265,17 +267,18 @@ engine left stopped under a page that wants playback. The two ready-state arms w
 when `ended_playback()` or an error holds.
 
 *Test.* Decision side: `media_elem_05_a_block_of_data_is_neither_a_pause_nor_a_stop` (and its red half,
-which counts the 12 want-of-data states round 1 left with a stopped engine, against 0 now). Element
+which counts the 12 want-of-data states the earlier code left with a stopped engine, against 0 now).
+Element
 side, as transcriptions with red runs: `media_elem_05_the_stall_dropped_nothing_before_the_fix` — the
 fork's Buffering arm wrote nothing and queued nothing, the fix drops to HAVE_CURRENT_DATA and queues
 `timeupdate` and `waiting` — and
-`finding_4_the_ready_state_arms_leave_an_ended_or_errored_element_alone`, which shows the first round's
+`finding_4_the_ready_state_arms_leave_an_ended_or_errored_element_alone`, which shows the earlier
 unguarded raise taking an ended element to HAVE_ENOUGH_DATA and queueing
 `["canplay", "playing", "canplaythrough"]` at it. In the element: the Buffering arm
 (`htmlmediaelement.rs:3312-3336`), the Playing arm (`:3291-3311`) and `can_hold_future_data`
 (`:3278-3280`). The raise *ends* the block and is not the restart: the restart is the `cmd=play` that
 answered the block while the mirror stood still (`BlockedButAskedToPlay`), and the decision the raise
-itself ends in prints `none`, because on that path the engine never stopped (the recheck's finding 1).
+itself ends in prints `none`, because on that path the engine never stopped.
 
 *Spec.* `#blocked-media-element` — "A media element is a blocked media element if its `readyState`
 attribute is in the HAVE_NOTHING state, the HAVE_METADATA state, or the HAVE_CURRENT_DATA state, or if
@@ -291,13 +294,13 @@ this state if playback has ended, as the current playback position can never adv
    Buffering arm runs the decision itself where it has nothing to lower.
 2. The engine's `PlaybackState::Buffering` is the only stall signal the player sends, and the Playing
    arm is the only thing in the fork that lifts the ready state out of HAVE_CURRENT_DATA — hence the
-   rule that a want-of-data block must never pause the engine, and hence finding 1.
+   rule that a want-of-data block must never pause the engine, and hence the frozen-play freeze.
 3. The guard is `!ended && !error`, not `!paused`: a paused element that runs out of data still has to
    say so. The sibling raise in the Paused arm (HAVE_METADATA → HAVE_ENOUGH_DATA, upstream's own) is
    *not* guarded, so an ended element that is reported `Paused` can still be raised; that is out of
-   scope for this change and is left as a known residual (finding 4's third case).
+   scope for this change and is left as a known residual.
 4. Nothing else in the fork lifts `readyState` out of HAVE_CURRENT_DATA, so the drop and the raise are
-   one round trip and must be read together ("a fix follows its cause").
+   one round trip and must be read together: a fix follows its cause.
 
 ## element-contract-6
 
@@ -309,7 +312,7 @@ as nobody's stop; and the ready-state clause that fires the event is satisfiable
 
 *Test.* `media_elem_06_an_error_is_a_stop_and_a_stall_is_not` (decision side) and
 `media_elem_06_the_waiting_clause_was_inverted_before_the_fix` (the clause, transcribed over all 16
-rows). The red run is harsher than round 1's summary: `was_potentially_playing` is
+rows). The red run is harsher than the first pass's summary: `was_potentially_playing` is
 `is_potentially_playing()`, whose third condition is that the element has *no* error, so the fork's
 `!self.error.get().is_none()` did not fire `waiting` at an error — it made the whole substep
 unsatisfiable, and the `waiting` and `timeupdate` of that ready-state branch were unreachable code.
@@ -360,8 +363,8 @@ a media element task given the media element to fire an event named `timeupdate`
    `media_elem_07_the_backwards_end_reached_no_decision_before_the_fix` compares `decide` against a
    transcription of the old body (`media_command.rs:1244-1254`); deleting the
    `update_media_state(MediaEvent::Ended)` call at `htmlmediaelement.rs:2800` fails no test in this file,
-   and the harness cannot build `servo-script` to drive a real element (see "The tests, and how findings
-   3 and 4 are tested at all"). The call site is checked at run time, by the element's own trace line and
+   and the harness cannot build `servo-script` to drive a real element (see "The tests, and how the
+   element-side rules are tested at all"). The call site is checked at run time, by the element's own trace line and
    `tools/media-trace-check`: with the call present, the step prints
    `event=ended paused=0 ended=1 seeking=0 potentially_playing=0 player_playing=1 cmd=pause` and the
    backend then prints its `player pause … on … mirror(…)` line; with the call gone neither line
@@ -421,16 +424,16 @@ algorithm clears the `error` attribute."
 
 ## What the checker cannot see from these lines
 
-Three consequences of the trace format the task fixes, reported rather than worked around.
-`tools/media-trace-check` lives in LucinaNet and is not this branch's file to change.
+Three consequences of the trace format, reported rather than worked around. `tools/media-trace-check`
+lives in LucinaNet and is not this tree's file to change.
 
 1. **element-contract-1 and the want-of-data window.** A stalled, non-seeking element prints
    `event=waiting potentially_playing=0 player_playing=1 cmd=none`; a stalled element whose engine the
    page asked to play prints `event=play potentially_playing=0 player_playing=0 cmd=play`.
    `elem_state` (`tools/media-trace-check/src/lib.rs:517-546`) compares `potentially_playing` with the
    next player report, so both are called breaks. Nothing the element can command fixes either one
-   while the mirror is a command mirror: pausing into agreement is the frozen-play freeze and finding 1's
-   freeze, and it also silences the signal that would end the block. Either the property exempts
+   while the mirror is a command mirror: pausing into agreement is the frozen-play freeze, and it also
+   silences the signal that would end the block. Either the property exempts
    `wants_playback && !potentially_playing` — which the line cannot express, since it carries no
    data-state field — or the line gains one field, `blocked=<0|1>`, which `MediaState` already computes
    at every decision.
@@ -439,14 +442,14 @@ Three consequences of the trace format the task fixes, reported rather than work
    `paused|ended|seeking` only, so an error stop is flagged. The cause is a `MediaState` field with no
    place on the line. An `error=<0|1>` field is the fix, and the same exemption list has to grow when
    `is_paused_for_user_interaction()` and `is_paused_for_in_band_content()` stop returning `false`
-   (assumption 2 of 03). The seek term in that list is now dead weight: the element pauses inside a seek
-   in no state (finding 2).
+   (assumption 2 of 03). The seek term in that list is now dead weight: `#blocked-media-element` has no
+   seeking term, and the element pauses inside a seek in no state.
 3. **element-contract-2's precondition.** `elem_play_command` (`:564-586`) flags any
    `event=play player_playing=1 cmd!=none`, while 02's own sentence (assumption 1) scopes it to an
    element in none of the stops. A play that lands on an ended or errored element with the engine still
    running is 03's pause and the tool's break; reaching the play steps in that state needs the
-   forwards-end interval of finding 4, so it is a shape to watch in a real log rather than one the
-   tests can produce.
+   forwards-end interval in which `ended` is set before `paused` is, so it is a shape to watch in a real
+   log rather than one the tests can produce.
 
 ## Running the tests
 
@@ -455,5 +458,5 @@ Three consequences of the trace format the task fixes, reported rather than work
 In the setup used that command cannot run at all: building `servo-script` requires
 `servo-script-bindings`, whose build script probes `uv run python`, `python3` and `python`, and the
 setup has none of them. The module was therefore compiled and run
-standalone, with `#[path]` including this file into a throwaway crate — 33 tests, all passing, printed
-evidence in `<work-dir>/tmp/evidence-round2.txt`.
+standalone, with `#[path]` including this file into a throwaway crate — 33 tests, all passing, the
+evidence being the traces those tests print.

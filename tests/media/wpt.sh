@@ -4,8 +4,8 @@
 #   tests/media/wpt.sh <lucinanet binary> [test paths relative to tests/wpt/tests ...]
 # Default: the media element tests and Media Source Extensions. Prints one line per test file (PASS/FAIL/TIMEOUT counts) and the
 # totals; per-subtest results go to $OUT (default /tmp/lucinanet-wpt).
-# Run it capped: systemd-run --user --scope -p CPUQuota=200% tests/media/wpt.sh ... ; it also waits while the build host is at 90 C.
-# Only localhost: the build host has no web-platform.test host entries, so cross-origin subtests fail here and are not counted against us.
+# Run it capped: systemd-run --user --scope -p CPUQuota=200% tests/media/wpt.sh ... ; it also waits while the CPU is at 90 C.
+# Only localhost: a machine with no web-platform.test host entries fails the cross-origin subtests here, and they are not counted against us.
 set -u
 # These tests load clips with sound tracks; the pass is a number of subtests, not anything heard. Play to the null
 # sink so a run on a Mac stays quiet, and leave the device alone for anyone watching the logs.
@@ -13,7 +13,8 @@ LUCINANET_MEDIA_SINK=${LUCINANET_MEDIA_SINK:-none}
 export LUCINANET_MEDIA_SINK
 bin=${1:?lucinanet binary}
 shift
-servo=${SERVO:-/home/user/Projects/Lucina/LucinaNet-servo}
+# The WPT corpus is not vendored here (`third_party/UPSTREAMS.toml` omits `tests/wpt`): set SERVO to a Servo checkout.
+servo=${SERVO:-$(cd "$(dirname "$0")/../.." && pwd)/third_party/servo}
 out=${OUT:-/tmp/lucinanet-wpt}
 port=${PORT:-8123}
 mkdir -p "$out"
@@ -39,7 +40,7 @@ cat > "$out/report.js" <<'EOF'
   });
 })();
 EOF
-# the build host's owner limit: background CPU work waits while the CPU is at or above 90 C (k10temp Tctl).
+# the machine's own thermal limit: background CPU work waits while the CPU is at or above 90 C (k10temp Tctl).
 cool() {
     local h
     for h in /sys/class/hwmon/hwmon*; do

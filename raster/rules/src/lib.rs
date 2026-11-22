@@ -312,7 +312,7 @@ pub fn blend_key(srgb: u32, drgb: u32, sa: u32, da: u32, equation: u32) -> Optio
     None
 }
 
-/// What LucinaNet's swgl does with a state the table lacks (patches/swgl): blend as premultiplied source-over
+/// What LucinaNet's swgl does with a state the table lacks (`swgl/src/gl.cc`): blend as premultiplied source-over
 /// (`GL_ONE, GL_ONE_MINUS_SRC_ALPHA`, key 2) rather than abort.
 pub fn blend_key_or_fallback(srgb: u32, drgb: u32, sa: u32, da: u32, equation: u32) -> usize //@ret
 //@ ensures ret < BLEND_KEYS_FROM_STATE,

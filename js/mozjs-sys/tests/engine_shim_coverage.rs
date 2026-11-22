@@ -109,7 +109,7 @@ const MUST_BE_GC: &[(&str, &str)] = &[
 /// (`NonNull::dangling()` from `dangling_failure!`), which a caller that null-checks the return - exactly how these
 /// functions report "no data" today - would read as a live pointer. So when a slice wraps one it MUST override the
 /// failure value to null, matching the function's own miss path: `#[engine_shim(failure = ::std::ptr::null_mut())]`
-/// (review change 5, docs/edge-wrap.md section b). The check below refuses a gated wrap of any name here without a
+/// (docs/edge-wrap.md section b). The check below refuses a gated wrap of any name here without a
 /// `failure = ...`. A dangling pointer stays correct ONLY where the caller feeds it to `slice::from_raw_parts` together
 /// with a length the caller already knows is 0 - that is the two string char getters
 /// (`JS_GetLatin1StringCharsAndLength`, `JS_GetTwoByteStringCharsAndLength`, read by `mozjs/src/conversions.rs` which
@@ -333,7 +333,7 @@ fn every_engine_extern_c_fn_is_wrapped() {
         if s.wrapped && !s.gc && MUST_BE_GC.iter().any(|(f, n)| *f == s.file && *n == s.name) {
             problems.push(format!(
                 "{}: `{}` is a tracer, write barrier, finalizer or weak-pointer update: it must be a `gc` shim \
-                 (#[engine_shim(gc)]), never a gated one (docs/edge-wrap.md d, review change 3)",
+                 (#[engine_shim(gc)]), never a gated one (docs/edge-wrap.md d)",
                 s.file, s.name
             ));
         }
@@ -341,7 +341,7 @@ fn every_engine_extern_c_fn_is_wrapped() {
             problems.push(format!(
                 "{}: `{}` returns element data whose own miss path is null: the type default is a dangling pointer a \
                  null-checking caller reads as live; write #[engine_shim(failure = ::std::ptr::null_mut())] \
-                 (docs/edge-wrap.md b, review change 5)",
+                 (docs/edge-wrap.md b)",
                 s.file, s.name
             ));
         }

@@ -1,7 +1,6 @@
 # The non-Rust leftovers: SQLite, zstd, runtimes (2026-11-04)
 
-Servo patches on branch `rust-store` of `LucinaNet-servo` (plus `rust-store-net`, `rust-store-zstd` until merged). Porting guidelines:
-our porting guidelines. The original is Servo at `docs/servo-pin` with our patches.
+The engine fork carries these Servo patches, on the Servo base named in `third_party/UPSTREAMS.toml`.
 
 ## What used SQLite, and what did not
 
@@ -67,18 +66,18 @@ Not proved: redb itself (its own tests, plus our power-cut test), the byte reads
   buffer sizes: all agree. Four bit flips that libzstd refuses decode in ruzstd to exactly the original content (asserted). 1 GiB of zeros
   decodes in bounded memory.
 - Servo's own tests, ported to the new engines: `servo-storage` 31 + 19 pass; `servo-net` 391 of 392 (the one, `test_filemanager`, passes
-  alone: a set-once runtime handle in Servo's tests, not this change); `servo-base` 38.
-- An independent review of the IndexedDB and registry engines against the SQLite ones found no range, order, id or count difference, and
+  alone: a set-once runtime handle in Servo's own tests, nothing to do with our patches); `servo-base` 38.
+- Checking the IndexedDB and registry engines against the SQLite ones found no range, order, id or count difference, and
   four issues, all fixed: disk-full was not seen through redb's errors; IndexedDB `complete` came before its commit was durable (now
   flushed first); a fresh registry could sweep an old profile's directories; disk walks under the registry's write lock. The storage
-  review found that a `flush` could return while another was still writing (fixed).
+  check found that a `flush` could return while another was still writing (fixed).
 - The Juno binary (`juno` profile) has no SQLite or libzstd left: `sqlite_master` 19 times before, 0 after; libzstd's error strings gone.
-- **Laptop, 2026-11-04, generation 29**, binary run from `/data/lucina/rust-store/`, not installed (the installed LucinaNet stays the
-  `lucinanet` session's tree until it adopts this): `tests/profile/restart.sh` PASS. httpbin.org set cookie `lucina=juno1006`, the page wrote
+- **Laptop, 2026-11-04**, binary run from `/data/lucina/rust-store/` and not installed over what the device already
+  carries: `tests/profile/restart.sh` PASS. httpbin.org set cookie `lucina=juno1006`, the page wrote
   localStorage and IndexedDB, the engine ran 40 s and ended with `_exit` (a kill: no exit-time save); the next run read back all three.
 - IndexedDB is experimental in Servo and off by default (`dom_indexeddb_enabled`), in LucinaNet too: the test turns it on. Whether
-  LucinaNet turns it on for everyone is the `lucinanet` session's call.
-- **QEMU power cuts on Juno** (LucinaOS `scripts/qemu-juno-disk.sh`, part `store`: 12 cuts at random times while `store_cut` commits to
+  LucinaNet turns it on for everyone is an open product decision.
+- **QEMU power cuts on Juno** (LucinaOS `scripts/qemu-juno-disk.sh`, outside this tree, part `store`: 12 cuts at random times while `store_cut` commits to
   `/data/lucina/net-cut/profile.redb`, the next boot checks what it finds):
   - First run, 2026-11-04: **all 12 cuts came back empty**, 16340 commits lost that had been reported durable. On the disk image the
     directory was there and the file was not: POSIX makes a new name durable only after an fsync of its directory, Linux ext4 commits it
@@ -101,4 +100,4 @@ Not proved: redb itself (its own tests, plus our power-cut test), the byte reads
   dropped and the next fsync returns 0), and `/data` writers can stall for minutes behind a sync. The cache is a bursty writer and
   losing it costs nothing, so it stays off `/data` meanwhile. The rest of the profile (history, zoom, localstorage) is unchanged.
 - **Moving it back:** when Juno kernel patch 1242 (write errors reported at fsync) and the writeback steps are on the installed
-  generation, the default returns to the profile. The disk-root chat says when; until then the tmpfs location stays.
+  generation, the default returns to the profile. No date is promised; until then the tmpfs location stays.

@@ -1,4 +1,4 @@
-//! LucinaNet's accessibility socket by hand, with the requests `lucina-devd` sends (`lucina-ax`'s protocol), for the build host,
+//! LucinaNet's accessibility socket by hand, with the requests `lucina-devd` sends (`lucina-ax`'s protocol), on a Linux desktop,
 //! where there is no `/run/lucina` and so no `lucina-ax` command target:
 //!
 //! ```text

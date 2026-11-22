@@ -31,7 +31,7 @@ use crate::jsapi::{JSClass, JSContext, JSErrorFormatString, JSObject, JS};
 use std::io::Write;
 use std::os::raw::{c_char, c_uint, c_void};
 
-// ---- LUCINANET_JS_MISSING_LOG=<file>: the run-time site log of docs/missing.md section 3 ----
+// ---- LUCINANET_JS_MISSING_LOG=<file>: the run-time site log of the missing-feature inventory ----
 // One tab-separated line per event, so a run over the site list says what pages actually reach instead
 // of stopping at the first abort. `<unix_ms>\tmissing\t<name>` for a stub, and
 // `<unix_ms>\terror\t<message>\t<file>:<line>` for an uncaught script error, at most ERROR_LOG_CAP of
@@ -175,6 +175,7 @@ pub mod cache_partition;
 pub mod saved_frame;
 pub mod env_chain;
 pub mod caller_private;
+pub mod external_buffer;
 
 pub mod crash_bt;
 pub mod poison;

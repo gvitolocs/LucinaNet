@@ -3,7 +3,7 @@
 # copy of the shipped file, and Verus must refuse every mutant.
 #   verification/store-buffer/mutants.sh <boundary/value_bits.rs> <engine/store_buffer_rules.rs>   (needs `verus`, or VERUS=...)
 # Normally started by verification/store-buffer/run.sh, which copies both files and this script into a directory of their own and
-# runs them on the proof host (`verus-remote`), or on the build host (FALLBACK=1).
+# runs Verus on them.
 # What Verus reads is the crate scripts/verify-shipped.sh builds from mozjs-sys/src/boundary: `value_bits` as `boundary::value_bits`,
 # so that the shipped `use crate::boundary::value_bits;` is the same line in both.
 set -uo pipefail

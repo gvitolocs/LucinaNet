@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-//! The profile store under real power cuts on Juno (QEMU, LucinaOS scripts/qemu-juno-disk.sh mode `store`).
+//! The profile store under real power cuts on Juno (QEMU).
 //!
 //! `store_cut check <file>`: opens the store and checks that it holds exactly the state after some commit, printing
 //! `store-cut: recovered <n>` or `store-cut: BAD <why>`.

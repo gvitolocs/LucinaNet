@@ -1,8 +1,8 @@
 # scroll-bench-tables — the findings tables, from the runs that made them
 
 Turns scroll-bench run directories and the matrix job logs they went through into the six findings
-tables of `docs/analysis/scroll-bench-findings.md`. It is the Rust port of `py/scroll-bench-analyse.py`,
-which the project's rule that new tools are Rust retires; the tables print the same numbers, in the same
+tables of the scroll-bench analysis. It is the Rust port of `scroll-bench-analyse.py`, which the
+project's rule that new tools are Rust retires; the tables print the same numbers, in the same
 order, under the same headings, byte for byte.
 
 Its own Cargo workspace, like `tools/wpt-reftest` and `tools/sitecheck`. It links no engine crate,
@@ -20,14 +20,14 @@ read under `--base`, which stands in for the scratch path the Python had written
 directories and the logs can be named as the matrix scripts named them.
 
 ```sh
-cd $WORK_DIR/lucinanet/scroll-bench
-cargo run --release --manifest-path ~/Projects/LucinaNet/tools/scroll-bench-tables/Cargo.toml -- \
-  --base "$PWD" m1 m2 m3 m4 \
-  logs/run-matrix.log logs/run-matrix2.log logs/run-matrix3.log logs/run-matrix4.log
+runs=$WORK_DIR/scroll-bench        # where the run directories and the matrix job logs are kept
+cargo run --release --manifest-path tools/scroll-bench-tables/Cargo.toml -- \
+  --base "$runs" m1 m2 m3 m4 \
+  "$runs/logs/run-matrix.log" "$runs/logs/run-matrix2.log" "$runs/logs/run-matrix3.log" "$runs/logs/run-matrix4.log"
 ```
 
 The tables go to stdout. The one thing on stderr is a note about runs with no load line, and it is
-absent when every run matched - which is the case for the 72 runs of the three the build host matrices.
+absent when every run matched - which is the case for the 72 runs of the three matrices.
 
 ## Where each number comes from
 
@@ -63,7 +63,7 @@ a section that is short rather than empty.
 ## Tests
 
 ```sh
-CARGO_TARGET_DIR=$WORK_DIR/lucinanet/target-tools cargo test --offline
+CARGO_TARGET_DIR=${CARGO_TARGET_DIR:-$PWD/target-tools} cargo test --offline
 ```
 
 `tests/fixture.rs` runs the binary over `tests/fixture/` - ten runs of the three matrices, a job log
@@ -73,14 +73,15 @@ compares stdout byte for byte. git carries no mtimes, so the test touches each r
 
 ## Re-generating the expected output
 
-Only worth doing if the fixture changes. The Python is outside the tree, at
-`<work-dir>/lucinanet/scroll-bench/py/scroll-bench-analyse.py`, and is unchanged: fix the invocation,
+Only worth doing if the fixture changes. The Python is not in this tree: it sits with the run
+directories, at `$runs/py/scroll-bench-analyse.py`, and is unchanged - fix the invocation,
 never the analysis. Its `BASE` is hard-coded, so name the directories absolutely, and it reads the
 mtimes a copy does not carry, so set them first - the same seconds `mtimes.txt` names, which is what
 `tests/fixture.rs` does too.
 
 ```sh
-fx=/tmp/scroll-bench-fixture && rm -rf $fx && cp -r tools/scroll-bench-tables/tests/fixture $fx && cd $fx
+tmproot=${TMPDIR:?set TMPDIR to a scratch directory (not /tmp)}
+fx=$tmproot/fixture-copy && rm -rf $fx && cp -r tools/scroll-bench-tables/tests/fixture $fx && cd $fx
 python3 - "$fx" <<'PY'
 import os, sys, glob
 base = sys.argv[1]

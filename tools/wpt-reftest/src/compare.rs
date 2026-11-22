@@ -175,7 +175,7 @@ mod tests {
 
     #[test]
     fn max_difference_is_a_ceiling_not_a_budget() {
-        // The css-masking shape in the brief: 0-69 maxDiff, 0-360 maxPixels.
+        // The css-masking shape: 0-69 maxDiff, 0-360 maxPixels.
         let d = scratch("ceiling");
         let fuzzy = Fuzzy { max_difference: 69, max_pixels: 360 };
         let a = png(&d, "a.png", 32, 32, &[]);

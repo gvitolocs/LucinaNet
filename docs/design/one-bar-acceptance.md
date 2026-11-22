@@ -40,14 +40,14 @@ chrome ended. With the ink rule the seam is unambiguous, and the glass bar gaine
 page's top reflected into its bottom edge. Down the bar at 1x the red channel now runs 253 at row 0 to 180 at row 43; at
 2x, 254 to 186. The bar is still glass, not dark, and the classic chrome is unchanged but for the rule under it.
 
-**This is not a live engine.** The precedent for that exists - `docs/specs/wiring-bookmarks.md` shot a real page through
+**This is not a live engine.** The precedent for that exists - a real page has been shot through
 a headless full-rust `lucinanet-servo` probe and `--render` - but that route cannot produce four of these six states: one
 headless load has one tab, types nothing, asks nothing and never sets a mac inset. So the page under the row is a fixture
 (`shot::fixture`: an ink rule across its top rows, a pale header band, then lines of ink on paper) chosen so the glass
 backdrop sampling has something representative to
 sample, and the engine is the UI crate's existing stand-in. What the pictures therefore prove is the chrome - geometry,
-order, fitting, materials, hit-testing - and nothing about the engine. The owner's Mac, running the real thing, remains
-the acceptance target; these are the pre-review set.
+order, fitting, materials, hit-testing - and nothing about the engine. A real Mac running the real thing remains
+the acceptance target; these pictures are what stands in for it until then.
 
 Scale comes from the harness, not from a knob: `k = (w/1024).min(h/768)` clamped to 0.6..3.0 (`lucina-app/src/ui.rs`), so
 1366x768 is 1x, 2048x1536 is 2x, and 400x300 sits on the 0.6 floor.
@@ -113,7 +113,7 @@ far, so nothing can be measured to draw a fraction. The glass chrome sweeps a 2 
 wide, 8 px at least) along the capsule's bottom edge on a 1.6 s loop, driven by the frame clock the kit hands it and kept
 alive by `GlassChrome::wake_after`; the classic chrome draws a static full-width 2 dp accent line on the same edge,
 because the classic path has no frame clock and asks for no repaints. The difference is deliberate and bounded: motion
-where the chrome already animates, a plain "something is happening" line where it does not. Before this change the
+where the chrome already animates, a plain "something is happening" line where it does not. Before, the
 classic chrome showed loading only as the reload glyph becoming a `x`. Neither line is a percentage, and the design's
 "progress line" wording should be read as this until the engine reports a fraction.
 
@@ -138,7 +138,7 @@ and does not clamp it to the box, so the kit's own `radius::PILL` (999) on a 2 d
 loading line was painted and invisible. `stroke_rrect` and `fill_rrect` clamp, the clip does not. `glass.rs` now clips
 the sweep with the capsule's own radius (`cap.h / 2`) and says why in a comment; the regression test
 `a_load_inks_the_accent_along_the_capsules_bottom_edge` counts actual accent pixels on that edge, so the failure mode is
-now a failing test rather than an empty-looking picture. The bug is the kit's to fix, in LucinaOS; this branch works
+now a failing test rather than an empty-looking picture. The bug is the kit's to fix, in LucinaOS; this tree works
 around it and says so in the comment, rather than patching a dependency from here.
 
 **The sweep's phase is the one thing a re-run moves.** The glass sweep reads the wall clock (`self.start.elapsed()`), so a

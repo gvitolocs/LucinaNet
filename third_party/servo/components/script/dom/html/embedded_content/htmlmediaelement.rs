@@ -942,8 +942,8 @@ impl HTMLMediaElement {
     fn internal_play_steps(&self, cx: &mut JSContext) {
         // Whether the page asked this element to start or only repeated the request: step 3 below
         // clears `paused`, so the answer has to be taken before it does. It names the decision's
-        // event, and with it the element-contract-2 case — the redundant play that first-fix found pausing
-        // a running pipeline.
+        // event, and with it the element-contract-2 case — the redundant play that used to pause a
+        // running pipeline.
         let paused_at_entry = self.Paused();
 
         // Step 1. If the media element's networkState attribute has the value NETWORK_EMPTY, invoke
@@ -1199,8 +1199,8 @@ impl HTMLMediaElement {
                 // `is_potentially_playing()`, whose own third condition is that there is no error, the
                 // two terms cannot both hold: the `waiting` and `timeupdate` of this substep were
                 // unreachable code, silent on every plain stall rather than firing only where an error
-                // had stopped playback (element-contract-6, and finding 3 of the contract-rewrite review, which asked
-                // for the red run — see media_command.rs's `waiting_fires`).
+                // had stopped playback (element-contract-6; media_command.rs's `waiting_fires` is the
+                // red run for it).
                 if was_potentially_playing
                     && !self.ended_playback(LoopCondition::Included)
                     && self.error.get().is_none()
@@ -2427,13 +2427,13 @@ impl HTMLMediaElement {
         // The rest of the steps are handled when the media engine signals a ready state change
         // or otherwise satisfies seek completion and signals a position change.
         //
-        // The decision runs at the start of the wait as well, and answers nothing in the case the
-        // first round paused for: step 12 is a *wait*, not an order to stop the engine, and
+        // The decision runs at the start of the wait as well, and answers nothing in the case an
+        // earlier version of it paused for: step 12 is a *wait*, not an order to stop the engine, and
         // `#blocked-media-element` has no seeking term, so a seek with nothing decoded is the same
-        // state as a mid-playback underrun (element-contract-3, element-contract-5). It is worse than the same
-        // state outside a seek if the element acts on it: the pause silences the one signal,
-        // `PlaybackState::Playing`, that raises the ready state back and so ends the wait at all
-        // (contract-rewrite review, finding 1).
+        // state as a mid-playback underrun (element-contract-3, element-contract-5). It is worse
+        // than the same state outside a seek if the element acts on it: the pause silences the one
+        // signal, `PlaybackState::Playing`, that raises the ready state back and so ends the wait at
+        // all.
         self.update_media_state(MediaEvent::SeekStart);
     }
 
@@ -2464,7 +2464,7 @@ impl HTMLMediaElement {
         // It is the same answer as any other event over this state — data at the position and an
         // element in no stop restarts an engine that stands still, an underrun leaves a running one
         // alone — and that is the point: the wait of step 12 is ended by the engine's own report, not
-        // by a command the element sent to silence it (element-contract-3, contract-rewrite review finding 1).
+        // by a command the element sent to silence it (element-contract-3).
         self.update_media_state(MediaEvent::SeekEnd);
     }
 
@@ -3300,7 +3300,7 @@ impl HTMLMediaElement {
                 // The raise ends the block; it is not the restart. The restart is the command that
                 // answered the block with `play` while the mirror stood still: the page's play, the
                 // drop's waiting, the seek's end (`BlockedButAskedToPlay`). The decision this raise
-                // ends in prints `none`, since there the engine never stopped (finding 1). A paused
+                // ends in prints `none`, since there the engine never stopped. A paused
                 // engine sends no `Playing`, so a want-of-data block must never pause one.
                 if self.can_hold_future_data()
                     && self.ready_state.get() >= ReadyState::HaveMetadata
@@ -3324,7 +3324,7 @@ impl HTMLMediaElement {
                     // An element whose playback has ended, or has stopped due to errors, is not
                     // stalled for anybody to answer: its ready state is the one the ends of playback
                     // or the fatal steps left it at, and rewriting it queues `canplay` and `playing`
-                    // at a page whose own algorithm forbids them (contract-rewrite review, finding 4).
+                    // at a page whose own algorithm forbids them.
                     return;
                 }
                 if self.ready_state.get() > ReadyState::HaveCurrentData {

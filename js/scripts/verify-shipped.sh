@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Verus on the functions that ship, not on a model of them (as LucinaOS scripts/verify-shipped.sh). The files of
+# Verus on the functions that ship, not on a model of them. The files of
 # mozjs-sys/src/boundary are plain Rust with their proof in `//@` lines; this script makes what Verus reads by mechanical steps
 # only, and checks that undoing them gives the shipped text back:
 #   `-> T //@ret`   becomes `-> (ret: T)`, the one thing Rust's syntax has no comment form for
 #   `... //@omit`   is dropped (a derive Verus does not check, and that holds no logic)
 #   `//@ proof`     becomes `proof`
 # All boundary files go into one crate, one module each, so `use super::x` between them works as in mozjs_sys.
-# Run on the build host through the verification script, one verification at a time: scripts/verify-shipped.sh [file.rs ...]   (MUTANT_FILE=... for mutants.sh)
+# Run through the verification script, one verification at a time: scripts/verify-shipped.sh [file.rs ...]   (MUTANT_FILE=... for mutants.sh)
 set -euo pipefail
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-verus=${VERUS:-/home/user/tools/verus/verus-x86-linux/verus}
+verus=${VERUS:-verus}
+command -v "$verus" >/dev/null 2>&1 || { echo "no Verus to run: '$verus' is not an executable here (put verus on PATH, or set VERUS)" >&2; exit 1; }
 dir=$root/mozjs-sys/src/boundary
 mods=(value_bits id_bits bounds roots)
 work=$(mktemp -d "${TMPDIR:-/tmp}/lucinanet-js-verify.XXXXXX")

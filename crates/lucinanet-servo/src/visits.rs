@@ -1,5 +1,5 @@
 //! The visited-page history the engine keeps: `lucinanet-historydb`'s store over the profile's `history.json`
-//! (docs/specs/wiring-omnibox-history.md). Nothing here touches Servo, so the glue is tested on its own; the engine
+//! (the omnibox/history wiring spec). Nothing here touches Servo, so the glue is tested on its own; the engine
 //! tells [`Visits`] what the tabs do (an address committed, a title arrived, a load completed) and asks it for the
 //! pages the address bar may suggest.
 
@@ -205,6 +205,22 @@ impl<K: Hash + Eq + Copy> Visits<K> {
         let query = Query { text, behavior: MatchBehavior::Anywhere, limit: CANDIDATES, include_hidden: false, since_us: None };
         self.db
             .search(&query)
+            .into_iter()
+            .map(|p| HistoryEntry {
+                url: p.url.clone(),
+                title: p.title.clone().unwrap_or_default(),
+                visit_count: p.visit_count,
+                typed_count: p.typed_count,
+                last_visit_us: p.last_visit_us,
+            })
+            .collect()
+    }
+
+    /// The pages last visited, newest first, for the history panel: at most `limit` and never more than
+    /// [`lucinanet_ui::HISTORY_LIST_MAX`]; hidden pages stay out, as they do from the address bar's suggestions.
+    pub fn recent(&self, limit: usize) -> Vec<HistoryEntry> {
+        self.db
+            .recent(limit.min(lucinanet_ui::HISTORY_LIST_MAX), false)
             .into_iter()
             .map(|p| HistoryEntry {
                 url: p.url.clone(),
@@ -446,6 +462,41 @@ mod tests {
         v.flush(t0 + 6_000_000);
         assert_eq!(std::fs::metadata(&file).unwrap().modified().unwrap(), mtime);
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_recent_pages_come_newest_first_and_capped() {
+        let mut v = Visits::<u32>::in_memory();
+        assert!(v.recent(10).is_empty(), "an empty store lists nothing");
+        v.intend(1, How::Link);
+        assert!(visit(&mut v, "https://example.com/old", "Old", 1_000));
+        assert!(visit(&mut v, "https://example.org/mid", "", 2_000));
+        assert!(visit(&mut v, "https://example.net/new", "New", 3_000));
+        let urls: Vec<String> = v.recent(10).into_iter().map(|e| e.url).collect();
+        assert_eq!(urls, ["https://example.net/new", "https://example.org/mid", "https://example.com/old"]);
+        let first = &v.recent(1)[0];
+        assert_eq!((first.title.as_str(), first.last_visit_us), ("New", 3_000), "title and time of the last visit travel");
+        assert_eq!(v.recent(2).len(), 2, "the limit is honoured");
+        assert!(v.recent(0).is_empty());
+
+        // The cap is the protocol's, whatever the caller asks.
+        let mut big = HistoryDb::new();
+        for i in 0..(lucinanet_ui::HISTORY_LIST_MAX as i64 + 50) {
+            big.record_visit(NewVisit {
+                url: &format!("https://example.com/{i}"),
+                title: None,
+                time_us: 1_000 + i,
+                transition: Transition::Link,
+                source: Source::Organic,
+                interesting: false,
+                from: None,
+            });
+        }
+        let mut v = Visits::<u32>::in_memory();
+        v.db = big;
+        let all = v.recent(usize::MAX);
+        assert_eq!(all.len(), lucinanet_ui::HISTORY_LIST_MAX, "never more than the cap");
+        assert_eq!(all[0].url, format!("https://example.com/{}", lucinanet_ui::HISTORY_LIST_MAX + 49), "the newest first");
     }
 
     #[test]

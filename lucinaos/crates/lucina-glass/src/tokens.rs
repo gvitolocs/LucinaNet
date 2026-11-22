@@ -1,6 +1,6 @@
 //! The design tokens, in one place: change a value here and every widget and screen follows. They are the Lucina house
 //! tokens (the design tokens, dark values) under the rules of docs/design/rules.md, plus the glass and the
-//! thin display face the owner kept from the concept. Lengths are dp on a 360 x 800 phone (1080 x 2400 at 3x); durations
+//! thin display face kept from the concept. Lengths are dp on a 360 x 800 phone (1080 x 2400 at 3x); durations
 //! are seconds.
 
 use crate::canvas::Color;

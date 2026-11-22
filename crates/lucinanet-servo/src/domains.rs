@@ -5,7 +5,7 @@
 //! `bundled` feature of the pinned fork - and the UI keeps no copy of it, so the answer travels to the window on
 //! [`lucinanet_ui::TabInfo`] and the field draws what it is told. Where the list cannot place a host (`localhost`, a single
 //! label, a bare suffix, an IP literal) the answer is `None` and the field emphasises the whole host, which is what it did
-//! before there was a list. `docs/specs/wiring-omnibox-history.md`, "Unfocused address display".
+//! before there was a list. The omnibox/history wiring spec, "Unfocused address display".
 
 use url::{Host, Url};
 

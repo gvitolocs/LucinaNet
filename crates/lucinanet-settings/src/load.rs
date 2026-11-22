@@ -490,6 +490,17 @@ mod tests {
         assert_eq!(settings.general.home_page, "https://ln.example/");
     }
 
+    /// Remote suggestions are off by default (no request the person did not cause), and a file that turns them on
+    /// is honoured.
+    #[test]
+    fn explicit_true_suggest_remote_still_loads() {
+        let (off, _) = Settings::from_json(r#"{"version":1}"#).expect("an empty file reads");
+        assert!(!off.search.suggest_remote);
+        let (on, warnings) = Settings::from_json(r#"{"version":1,"search":{"suggest_remote":true}}"#).expect("reads");
+        assert!(warnings.is_empty(), "{warnings:?}");
+        assert!(on.search.suggest_remote);
+    }
+
     /// A whole section of the wrong shape costs that section; the sections around it are read as usual.
     #[test]
     fn wrong_type_section_drops_only_that_section() {

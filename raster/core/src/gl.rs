@@ -1228,7 +1228,7 @@ impl Context {
     /// switches on it; this looks the tuple up in `rules::BLEND_TABLE` instead (Verus-proved). The two agree on
     /// every state except the 22 aliased ones `raster/rules/tests/blend_hash.rs` lists, where swgl's hash happens to
     /// equal a table entry's (or misses one) and the tuple comparison gives the honest answer. A state outside the
-    /// table falls back to premultiplied source-over, as LucinaNet's swgl does (patches/swgl), with its message.
+    /// table falls back to premultiplied source-over, as LucinaNet's swgl does (`swgl/src/gl.cc`), with its message.
     fn hash_blend_key(&mut self) {
         let (srgb, drgb, sa, da, eq) =
             (self.blendfunc_srgb, self.blendfunc_drgb, self.blendfunc_sa, self.blendfunc_da, self.blend_equation);

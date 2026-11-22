@@ -32,7 +32,7 @@ both "the hook used the `Context` it was handed". The containment of an earlier 
    C finalizers in the glue that call back into the JSAPI shims through `GC_CONTEXT`, and
    `HeapPtr::to_handle`, which needs no context (row 6d's handle clause stays run-time/prose).
    Teardown is unchanged: finalizers at context drop get the same `GcHookCx`, and an allocation that a
-   host makes there through a stored `Context` is still served (the containment's review item 1).
+   host makes there through a stored `Context` is still served.
 5. No deprecated shim. The glue pins the engine by git revision (`mozjs-sys/Cargo.toml`, `rev =`), so it
    keeps compiling against the old engine until the pin moves; the pin bump applies the four-line glue
    change in the last section. A shim would need a second trait (Rust has no overloading) and would keep
@@ -109,9 +109,9 @@ pub struct EngineCellHooks {
 - Running JS from a hook needs a `Context`, so it is covered by the type unless the host escaped it; the
   escaped case allocates and aborts.
 
-## Glue-side change needed at the next pin bump (not applied in this run)
+## Glue-side change needed at the next pin bump (not yet applied)
 
-`/home/user/Projects/Lucina/LucinaNet-js`, `mozjs-sys/src/engine/cx.rs`, in `impl Host for ServoHost`
+`mozjs-sys/src/engine/cx.rs` in the glue workspace (`js/`), in `impl Host for ServoHost`
 (lines 169-235 at `e5558ef`). The four hooks ignore their context today (`_bs`), so the change is the
 parameter type only:
 

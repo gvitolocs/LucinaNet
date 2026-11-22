@@ -1,4 +1,4 @@
-# M1: scores an engine against headless Chromium, per site. Its own workspace: it links no engine.
+# Scores an engine against headless Chromium, per site. Its own workspace: it links no engine.
 [workspace]
 
 [package]

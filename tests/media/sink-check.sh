@@ -13,7 +13,7 @@
 #   (ii)  that WAV is longer than its 44-byte header, so frames really ran through the sink while the page's clock moved;
 #   (iii) the log carries no CoreAudio line at all: with the switch on, crates/lucinanet-media/src/mixer.rs returns the
 #         stand-in before its macOS block, so cpal is never asked for an output stream on a Mac.
-# Where there is no sound device (the build host, QEMU) the stand-in is what you get with the switch off too, so there the
+# Where there is no sound device (a Linux desktop, QEMU) the stand-in is what you get with the switch off too, so there the
 # proof of the switch is (i), the unit tests in mixer.rs and that code path; (iii) still says the device path was not
 # walked. On a Mac (i) is the line that would be missing if the switch did not work, and the clip would be audible.
 #

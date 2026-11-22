@@ -27,5 +27,6 @@ pub use super::clone::*;
 pub use super::saved_frame::*;
 pub use super::env_chain::*;
 pub use super::caller_private::*;
+pub use super::external_buffer::*;
 
 pub use super::func::glue__JS_CallArgsFromVp;

@@ -1,5 +1,5 @@
 #!/bin/sh
-# a tracked flaw: a scaled video drawn as YUV planes must be the whole frame, not one source row repeated down the box.
+# The scaled-video flaw: a scaled video drawn as YUV planes must be the whole frame, not one source row repeated down the box.
 #   tests/media/scaled-planes.sh [lucinanet binary]
 # Same seeked frame twice: once as planes (WebRender draws them with brush_yuv_image, under a transform or a
 # non-1:1 size) and once as BGRA (LUCINANET_MEDIA_YUV=0, an ordinary image). scaled-planes.py counts the picture's

@@ -1,6 +1,6 @@
 // LucinaNet compat shims (docs/compat-shims.md): the web APIs LucinaJS does not implement that real pages call
 // without feature-testing. The engine injects this as a user script at document start, in every frame, before the
-// page's own scripts and before `LUCINANET_USER_JS`; `LUCINANET_COMPAT_SHIMS=0` turns it off.
+// page's own scripts and before a harness build's user script (docs/harness-doors.md); `LUCINANET_COMPAT_SHIMS=0` turns it off.
 // Every definition is guarded, so an API the engine does have is left exactly as it is.
 // Everything below stays at ES5 level syntax (var, function expressions, no arrow, no class, no template string,
 // no block scoping) on purpose: LucinaJS parses this file as one script, so a single construct it does not accept

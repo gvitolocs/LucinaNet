@@ -20,6 +20,7 @@ use servo_media::player::mse::MseError;
 use servo_media::{ServoMedia, SupportsMediaType};
 use stylo_atoms::Atom;
 
+use crate::dom::bindings::codegen::Bindings::HTMLMediaElementBinding::HTMLMediaElementMethods;
 use crate::dom::bindings::codegen::Bindings::MediaSourceBinding::{
     EndOfStreamError, MediaSourceMethods, ReadyState,
 };
@@ -31,6 +32,7 @@ use crate::dom::bindings::reflector::DomGlobal;
 use crate::dom::bindings::root::{Dom, DomRoot, MutNullableDom};
 use crate::dom::bindings::str::DOMString;
 use crate::dom::eventtarget::EventTarget;
+use crate::dom::html::embedded_content::media_command;
 use crate::dom::html::htmlmediaelement::HTMLMediaElement;
 use crate::dom::media::sourcebuffer::SourceBuffer;
 use crate::dom::media::sourcebufferlist::SourceBufferList;
@@ -172,6 +174,21 @@ impl MediaSource {
 
     /// <https://www.w3.org/TR/media-source-2/#mediasource-detach>
     pub(crate) fn detach(&self) {
+        // LucinaNet: observation only. `closed` is produced here and nowhere else at
+        // runtime, and the element has not yet paused or reset its position, so a close while
+        // the page was playing (the `media-closed-while-playing` signature) is visible in the product log.
+        if let Some(element) = self.media_element.get() {
+            media_command::log_closed_while_playing(
+                element.Paused(),
+                element.Ended(),
+                *element.CurrentTime(),
+                true,
+                element.ReadyState(),
+                self.source_buffers.buffers().len(),
+                self.active_source_buffers.buffers().len(),
+            );
+        }
+
         // Step 1. Set the readyState attribute to "closed".
         self.ready_state.set(ReadyState::Closed);
 

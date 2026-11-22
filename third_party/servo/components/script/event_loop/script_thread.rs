@@ -46,7 +46,7 @@ use embedder_traits::user_contents::{UserContentManagerId, UserContents, UserScr
 use embedder_traits::{
     EmbedderControlId, EmbedderControlResponse, EmbedderMsg, FocusSequenceNumber,
     InputEventOutcome, JavaScriptEvaluationError, JavaScriptEvaluationId, LoadStatus,
-    MediaSessionActionType, ViewportDetails, WebDriverScriptCommand,
+    MediaSessionActionType, PageText, PageTextId, ViewportDetails, WebDriverScriptCommand,
 };
 use encoding_rs::Encoding;
 use fonts::{FontContext, SystemFontServiceProxy, WebFontLoadEvent};
@@ -141,6 +141,7 @@ use crate::dom::element::Element;
 use crate::dom::globalscope::GlobalScope;
 use crate::dom::html::htmliframeelement::{HTMLIFrameElement, IframeContext, ProcessingMode};
 use crate::dom::node::focus::FocusTrigger;
+use crate::dom::node::pagetext::collect_page_text;
 use crate::dom::node::{Node, NodeTraits};
 use crate::dom::servoparser::{ParserContext, ServoParser};
 #[cfg(feature = "devtools")]
@@ -2031,6 +2032,9 @@ impl ScriptThread {
                 script,
             ) => {
                 self.handle_evaluate_javascript(cx, webview_id, pipeline_id, evaluation_id, script);
+            },
+            ScriptThreadMessage::RequestPageText(webview_id, pipeline_id, page_text_id, limit) => {
+                self.handle_request_page_text(webview_id, pipeline_id, page_text_id, limit);
             },
             ScriptThreadMessage::SendImageKeysBatch(pipeline_id, image_keys) => {
                 if let Some(window) = self.documents.borrow().find_window(pipeline_id) {
@@ -4815,6 +4819,28 @@ impl ScriptThread {
         ));
     }
 
+    /// The text of the pipeline's document as blocks (LucinaNet find bar), read straight from the
+    /// DOM structs: no script runs, nothing is observable by the page, nothing is kept here. A
+    /// pipeline that is not (or no longer) in this script thread is answered with an empty
+    /// `PageText`.
+    fn handle_request_page_text(
+        &self,
+        webview_id: WebViewId,
+        pipeline_id: PipelineId,
+        page_text_id: PageTextId,
+        limit: usize,
+    ) {
+        let page_text = match self.documents.borrow().find_document(pipeline_id) {
+            Some(document) => collect_page_text(&document, limit),
+            None => PageText::default(),
+        };
+        let _ = self.senders.pipeline_to_constellation_sender.send((
+            webview_id,
+            pipeline_id,
+            ScriptToConstellationMessage::FinishPageText(page_text_id, page_text),
+        ));
+    }
+
     fn handle_refresh_cursor(&self, pipeline_id: PipelineId) {
         let Some(document) = self.documents.borrow().find_document(pipeline_id) else {
             return;
@@ -5048,8 +5074,8 @@ mod tests {
     #[test]
     fn a_queued_wheel_is_not_left_for_the_fallback_timer() {
         // The 20 ms fallback was the floor of a scroll on a page that animates nothing: ~21 ms
-        // intervals with a ~2 ms paint, measured at both scales and on both machines
-        // (<work-dir>/lucinanet/yt-nav-ev/race/pacing-floor.md §2). With input pending the
+        // intervals with a ~2 ms paint, measured at both scales and on both
+        // machines. With input pending the
         // opportunity is the next frame boundary: the frame period measured from the last
         // opportunity, never the 20 ms fallback, over the whole phase range steps arrive at.
         for since_last_ms in [0u64, 1, 2, 4, 8, 10, 15, 16, 17, 19, 20, 25] {

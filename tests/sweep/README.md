@@ -5,7 +5,7 @@ diff against the previous build. It answers "which pages fail" without asking an
 
 | file | what |
 | --- | --- |
-| `sites.tsv` | the fixed list: `id, category, url, note`. Ids `S001`..`S100`. `prev=1` in the note marks the 33 pages of the 2026-11-13 owner sweep. Changing a row is a reviewed change. |
+| `sites.tsv` | the fixed list: `id, category, url, note`. Ids `S001`..`S100`. `prev=1` in the note marks the 25 pages of the 2026-11-13 sweep. Changing a row is a reviewed change. |
 | `walls.tsv` | wall and error-page markers and the numeric limits, as data. It grows here, not in code. |
 | `sweep.sh` | the runner. |
 | `selftest.sh`, `fixtures/` | the shell self-test on three local `file:` pages. |
@@ -20,8 +20,8 @@ gov-edu-health, travel-maps, vendor-docs, forums-blogs. Pages in CJK, Arabic, Cy
 Public URLs only. No login, no credentials, no cookies (`LUCINANET_PROFILE_DIR=none`). Muted
 (`LUCINANET_MEDIA_SINK=none` for every page). No captcha solving and no bot-wall bypass of any kind: a walled page
 is scored walled and never retried with tricks. At most 4 pages in parallel, never two pages of one host at once
-and a 5 s gap between pages of one host. 120 s cap per page. Nothing of the owner's is read. The full sweep is
-one job in the long queue when allowed.
+and a 5 s gap between pages of one host. 120 s cap per page. Nothing personal is read. The full sweep is
+a long job: run it when the machine is free.
 
 How the mute is checked: each page's log must show `sound sink none` whenever media started (the runner sets
 `RUST_LOG=error,lucinanet_media=info` so the line is printed); a `sound sink` line that is not `none` writes
@@ -30,14 +30,12 @@ null sink. On macOS the runner also runs `tests/media/sink-check.sh` first.
 
 ## Run it
 
-On the build host (the normal place):
+Run it from a checkout, on Linux:
 
 ```sh
-# WORK_DIR: set it to a scratch directory
-cd "$WORK_DIR/LucinaNet/<working-copy>"                   # a separate working copy of the repository
+# WORK_DIR: set it to a scratch directory for the results
 cargo build --release --manifest-path tools/sweep-score/Cargo.toml
-\
-  tests/sweep/sweep.sh <engine binary> $WORK_DIR/lucinanet/site-sweep/run-$(date -u +%Y%m%d) \
+tests/sweep/sweep.sh <engine binary> $WORK_DIR/lucinanet/site-sweep/run-$(date -u +%Y%m%d) \
     --build-id <commit> --scorer tools/sweep-score/target/release/sweep-score
 ```
 

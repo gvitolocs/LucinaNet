@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Is the painted picture a scaled frame, or one source row repeated? (a tracked flaw)
+"""Is the painted picture a scaled frame, or one source row repeated? (the scaled-video flaw)
 
     scaled-planes.py painted <png>                    exit 0 once the box holds a picture, not the #222 background
     scaled-planes.py compare <planes.png> <bgra.png>  the two predictions, printed; exit 1 if the planes are bars

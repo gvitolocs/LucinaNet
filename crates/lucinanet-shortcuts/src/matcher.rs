@@ -252,8 +252,8 @@ mod tests {
     #[test]
     fn select_tab_digits_firefox_linux_uses_alt() {
         // browser-sets.inc: `#ifdef XP_GNOME #define NUM_SELECT_TAB_MODIFIER alt`, so on Linux the digits are
-        // Alt+1..8 and Alt+9. The `accel` branch there is the Windows/macOS one, so Ctrl+digit - which the brief
-        // listed as the other possibility - is not bound. The keypad types the same characters, and Firefox
+        // Alt+1..8 and Alt+9. The `accel` branch there is the Windows/macOS one, so Ctrl+digit - the other
+        // candidate in the intended set - is not bound. The keypad types the same characters, and Firefox
         // matches on the character, so it selects tabs too.
         for (i, key) in DIGITS.iter().enumerate() {
             let n = i as u8 + 1;

@@ -1,8 +1,7 @@
 # lucinanet-wpt-jsshell
 
 Runs the `jsshell` variant of WPT tests through the Brimstone engine as a JavaScript
-shell, and writes the results as JSONL. Slice I of the WebAssembly work
-(`docs/lucinajs-wasm-design.md` §7.3, §5): the point is to be able to ask what the engine
+shell, and writes the results as JSONL. Part of the WebAssembly work: the point is to be able to ask what the engine
 asks of `WebAssembly`, file by file, with nothing else standing in for it.
 
 ```
@@ -11,7 +10,7 @@ lucinanet-wpt-jsshell --wpt <corpus/tests> --filter wasm/jsapi/ --out results.js
 ```
 
 `--wpt` is the directory that holds `resources/testharness.js` - the read-only corpus
-checkout, e.g. `/home/user/Projects/Lucina/LucinaNet-servo/tests/wpt/tests`. It is
+checkout, e.g. `tests/wpt/tests` of a Servo checkout. It is
 read-only: the runner never writes inside it. `--filter` is a substring of the path
 relative to that root, repeatable; the walk starts at the filters' common directory, so
 one filter over `wasm/jsapi/` does not read the whole corpus.
@@ -95,6 +94,6 @@ with no `jsshell` in its header. The fixtures exist so the JSONL contract is pin
 without a corpus checkout; the corpus itself is validated by hand, in a temporary checkout.
 
 ```
-cargo build --offline     # or, on the build host:
-cargo test --offline
+cargo build --offline
+cargo test --offline      # on the reference Linux development machine
 ```

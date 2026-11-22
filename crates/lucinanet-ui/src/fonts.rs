@@ -16,7 +16,7 @@
 //! JP/SC/KR", FreeSerif and Symbola; on macOS CoreText resolves Apple's names (Apple Color Emoji, Hiragino Sans,
 //! Songti SC, Apple SD Gothic Neo, Geeza Pro). But a family that no scanned file declares cannot be chosen, and so a
 //! missing directory and a missing glyph look identical on screen: one box per character. Naming Noto Color Emoji is
-//! worth nothing on a host that has no emoji font installed anywhere in reach, which is what the build host is - the crab in
+//! worth nothing on a host that has no emoji font installed anywhere in reach, which is what a minimal Linux install is - the crab in
 //! a YouTube title is U+1F980, and no face in `/usr/share/fonts` has it. What this module can decide is which
 //! directories get scanned; what the distribution ships is not ours to choose.
 //!

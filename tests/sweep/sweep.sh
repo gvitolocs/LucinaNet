@@ -12,7 +12,7 @@
 #   Roughly 10 to 40 minutes for the full list, and never more than 4 browser processes alive at once.
 #
 # THE RULES (never broken): public URLs only; no login, no credentials, no cookies (LUCINANET_PROFILE_DIR=none, and
-# nothing of the owner's is read); no captcha solving and no bot-wall bypass of any kind (a walled page is scored
+# nothing personal is read); no captcha solving and no bot-wall bypass of any kind (a walled page is scored
 # walled by tools/sweep-score and is never retried); at most 4 pages in parallel; never two pages of one host at
 # once and a 5 s gap between the end of one and the start of the next page of the same host (SWEEP_HOST_GAP_S);
 # 120 s of wall clock per page (SWEEP_PAGE_CAP_S), then a TERM and, 10 s later, a KILL of the process this script
@@ -62,7 +62,7 @@ case $list in /*) ;; *) list=$PWD/$list ;; esac
 # macOS: only with the explicit flag, and only when the mute switch is proven for this very binary.
 if [ "$(uname -s)" = Darwin ]; then
   if [ "${SWEEP_ALLOW_MAC:-}" != 1 ]; then
-    echo "sweep: refusing to run on macOS: the owner's Mac must never play sound. Set SWEEP_ALLOW_MAC=1 to run muted." >&2
+    echo "sweep: refusing to run on macOS: the Mac must never play sound. Set SWEEP_ALLOW_MAC=1 to run muted." >&2
     exit 2
   fi
   if ! "$here/../media/sink-check.sh" "$bin" >&2; then

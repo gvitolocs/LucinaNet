@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-//! What the browser itself answers to when a key is pressed, as data (docs/specs/lucinanet-shortcuts.md).
+//! What the browser itself answers to when a key is pressed, as data (the shortcuts spec).
 //! [`table`] holds the defaults of each engine on Linux, [`matcher`] turns a physical key press plus the
 //! modifiers held into a [`Command`], and nothing here touches an engine, a window or a clock: the wiring in
 //! `browser.rs` and `desktop.rs` asks [`lookup`] for every key press and runs the command it gets back, or

@@ -172,7 +172,7 @@ pub fn window_left_inset(env_value: Option<&str>, macos: bool) -> f32 {
 }
 
 /// The window's own mark, compiled in so a desktop build carries it without a file on disk: the
-/// approved 128x128 PNG under assets/logo, whose README is the note on that art. It is decoded once,
+/// 128x128 PNG under assets/logo, whose README is the note on that art. It is decoded once,
 /// at window creation, and never on a paint.
 const WINDOW_ICON_PNG: &[u8] = include_bytes!("../../../assets/logo/lucinanet-128.png");
 
@@ -329,7 +329,7 @@ impl ApplicationHandler<News> for Host {
         if self.window.is_some() {
             return;
         }
-        let mut attributes = Window::default_attributes().with_title("LucinaNet").with_resizable(false);
+        let mut attributes = Window::default_attributes().with_title(crate::WINDOW_TITLE).with_resizable(false);
         // The mark, decoded once here rather than on every paint. A `None` — an asset that could not be
         // read — is what winit is handed when there is no icon at all, so the window still opens.
         attributes = attributes.with_window_icon(window_icon());
@@ -511,7 +511,7 @@ mod tests {
         let pixels: Vec<[u8; 4]> = rgba.chunks_exact(4).map(|px| [px[0], px[1], px[2], px[3]]).collect();
         let seeable: Vec<&[u8; 4]> = pixels.iter().filter(|px| px[3] != 0).collect();
         assert!(seeable.len() > 1_000, "only {} of the {} pixels hold any ink", seeable.len(), pixels.len());
-        // The violet mark, as the owner approved it: blue leads the mean of the seeable pixels by a
+        // The violet mark: blue leads the mean of the seeable pixels by a
         // margin, which a flat gray or black placeholder would not. (The file measures 161/173/231.)
         let mean = |channel: usize| seeable.iter().map(|px| usize::from(px[channel])).sum::<usize>() / seeable.len();
         let (red, green, blue) = (mean(0), mean(1), mean(2));

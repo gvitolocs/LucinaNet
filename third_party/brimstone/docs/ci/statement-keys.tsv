@@ -1,5 +1,5 @@
-# Generated: lucina-ci spec --write-counts. The statement keys of every proof unit at the last regeneration (docs/ci/PROOF-ROLES.md).
-# `spec --check` refuses a key that is in this file at the base commit and is no longer extracted, unless an amendment or the merge allow covers it.
+# Generated from what is on disk, by the proof spec counts. The statement keys of every proof unit at the last regeneration.
+# The spec check refuses a key that is in this file at the base commit and is no longer extracted, unless an amendment or the merge allow covers it.
 # unit<TAB>key
 shipped/bytecode/disk_rules	src/js/runtime/bytecode/fncache/disk_rules.rs::accepts
 shipped/bytecode/disk_rules	src/js/runtime/bytecode/fncache/disk_rules.rs::evict_for

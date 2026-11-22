@@ -1,6 +1,5 @@
 //! lucina-ax: Juno's AccessKit adapter. Apps publish what is on their screen as an AccessKit tree, through a socket instead of
 //! AT-SPI or UIA, and take Lucina's actions by node id, so that she works an app from its real state rather than its pixels.
-//! See docs/research/juno-ax.md (stage B of docs/research/juno-ai-native.md).
 //!
 //! - [`rules`]: what may leave an app, node ids, which widget an action reaches, the size limits. Verus checks that file.
 //! - [`tree`]: the [`Builder`] a toolkit fills while `view` runs, the [`Snapshot`] it makes, its text and version, and

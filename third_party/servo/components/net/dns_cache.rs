@@ -4,7 +4,7 @@
 
 //! LucinaNet: a host name cache with one lookup in flight per name. The rules (lifetimes, when a lookup starts, how many
 //! entries) are the Verus-checked functions of `lucinanet-net-policy`; this file is the glue: the map, the blocking
-//! lookup, the wakeups. Numbers and their sources: `docs/specs/connector.md` (LucinaNet).
+//! lookup, the wakeups. Each number states its source where it is defined.
 //!
 //! The cache sits behind [`Resolver`], the interface a lower layer (a Juno system service) can implement in its place: the key is
 //! a plain host name, the answer a list of addresses, both `serde`-able.

@@ -31,7 +31,7 @@
 //! and could be subtracted from the count later. It is not corrected here.
 //!
 //! How large it is: **not measured**. This is type-checked for `aarch64-apple-darwin` by a cross
-//! check on the Linux build host, which is as far as it can go without a Mac: no CoreAudio, so no
+//! check on Linux x86_64, which is as far as it can go without a Mac: no CoreAudio, so no
 //! callbacks and no timestamps to read. On a Mac, log `info.timestamp().playback -
 //! info.timestamp().callback` per callback on the built-in output (a few device buffers of a few ms
 //! each is typical; Bluetooth headphones are far worse, up to ~100 ms) and record the median here in

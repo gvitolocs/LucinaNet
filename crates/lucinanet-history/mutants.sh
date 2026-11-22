@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shows that Verus can fail on crates/lucinanet-history/src/policy.rs: each line plants one bug in a copy, and Verus must refuse it.
-# Run on the build host from the repository root, through the verification script: crates/lucinanet-history/mutants.sh
+# Run on a Linux desktop from the repository root, through the verification script: crates/lucinanet-history/mutants.sh
 set -uo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 shipped=$root/crates/lucinanet-history/src/policy.rs

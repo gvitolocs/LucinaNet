@@ -7,8 +7,12 @@ publish = false
 license = "MPL-2.0"
 
 [features]
-# A window on a Linux desktop (`--desktop`), for the build host; Juno builds go without it.
+# A window on a Linux desktop (`--desktop`); Juno builds go without it.
 desktop = ["dep:winit", "dep:softbuffer"]
+# Test and measurement doors: `--render`, the scripted session, and the other ways the environment or the command line can
+# start a request or run script (docs/harness-doors.md). OFF by default and in every build that can reach a user; a build
+# without it does not contain that code.
+harness = []
 
 [dependencies]
 keyboard-types = "0.8"
@@ -20,7 +24,9 @@ lucina-app = { path = "../../lucinaos/crates/lucina-app" }
 lucina-glass = { path = "../../lucinaos/crates/lucina-glass" }
 
 libc = "0.2"
+lucinanet-find = { path = "../lucinanet-find" }
 lucinanet-omnibox = { path = "../lucinanet-omnibox" }
+lucinanet-settings = { path = "../lucinanet-settings" }
 lucinanet-shortcuts = { path = "../lucinanet-shortcuts" }
 lucinanet-zoom = { path = "../lucinanet-zoom" }
 png = "0.18"

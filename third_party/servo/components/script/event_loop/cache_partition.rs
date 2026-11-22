@@ -57,9 +57,37 @@ pub(crate) unsafe fn set(
 
 #[cfg(all(test, feature = "brimstone"))]
 mod tests {
+    use std::path::PathBuf;
+
+    use embedder_traits::resources::{Resource, ResourceReaderMethods};
     use servo_url::ServoUrl;
 
     use super::top_level_partition;
+
+    /// The registrable domain (`Site::from_origin`) reads the public suffix list through the embedder's resource reader,
+    /// which panics when none is registered. A script unit test has no embedder, so it registers this one, serving the real
+    /// list Servo ships (`components/default-resources`): the partition logic itself is the production code. (Depending on
+    /// `servo-default-resources` instead would change the dependency set the gate's `--locked` build is checked against.)
+    struct TestResourceReader;
+
+    impl ResourceReaderMethods for TestResourceReader {
+        fn read(&self, res: Resource) -> Vec<u8> {
+            match res {
+                Resource::DomainList => {
+                    include_bytes!("../../default-resources/resources/public_domains.txt").to_vec()
+                },
+                other => panic!("the cache partition tests do not read {}", other.filename()),
+            }
+        }
+        fn sandbox_access_files(&self) -> Vec<PathBuf> {
+            vec![]
+        }
+        fn sandbox_access_files_dirs(&self) -> Vec<PathBuf> {
+            vec![]
+        }
+    }
+
+    embedder_traits::submit_resource_reader!(&TestResourceReader);
 
     fn partition(url: &str) -> Option<String> {
         top_level_partition(&ServoUrl::parse(url).unwrap().origin())

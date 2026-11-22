@@ -201,7 +201,7 @@ mod tests {
     }
 
     /// Every constant against the number `linux/input-event-codes.h` gives its `KEY_*` (checked against the header
-    /// on the build host, /usr/include/linux/input-event-codes.h, 2026-11-11). The values are written out here on purpose:
+    /// on a Linux system, /usr/include/linux/input-event-codes.h). The values are written out here on purpose:
     /// reading the header at test time would make the test depend on the machine.
     #[test]
     fn every_code_is_the_kernels() {

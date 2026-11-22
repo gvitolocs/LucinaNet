@@ -2,7 +2,8 @@
 # Shared by scripts/verify.sh, scripts/verify-shipped.sh and verification/mutants.sh: choose the Verus binary, print which one it
 # is, and refuse any version but the one pinned in verification/verus.version. Sourced, never run: it leaves the binary in `verus`.
 #
-#   VERUS           the binary to use, instead of the ones we look for
+#   VERUS           the Verus binary to use, by name or by path
+#   VERUS_HOME      a Verus install directory to look in, when VERUS is unset and `verus` is not on PATH
 #   VERUS_PIN_FILE  read the pin somewhere else than verification/verus.version (tests only)
 #   VERUS_ALLOW_ANY 1 runs an unpinned Verus anyway, after a loud warning (experiments only)
 #
@@ -12,17 +13,14 @@ _here=${BASH_SOURCE[0]:-$0}
 _dir=$(cd "$(dirname "$_here")/.." && pwd)
 pin_file=${VERUS_PIN_FILE:-$_dir/verification/verus.version}
 
-verus=${VERUS:-}
-if [ -z "$verus" ]; then
-    if [ -x "$HOME/tools/verus/verus-x86-linux/verus" ]; then
-        verus=$HOME/tools/verus/verus-x86-linux/verus
-    else
-        verus=verus
-    fi
-fi
+# Verus comes from VERUS, else from VERUS_HOME, else from PATH.
+verus=${VERUS:-${VERUS_HOME:+$VERUS_HOME/verus}}
+verus=${verus:-verus}
 # Absolute even when it came off PATH, so the line below names the binary that ran.
 found=$(command -v "$verus" 2>/dev/null || true)
-[ -n "$found" ] || { echo "verus-pin: no verus to run: '$verus' is not an executable on this machine (set VERUS)." >&2; exit 2; }
+[ -n "$found" ] || { echo "verus-pin: no verus to run: '$verus' is not an executable on this machine." >&2
+                     echo "verus-pin: put verus on PATH, or set VERUS to the binary, or VERUS_HOME to its directory." >&2
+                     exit 2; }
 verus=$found
 
 # The release Verus prints. Its profile, platform and toolchain lines are not part of the pin: the last one changes with our own

@@ -7,7 +7,7 @@
 //! `update_media_state` is the one place the media element tells its player to run or to stop, and
 //! several algorithms reach it: the internal play steps, the internal pause steps, the ready-state
 //! steps, the seek algorithm, the end-of-playback steps and the media element load algorithm.
-//! Before first-fix they all got the same two branches, and one of those answers was the frozen-play
+//! Before this split they all got the same two branches, and one of those answers was the frozen-play
 //! freeze: a `play()` that arrived while the pipeline was running paused it.
 //!
 //! This module holds the answer as one pure function of (event, element state). It imports nothing
@@ -16,13 +16,13 @@
 //! `contracts-media-elem.md` beside it, and the tests below hold them over every state and over
 //! random event sequences.
 //!
-//! The rule the contract-rewrite review settled: the player is commanded by what the element *is* — paused,
+//! The rule: the player is commanded by what the element *is* — paused,
 //! ended, errored, blocked for content — and want of data is not one of those. Two reasons, and the
 //! second is the one that bites. The specification's `#blocked-media-element` has no seeking term,
 //! so a seek that has nothing to decode and a mid-playback underrun are the same state; and the
 //! engine's command mirror is the only thing this element can read, so pausing it for want of data
 //! stops the very signal (`PlaybackState::Playing`, which raises the ready state back above
-//! `HAVE_CURRENT_DATA`) that would end the block. That is finding 1 of the review: a seek that runs
+//! `HAVE_CURRENT_DATA`) that would end the block. That is the frozen-play case: a seek that runs
 //! out of data paused the player and never started it again. Want of data therefore commands
 //! nothing when the engine is already running, and commands a `play()` when the page wants playback
 //! and the engine is stopped — which is the same answer in both directions: the engine runs whenever
@@ -81,7 +81,7 @@ impl MediaState {
     /// true, or the current playback position is not contained in any of the ranges in buffered"
     /// (<https://html.spec.whatwg.org/multipage/#event-media-waiting>) — and to element-contract-4's "data
     /// buffered". The element's own `is_potentially_playing()` does not read them, so a high ready
-    /// state with a hole at the position is potentially playing (contract-rewrite review, finding 5).
+    /// state with a hole at the position is potentially playing.
     pub fn blocked_for_want_of_data(&self) -> bool {
         !self.ready_state.has_future_data()
     }
@@ -199,7 +199,7 @@ pub enum Reason {
     /// The element is potentially playing and the player is not: start it.
     PotentiallyPlayingButStopped,
     /// Want of data with the engine stopped and the page wanting playback: start it anyway, because
-    /// the running engine is the only thing that can end the block (contract-rewrite review, finding 1).
+    /// the running engine is the only thing that can end the block.
     BlockedButAskedToPlay,
     /// The page or the element paused: `paused` is true.
     OrderedPause,
@@ -212,8 +212,7 @@ pub enum Reason {
     /// element-contract-3's answer in the want-of-data window: nothing ordered a stop, and the engine is
     /// already commanded to run, so there is nothing to send. A pause commanded there is a stop that
     /// nothing answers — the element stays not-potentially-playing until the data returns, and the
-    /// engine that is paused reports nothing — which is the shape of the frozen-play freeze and of finding
-    /// 1.
+    /// engine that is paused reports nothing — which is the shape of the frozen-play freeze.
     Starved,
     /// The player is already stopped and nothing asks it to run.
     NothingToStop,
@@ -269,7 +268,7 @@ impl Decision {
 /// a stop of the element's; want of data is not, and `#blocked-media-element` says so by never
 /// mentioning `seeking`: the seek algorithm's step 12 is a wait for decoded data, not an instruction
 /// to the engine. A running engine is also the only thing that can end a want-of-data block, which
-/// is why the pause is not merely unauthorized but fatal (contract-rewrite review, findings 1 and 2).
+/// is why the pause is not merely unauthorized but fatal.
 fn stop_cause(state: &MediaState) -> Option<Reason> {
     if state.paused {
         Some(Reason::OrderedPause)
@@ -303,8 +302,8 @@ fn stop_cause(state: &MediaState) -> Option<Reason> {
 ///   (<https://html.spec.whatwg.org/multipage/#internal-play-steps>): they clear `paused`, seek back
 ///   if the element had ended, and otherwise only ask the player to run. So the answer to a play
 ///   comes from the rule alone — on an element that is not in a stop the player is either already
-///   running, and no command goes out, or stopped, and the command is `play`. That is first-fix stated
-///   as a rule instead of a branch: element-contract-2.
+///   running, and no command goes out, or stopped, and the command is `play`. That is element-contract-2,
+///   stated as a rule rather than a branch.
 pub fn decide(event: MediaEvent, state: &MediaState) -> Decision {
     if let Some(reason) = stop_cause(state) {
         return if state.player_playing {
@@ -333,8 +332,8 @@ pub fn decide(event: MediaEvent, state: &MediaState) -> Decision {
         reason: if state.potentially_playing {
             Reason::PotentiallyPlayingButStopped
         } else {
-            // Blocked for want of data, with the page's wish standing. A `play()` the first round
-            // left unanswered, and the engine then reported nothing at all: finding 1.
+            // Blocked for want of data, with the page's wish standing. A `play()` left unanswered
+            // here is the frozen-play case: the engine then reported nothing at all.
             Reason::BlockedButAskedToPlay
         },
     }
@@ -365,11 +364,97 @@ pub fn trace(event: MediaEvent, state: &MediaState, decision: &Decision) {
     }
 }
 
+/// a MediaSource going to `closed` while the element it was attached to is playing is
+/// the `media-closed-while-playing` signature. The only runtime producer of `closed` is
+/// `MediaSource::detach()`,
+/// which runs before the element's own `paused.set(true)` and position reset, so at that point
+/// the element still reports what the page saw. Observation only: the answer changes nothing.
+pub fn closed_while_playing(paused: bool, ended: bool, current_time: f64, attached: bool) -> bool {
+    attached && !paused && !ended && current_time > 0.0
+}
+
+/// The product log line for [`closed_while_playing`]: numbers only, never a URL, host, header or
+/// cookie. `ct` is the current playback position in seconds, with one decimal.
+pub fn closed_while_playing_line(
+    ct: f64,
+    elem_ready_state: u16,
+    sbuffers: usize,
+    abuffers: usize,
+) -> String {
+    format!(
+        "lucinanet-media: media-closed-while-playing ct={ct:.1} elem_ready_state={elem_ready_state} \
+         sbuffers={sbuffers} abuffers={abuffers}"
+    )
+}
+
+/// The line above on stderr (always on, unlike `trace`: the product's session log must show a
+/// return of the `media-closed-while-playing` signature without a probe). `warn!` is dropped by the
+/// product's default RUST_LOG.
+pub fn log_closed_while_playing(
+    paused: bool,
+    ended: bool,
+    current_time: f64,
+    attached: bool,
+    elem_ready_state: u16,
+    sbuffers: usize,
+    abuffers: usize,
+) {
+    if closed_while_playing(paused, ended, current_time, attached) {
+        eprintln!(
+            "{}",
+            closed_while_playing_line(current_time, elem_ready_state, sbuffers, abuffers)
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    /// The decision as it stood at the parent of the first-fix fix (`5c43b1520`), kept here only so
+    #[test]
+    fn closed_while_playing_true_for_a_playing_attached_element() {
+        assert!(closed_while_playing(false, false, 42.6, true));
+    }
+
+    #[test]
+    fn closed_while_playing_false_when_paused_ended_at_zero_or_unattached() {
+        assert!(!closed_while_playing(true, false, 42.6, true));
+        assert!(!closed_while_playing(false, true, 42.6, true));
+        assert!(!closed_while_playing(false, false, 0.0, true));
+        assert!(!closed_while_playing(false, false, f64::NAN, true));
+        assert!(!closed_while_playing(false, false, 42.6, false));
+    }
+
+    #[test]
+    fn closed_while_playing_line_format_is_exact() {
+        assert_eq!(
+            closed_while_playing_line(42.64, 4, 2, 1),
+            "lucinanet-media: media-closed-while-playing ct=42.6 elem_ready_state=4 sbuffers=2 abuffers=1"
+        );
+        let line = closed_while_playing_line(1234.5, 0, 0, 0);
+        assert!(!line.contains('\n'));
+        assert!(!line.contains("://") && !line.contains('/') && !line.contains('?'));
+    }
+
+    #[test]
+    fn mediasource_detach_calls_the_predicate_before_closing() {
+        // The fork has no DOM harness: pin the call site by its source text. The log must come
+        // before `ready_state.set(Closed)`, so the element still reports what the page saw.
+        let src = include_str!("../../media/mediasource.rs");
+        let detach = src
+            .split("pub(crate) fn detach(&self)")
+            .nth(1)
+            .expect("detach");
+        let log = detach
+            .find("log_closed_while_playing(")
+            .expect("detach logs");
+        let close = detach
+            .find("self.ready_state.set(ReadyState::Closed)")
+            .expect("closes");
+        assert!(log < close);
+    }
+
+    /// The decision as it stood at `5c43b1520`, kept here only so
     /// these tests can show which contracts the old code broke. Nothing reaches it from the
     /// element. The old `update_media_state` read only the ready-state branch and the mirror:
     ///
@@ -392,7 +477,7 @@ mod tests {
         Decision::none(Reason::NothingToStop)
     }
 
-    /// The rule as first-fix left it: the guard added, still with no event and no cause behind the
+    /// The rule after the guard-only step: the guard added, still with no event and no cause behind the
     /// pause. Used to show where splitting the event out changes the answer.
     fn decide_first_fix(_event: MediaEvent, state: &MediaState) -> Decision {
         if state.potentially_playing && !state.player_playing {
@@ -418,11 +503,11 @@ mod tests {
         }
     }
 
-    /// The decision as the first round of contract-rewrite left it (`e441b99b2`), before the cross-family
-    /// review: want of data outside a seek issued no command, but want of data *inside* one paused
-    /// the player for the duration of the seek. Nothing reaches it from the element; it is here
-    /// because finding 1 of the review is that this is the pause nothing answers, and the red runs
-    /// below have to run against the code this branch actually wrote, not only against upstream's.
+    /// The decision as it stood at `e441b99b2`: want of data outside a seek issued no command, but
+    /// want of data *inside* one paused the player for the duration of the seek. Nothing reaches it
+    /// from the element; it is here because that is the pause nothing answers — the frozen-play case
+    /// — and the red runs below have to run against the code the port actually wrote, not only
+    /// against upstream's.
     fn decide_pre_contract_rewrite(event: MediaEvent, state: &MediaState) -> Decision {
         if state.potentially_playing {
             return if state.player_playing {
@@ -574,11 +659,11 @@ mod tests {
                     && state.blocked_for_want_of_data()
                     && !state.potentially_playing
                 {
-                    // The one window 01 cannot close from here, and the review's finding 2 says the
-                    // specification never asked it to: the element is blocked for want of data, so it
-                    // is not potentially playing, while the mirror says the last command was `play()`
-                    // — or says nothing, and the element starts the engine anyway because a stopped
-                    // engine reports nothing and the block would never end (finding 1). Pausing into
+                    // The one window this rule cannot close from here, and the specification never
+                    // asked it to: the element is blocked for want of data, so it is not potentially
+                    // playing, while the mirror says the last command was `play()` — or says nothing,
+                    // and the element starts the engine anyway because a stopped
+                    // engine reports nothing and the block would never end. Pausing into
                     // agreement is the freeze; this is the window element-contract-5 owns, seek or not.
                     continue;
                 }
@@ -749,7 +834,7 @@ mod tests {
     /// `paused`, ended playback and stopped due to errors; the fourth, a blocked media element, is a
     /// stop only for its two content conditions.
     ///
-    /// `seeking` was on this list until the review's findings 1 and 2 took it off: #blocked-media-element
+    /// `seeking` is not on this list: #blocked-media-element
     /// has no seeking term, so a seek that has nothing to decode and a mid-playback underrun are the
     /// same state, and pausing either one is the stop nothing answers — a paused engine emits no
     /// `PlaybackState::Playing`, which is the only thing that raises the ready state back above
@@ -796,11 +881,11 @@ mod tests {
         );
     }
 
-    /// The seek that the first round of this change paused, and why that was wrong: a seek into a
+    /// The seek that the earlier code paused, and why that was wrong: a seek into a
     /// hole is `#blocked-media-element` with no more and no less — the seek algorithm's step 12 waits
     /// for the data, it does not tell the element to stop the engine — and a paused engine sends no
     /// `PlaybackState::Playing`, which is the only thing that raises the ready state out of
-    /// `HAVE_CURRENT_DATA`. So the pause the round-one decision issued there was never answered. The
+    /// `HAVE_CURRENT_DATA`. So the pause the earlier code issued there was never answered. The
     /// answer now is the same as for a plain underrun: nothing, and the engine's own answer arrives as
     /// a ready-state change that restarts the element if anything ever stopped it.
     #[test]
@@ -823,8 +908,8 @@ mod tests {
                 "{event:?} over a seek that has nothing to decode",
             );
         }
-        // Red first, against this branch's own previous answer: the same snapshot, and the round-one
-        // decision stops the engine the wait is waiting for.
+        // Red first, against the previous answer: the same snapshot, and the
+        // earlier code stops the engine the wait is waiting for.
         for event in [
             MediaEvent::SeekStart,
             MediaEvent::Waiting,
@@ -833,16 +918,16 @@ mod tests {
             assert_eq!(
                 decide_pre_contract_rewrite(event, &seek_into_a_hole).command,
                 PlayerCommand::Pause,
-                "the round-one decision was expected to pause here ({event:?})"
+                "the earlier decision was expected to pause here ({event:?})"
             );
         }
         eprintln!(
-            "element-contract-3 before round 2: a seek with nothing to decode answered pause to all \
+            "element-contract-3 before the fix: a seek with nothing to decode answered pause to all \
              three seek events; now none of them command anything"
         );
 
         // And the mirror of the same window with the engine already stopped: the page wants playback,
-        // so the engine is started, which is what turns the wait into an answer (finding 1).
+        // so the engine is started, which is what turns the wait into an answer.
         let stopped_mid_seek = MediaState {
             player_playing: false,
             ..seek_into_a_hole
@@ -861,8 +946,8 @@ mod tests {
     /// element-contract-4: a state that ends with `play()` over an element with data buffered at the
     /// position leaves the player playing. Over every state; the sequence form is below. The
     /// precondition is the specification's — a play the element is allowed to make and data to play —
-    /// and it now includes the blocked element whose engine stands still, which is the half round one
-    /// left frozen (finding 1).
+    /// and it now includes the blocked element whose engine stands still, which is the half the
+    /// earlier code left frozen.
     #[test]
     fn media_elem_04_holds_for_every_state_ending_with_a_play() {
         for state in all_states() {
@@ -892,10 +977,10 @@ mod tests {
     /// element-contract-5: an element blocked for want of data is not potentially playing
     /// (`#blocked-media-element` is one of the four conditions of `#potentially-playing`), and the
     /// answer to that block is the engine's own: never a pause, and never an engine left stopped
-    /// under a page that wants playback. Both halves matter, and the second is the review's finding 1:
-    /// the first round issued no command at all for a starved element whose engine stood still, and a
-    /// standstill engine reports nothing ever again — the ready state cannot rise, so the element
-    /// cannot become potentially playing, so nothing plays it.
+    /// under a page that wants playback. Both halves matter, and the second is the frozen-play case:
+    /// the earlier code issued no command at all for a starved element whose engine stood
+    /// still, and a standstill engine reports nothing ever again — the ready state cannot rise, so the
+    /// element cannot become potentially playing, so nothing plays it.
     #[test]
     fn media_elem_05_a_block_of_data_is_neither_a_pause_nor_a_stop() {
         for state in reachable_states() {
@@ -931,8 +1016,8 @@ mod tests {
             }
         }
 
-        // Red first: how many of those windows the first round left stopped, and what answers them
-        // now. This is the freeze finding 1 names, counted rather than argued.
+        // Red first: how many of those windows the earlier code left stopped, and what
+        // answers them now. This is the frozen-play freeze, counted rather than argued.
         let left_stopped = reachable_states()
             .into_iter()
             .filter(|state| {
@@ -944,7 +1029,7 @@ mod tests {
             .count();
         assert!(
             left_stopped > 0,
-            "the round-one decision was expected to leave a starved element's engine stopped"
+            "the earlier decision was expected to leave a starved element's engine stopped"
         );
         let now_stopped = reachable_states()
             .into_iter()
@@ -957,7 +1042,7 @@ mod tests {
             .count();
         assert_eq!(now_stopped, 0, "the restart half of element-contract-5 broke");
         eprintln!(
-            "element-contract-5 before round 2: {left_stopped} want-of-data states left the engine \
+            "element-contract-5 before the fix: {left_stopped} want-of-data states left the engine \
              stopped with the page asking for playback; now {now_stopped}"
         );
 
@@ -986,8 +1071,8 @@ mod tests {
             ),
             Decision::none(Reason::Starved),
         );
-        // The engine stopped under the same block, with the page wanting playback: the restart
-        // finding 1 asked for, and the half the first round left frozen.
+        // The engine stopped under the same block, with the page wanting playback: the restart the
+        // frozen-play case asked for, and the half the earlier code left frozen.
         assert_eq!(
             decide(MediaEvent::Waiting, &starved),
             Decision {
@@ -1103,16 +1188,16 @@ mod tests {
         }
     }
 
-    // ------------------------------------------- the element-side steps, transcribed (review 1, 3, 4)
+    // ------------------------------------------- the element-side steps, transcribed
     //
-    // Findings 3 and 4 are about `htmlmediaelement.rs`, which could not be compiled in the setup used: its build
-    // gate needs a Python for `servo-script-bindings`, which that setup does not have (see the review
-    // report). The rules those lines implement are transcribed here, before and after, so the
+    // Two of the element-side rules live in `htmlmediaelement.rs`, which could not be compiled in the
+    // setup used: its build gate needs a Python for `servo-script-bindings`, which that setup does not
+    // have. The rules those lines implement are transcribed here, before and after, so the
     // contracts that live in them can be run red and green instead of argued. Each function names the
     // line it stands for, in the working tree; the transcription itself is what the build gate has to
     // confirm against the code.
 
-    /// The element as the fixes left it, against the fork at `fd3fd2cef`.
+    /// The element across the stages, against `fd3fd2cef`.
     #[derive(Clone, Copy, PartialEq)]
     enum Stage {
         /// Before this change: the `Buffering` arm returned without touching the ready state, the
@@ -1120,11 +1205,11 @@ mod tests {
         /// fatal steps ended at `update_keep_alive`, and neither ready-state arm asked whose playback
         /// had ended or errored.
         Before,
-        /// The first round of this change: the arms were widened as finding 1 needs them to be, but
-        /// neither had the guard finding 4 asked for, and the decision still paused a seek that had
-        /// nothing to decode.
+        /// The intermediate stage (`RoundOne`): the arms were widened as the frozen-play case needs
+        /// them to be, but neither had the guard the ended/errored check asked for, and the decision
+        /// still paused a seek that had nothing to decode.
         RoundOne,
-        /// This branch.
+        /// The current stage.
         After,
     }
 
@@ -1134,7 +1219,7 @@ mod tests {
     /// has ended, as the current playback position can never advance in this case"* — and an
     /// element whose playback has stopped due to errors
     /// (<https://html.spec.whatwg.org/multipage/#stopped-due-to-errors>) is not able to play the
-    /// content at the position, which is the same absence written the other way (finding 4). The
+    /// content at the position, which is the same absence written the other way. The
     /// `paused` attribute is not part of it: an element the page paused still has to say in its
     /// ready state when the data runs out, because that is the element's data question and not the
     /// page's order.
@@ -1142,8 +1227,8 @@ mod tests {
         !state.ended && !state.error
     }
 
-    /// The `waiting` clause of the ready-state steps (`htmlmediaelement.rs:1200-1207`), which is
-    /// finding 3 in one line: before the fix the error term was inverted, so the event fired exactly
+    /// The `waiting` clause of the ready-state steps (`htmlmediaelement.rs:1200-1207`), the rule in
+    /// one line: before the fix the error term was inverted, so the event fired exactly
     /// where it must not and stayed silent exactly where it must. `was_potentially_playing` is the
     /// element's own answer *before* the new ready state is written (`:1121`), which the transcription
     /// derives from the old level and the three stops.
@@ -1158,7 +1243,7 @@ mod tests {
             }
     }
 
-    /// `change_ready_state`'s step 1 (`htmlmediaelement.rs:1134-1286`), as far as these findings need
+    /// `change_ready_state`'s step 1 (`htmlmediaelement.rs:1134-1286`), as far as these cases need
     /// it: the events a transition queues. `waiting` and `timeupdate` are the clause above; `playing`
     /// is `notify_about_playing`, which the ready-state steps run for an element whose `paused`
     /// attribute is false.
@@ -1217,12 +1302,12 @@ mod tests {
 
     /// `PlaybackState::Playing` (`htmlmediaelement.rs:3291-3311`): the raise out of a want-of-data
     /// block, and what it queues. It ends the block; it is not the restart, which was commanded
-    /// earlier, by the decision that found the mirror already stopped (finding 1).
+    /// earlier, by the decision that found the mirror already stopped.
     fn playing(stage: Stage, state: &MediaState) -> (Option<ReadyLevel>, Vec<&'static str>) {
         let raises = match stage {
             // `fd3fd2cef` raised out of `HAVE_METADATA` only.
             Stage::Before => state.ready_state == ReadyLevel::HaveMetadata,
-            // The first round widened the arm for every want-of-data level, ended or not.
+            // `RoundOne` widened the arm for every want-of-data level, ended or not.
             Stage::RoundOne => {
                 state.ready_state >= ReadyLevel::HaveMetadata
                     && state.ready_state < ReadyLevel::HaveFutureData
@@ -1265,7 +1350,7 @@ mod tests {
         }
     }
 
-    /// Finding 3, 05: the stall changed nothing in the fork, so the element kept a ready state that
+    /// The stall changed nothing in the fork, so the element kept a ready state that
     /// said "data ahead" over a position with no data, and the page never heard `waiting`.
     #[test]
     fn media_elem_05_the_stall_dropped_nothing_before_the_fix() {
@@ -1299,8 +1384,8 @@ mod tests {
         );
     }
 
-    /// Finding 3, 06: the clause table, run over both readings of the error term. The transcription is
-    /// harsher than the first round's summary of the bug: `was_potentially_playing` is
+    /// The clause table, run over both readings of the error term. The transcription is
+    /// harsher than the first pass's summary of the bug: `was_potentially_playing` is
     /// `is_potentially_playing()`, whose third condition is that the element has *no* error, so the
     /// fork's `!self.error.get().is_none()` made the whole condition unsatisfiable — the `waiting` (and
     /// the paired `timeupdate`) of that ready-state step could not fire in any state at all.
@@ -1352,7 +1437,7 @@ mod tests {
         );
     }
 
-    /// Finding 3, 07: the backwards end reached the player only through the fix.
+    /// The backwards end reached the player only through the fix.
     #[test]
     fn media_elem_07_the_backwards_end_reached_no_decision_before_the_fix() {
         let backwards = MediaState {
@@ -1385,7 +1470,7 @@ mod tests {
         );
     }
 
-    /// Finding 3, 08: same, for the fatal steps.
+    /// The same, for the fatal steps.
     #[test]
     fn media_elem_08_the_fatal_steps_reached_no_decision_before_the_fix() {
         let errored = MediaState {
@@ -1414,7 +1499,7 @@ mod tests {
         );
     }
 
-    /// Finding 4: neither the raise nor the drop may touch an element whose playback has ended or has
+    /// Neither the raise nor the drop may touch an element whose playback has ended or has
     /// stopped due to errors. The forwards end of playback leaves the ready state at
     /// `HAVE_CURRENT_DATA` while `paused` is still false and the task that sets it is queued, so an
     /// engine signal in that interval is the case that matters: the raise would queue `canplay`,
@@ -1436,13 +1521,13 @@ mod tests {
             events.is_empty(),
             "and no `canplay`/`playing`/`canplaythrough` may be queued at it: {events:?}"
         );
-        // The first round's arm, unguarded, is the red half: it raises, and queues three events the
+        // `RoundOne`'s arm, unguarded, is the red half: it raises, and queues three events the
         // ends-of-playback steps leave out on purpose.
         let unguarded = playing(Stage::RoundOne, &ended_before_the_task_runs);
         assert_eq!(unguarded.0, Some(ReadyLevel::HaveEnoughData));
         assert!(
             unguarded.1.contains(&"canplaythrough"),
-            "the first round queued {:?}",
+            "the wider arm queued {:?}",
             unguarded.1
         );
 
@@ -1463,7 +1548,7 @@ mod tests {
         assert_eq!(
             buffering(Stage::RoundOne, &errored).0,
             Some(ReadyLevel::HaveCurrentData),
-            "and the first round wrote it anyway"
+            "and the wider arm wrote it anyway"
         );
         assert_eq!(playing(Stage::After, &errored).0, None);
 
@@ -1482,7 +1567,7 @@ mod tests {
         assert_eq!(
             buffering(Stage::Before, &clear).0,
             None,
-            "which is what finding 3 asked to see failing"
+            "which is the failure the guard exists to catch"
         );
         let stalled = MediaState {
             ready_state: ReadyLevel::HaveCurrentData,
@@ -1501,17 +1586,17 @@ mod tests {
             "{raised_events:?}: notify_about_playing is what tells the page it is playing again"
         );
         eprintln!(
-            "finding 4: the raise and the drop now ask whose playback ended or errored; the first \
-             round raised an ended element to HAVE_ENOUGH_DATA ({:?}) and dropped an errored one to \
+            "the raise and the drop now ask whose playback ended or errored; the wider arm \
+             raised an ended element to HAVE_ENOUGH_DATA ({:?}) and dropped an errored one to \
              HAVE_CURRENT_DATA",
             unguarded.1
         );
     }
 
-    /// Finding 1, the round trip: a seek that runs out of data. The engine's rule is the fork's own —
+    /// The round trip of a seek that runs out of data. The engine's rule is the fork's own —
     /// `PlaybackState::Playing` is what a *running* engine reports, and `player.paused()` mirrors the
     /// last command, so an engine the element paused reports nothing at all
-    /// (`components/media/backends/gstreamer/player.rs:226-239`). That is why the pause the first round
+    /// (`components/media/backends/gstreamer/player.rs:226-239`). That is why the pause the wider arm
     /// sent inside a seek was the last command anybody would ever send.
     #[test]
     fn finding_1_a_seek_that_runs_out_of_data_starts_the_engine_again() {
@@ -1525,7 +1610,7 @@ mod tests {
         for (name, decide_fn) in variants {
             let (state, player, trail) = seek_out_of_data(decide_fn);
             let frozen = !player.playing && !state.potentially_playing && !state.paused;
-            eprintln!("finding 1, {name}:\n{}", trail.join("\n"));
+            eprintln!("{name}:\n{}", trail.join("\n"));
             if frozen {
                 frozen_names.push(name);
             }
@@ -1545,7 +1630,7 @@ mod tests {
 
     /// The element's own arithmetic, transcribed from `is_potentially_playing()`
     /// (`htmlmediaelement.rs:2000-2008`): the three stops and the ready state. Not the buffered
-    /// ranges, which the element does not read (finding 5) — that is why a seek with nothing decoded
+    /// ranges, which the element does not read — that is why a seek with nothing decoded
     /// yet is still potentially playing at step 4, and why the block only arrives with the stall.
     fn as_the_element_sees_it(state: &mut MediaState) {
         state.potentially_playing = state.wants_playback() && state.ready_state.has_future_data();
@@ -1588,7 +1673,7 @@ mod tests {
         record("seek start", MediaEvent::SeekStart, &state, &mut player);
 
         // The engine's answer to the flush is a stall: the Buffering arm drops the ready state
-        // (finding 4's guard passes, nothing has ended or errored) and `change_ready_state` ends with
+        // (the guard passes, nothing has ended or errored) and `change_ready_state` ends with
         // the decision, still inside the seek window.
         let (dropped, _) = buffering(Stage::After, &state);
         if let Some(new) = dropped {
@@ -1604,9 +1689,9 @@ mod tests {
         as_the_element_sees_it(&mut state);
         record("seek end", MediaEvent::SeekEnd, &state, &mut player);
 
-        // And the engine's rule, which is the whole of finding 1: `PlaybackState::Playing` is what an
-        // engine that is *running* reports, so an engine the element paused reports nothing, the ready
-        // state cannot rise, and the element never becomes potentially playing again.
+        // And the engine's rule, the whole of the frozen-play case: `PlaybackState::Playing` is what
+        // an engine that is *running* reports, so an engine the element paused reports nothing, the
+        // ready state cannot rise, and the element never becomes potentially playing again.
         if player.playing {
             let (raised, _) = playing(Stage::After, &state);
             if let Some(new) = raised {
@@ -1784,7 +1869,7 @@ mod tests {
             }
             // The element's own arithmetic: the three stops and the ready state. The buffered ranges
             // are not in it — `is_potentially_playing()` never reads them, and neither does
-            // `#blocked-media-element` (finding 5).
+            // `#blocked-media-element`.
             let potentially_playing =
                 !elem.paused && !elem.ended && !elem.error && elem.future_data;
             let state = MediaState {
@@ -2008,15 +2093,15 @@ mod tests {
     /// Where splitting the event out changes the answer against the code first-fix left, and why it is
     /// allowed to: one window only, want of data outside a seek, where first-fix still stopped the
     /// player although no cause on element-contract-3's list ordered a stop (and the stop was the pause
-    /// nothing answers). Everywhere else the two agree, which is the "behaviour after first-fix
-    /// unchanged" of this task.
-    /// Where this branch's decision differs from the one first-fix merged, and why each difference is
+    /// nothing answers). Everywhere else the two agree, which is the requirement that behaviour outside
+    /// that window stay as first-fix left it.
+    /// Where the current decision differs from the one first-fix merged, and why each difference is
     /// allowed. One window only: want of data while the page still wants playback. Inside it the two
     /// commands first-fix gave are both wrong — a running engine it paused (the stop nothing answers,
-    /// which is the frozen-play freeze and review finding 1) and a stopped engine it left stopped, which is
-    /// finding 1's other half: a paused engine reports no `PlaybackState::Playing`, so nothing ever
-    /// raises the ready state and the element cannot become potentially playing again. Everywhere else
-    /// the two agree, which is the "behaviour after first-fix unchanged" of this task.
+    /// which is the frozen-play freeze) and a stopped engine it left stopped, the other half of the
+    /// same bug: a paused engine reports no `PlaybackState::Playing`, so nothing ever raises the ready
+    /// state and the element cannot become potentially playing again. Everywhere else the two agree,
+    /// which is the requirement that behaviour outside that window stay as first-fix left it.
     #[test]
     fn the_split_differs_from_first_fix_only_where_a_contract_says_it_must() {
         let mut pause_taken_out = 0;

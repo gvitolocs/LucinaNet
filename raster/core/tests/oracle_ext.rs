@@ -103,7 +103,7 @@ struct A16([u32; 4]);
 impl Texels {
     /// `n` texel words after one 16-byte guard of 0xA5 bytes, so that a read before the texture (which the C++ does
     /// for a 1-texel-wide linear plane: `clampCoord(x, width - 1)` is -1) sees the same non-zero bytes on every
-    /// target instead of whatever the allocator keeps there (zero on glibc x86_64, not on the laptop's musl).
+    /// target instead of whatever the allocator keeps there (zero on glibc x86_64, not on musl).
     fn new(n: usize) -> Texels {
         let mut v = vec![A16([0; 4]); n.div_ceil(4) + 1];
         v[0] = A16([0xA5A5_A5A5; 4]);
@@ -1112,7 +1112,7 @@ fn validate_and_state() {
     }
 }
 
-// ---- scaled YUV image path (flaw a tracked flaw: vertical colour bars, aarch64 macOS) --------------------------------
+// ---- scaled YUV image path (vertical colour bars on aarch64 macOS) --------------------------------------------------
 
 /// A packed R8 plane `w x h` with rows `pad` bytes past `w` (a decoder's rows are rarely a multiple of 4: they are
 /// whatever its own alignment gives them), after the 16-byte `0xA5` guard `Texels::new` prepends, so a read before a
@@ -1289,7 +1289,7 @@ fn render_scaled_yuv(sw: u32, sh: u32, dw: u32, dh: u32, rect_sampler: bool, pad
     assert_eq!(
         constant_columns, 0,
         "scaled YUV3 {sw}x{sh}->{dw}x{dh} {} stride {}: {constant_columns} of {dw} output columns are constant down \
-         their height - vertical colour bars (each column the same for every row), the a tracked flaw symptom",
+         their height - vertical colour bars (each column the same for every row), the flaw's symptom",
         if rect_sampler { "rect" } else { "2D" },
         ty.stride
     );
@@ -1302,7 +1302,7 @@ fn texture_yuv_scaled_image_path() {
     // Every scaled case is anisotropic: up in one axis and down in the other (960x270 from 640x360 downscales
     // vertically, as the reported YouTube box does; 1920x1080 from 640x360 upscales both ways). 942 is not a
     // multiple of 4, so a row's last chunk runs past the span. The 1:1 rect case is the control: what
-    // CompositeYUV draws, which the report says was already correct.
+    // CompositeYUV draws, which is the behaviour the control checks.
     let cases = [
         (320u32, 240u32, 960u32, 270u32),
         (320, 240, 942, 707),

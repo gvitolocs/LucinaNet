@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Shows that verification/glyph_key.rs can fail: each try plants one bug in a copy of the shipped
-# src/glyph_key_bits.rs, and Verus has to refuse it. Run from the repo root; this script
-# calls Verus directly, one verification at a time, as the verification script does on a shared host.
+# src/glyph_key_bits.rs, and Verus has to refuse it. Run from the package root (the script cds there itself);
+# it calls Verus directly, one verification at a time. Needs Verus: put it on PATH or set VERUS to its binary.
 set -uo pipefail
-verus=${VERUS:-/home/user/tools/verus/verus-x86-linux/verus}
+cd "$(dirname "$0")/.."
+verus=${VERUS:-verus}
+command -v "$verus" >/dev/null 2>&1 || { echo "error: Verus not found; put verus on PATH or set VERUS=/path/to/verus" >&2; exit 1; }
 work=$(mktemp -d "${TMPDIR:-/tmp}/glyphkey-mutants.XXXXXX")
 trap 'rm -rf "${work:?}"' EXIT
 fail=0

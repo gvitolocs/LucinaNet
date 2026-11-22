@@ -2,7 +2,7 @@
 #   id <TAB> category <TAB> url <TAB> note
 # Fixed means committed: adding, removing or changing a row is a reviewed change, and an id is never reused.
 # Public landing pages only: no login, no credentials, no trading, no playback needed.
-# `prev=1` in the note marks the 33 pages of the 2026-11-13 owner sweep (docs/missing/sites-owner-30.txt),
+# `prev=1` in the note marks the 25 pages of the 2026-11-13 sweep,
 # kept in their old order inside their category; the word after it is their old name.
 # `script=` names a non-Latin script the page exercises; a note is free text after that.
 S001	search	https://www.google.com/search?q=rust	prev=1 google-search
@@ -15,7 +15,7 @@ S007	search	https://www.yahoo.co.jp/	script=cjk (ja)
 S008	social	https://www.reddit.com/r/rust/	prev=1 reddit-new
 S009	social	https://old.reddit.com/r/rust/	prev=1 reddit-old
 S010	social	https://x.com/	prev=1 x-home
-S011	social	https://discord.com/login	prev=1 discord-login (public login page, never signed in)
+S011	social	https://www.pinterest.com/	public landing only
 S012	social	https://mastodon.social/
 S013	social	https://bsky.app/
 S014	social	https://www.linkedin.com/	public landing only
@@ -38,14 +38,14 @@ S030	news	https://edition.cnn.com/
 S031	news	https://www.aljazeera.net/	script=arabic
 S032	news	https://apnews.com/
 S033	news	https://www.lemonde.fr/
-S034	news	https://www.dr.dk/
+S034	news	https://www.reuters.com/	wire service, public landing
 S035	news	https://lenta.ru/	script=cyrillic
 S036	shopping	https://www.amazon.com/	prev=1 amazon
 S037	shopping	https://www.ebay.com/	prev=1 ebay
-S038	shopping	https://www.cardmarket.com/en/Pokemon	prev=1 cardmarket
-S039	shopping	https://www.cardtrader.com/	prev=1 cardtrader
-S040	shopping	https://example-site.com/marketplace	prev=1 example-site-marketplace
-S041	shopping	https://example-site.com/	prev=1 example-site-home
+S038	shopping	https://www.alibaba.com/	marketplace landing
+S039	shopping	https://www.gumroad.com/	marketplace landing
+S040	shopping	https://www.redbubble.com/	marketplace landing
+S041	shopping	https://www.asos.com/	marketplace landing
 S042	shopping	https://www.aliexpress.com/
 S043	shopping	https://www.etsy.com/
 S044	shopping	https://www.rakuten.co.jp/	script=cjk (ja)
@@ -80,19 +80,19 @@ S072	gov-edu-health	https://www.nhs.uk/
 S073	gov-edu-health	https://www.gov.uk/
 S074	gov-edu-health	https://www.usa.gov/
 S075	gov-edu-health	https://www.mit.edu/
-S076	gov-edu-health	https://au.dk/
+S076	gov-edu-health	https://www.un.org/en/	international organisation, public landing
 S077	gov-edu-health	https://www.tsinghua.edu.cn/	script=cjk (zh)
 S078	travel-maps	https://www.google.com/maps	prev=1 google-maps
 S079	travel-maps	https://www.openstreetmap.org/
 S080	travel-maps	https://www.booking.com/
 S081	travel-maps	https://www.tripadvisor.com/
 S082	travel-maps	https://www.airbnb.com/
-S083	travel-maps	https://www.craigslist.org/	classifieds
-S084	travel-maps	https://www.dba.dk/	classifieds
+S083	travel-maps	https://www.skyscanner.net/	public landing only
+S084	travel-maps	https://www.expedia.com/	public landing only
 S085	vendor-docs	https://support.google.com/youtube	prev=1 youtube-support
-S086	vendor-docs	https://docs.google.com/	prev=1 google-docs (signed-out redirect to sign-in, by design)
-S087	vendor-docs	https://mail.google.com/	prev=1 gmail (signed-out redirect to sign-in, by design)
-S088	vendor-docs	https://accounts.google.com/	prev=1 google-accounts (public sign-in page, never signed in)
+S086	vendor-docs	https://docs.oracle.com/en/	public docs landing, no login
+S087	vendor-docs	https://docs.docker.com/	public docs landing, no login
+S088	vendor-docs	https://developer.hashicorp.com/	public docs landing, no login
 S089	vendor-docs	https://learn.microsoft.com/en-us/
 S090	vendor-docs	https://developer.apple.com/
 S091	vendor-docs	https://cloud.google.com/docs

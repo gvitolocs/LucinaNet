@@ -7,14 +7,15 @@
 #   publish        sha256 files, a build provenance attestation, a draft release, a check of the README download table, publish,
 #                  and a check that every link of that table resolves (the release goes back to draft if one does not)
 #
-# Windows and Android: their workflows (windows.yml, android.yml) are written separately and run by hand today. Their files join a release
-# in one of two ways, and nothing here builds them:
-#   1. Automatic: when such a workflow is callable (`workflow_call`) add a job `build-windows` (or `build-android`) that uses it, uploads
-#      its zip/apk, sha256 and linked-library list as an artifact named `release-windows` (or `release-android`), then add that job to
-#      `needs:` of `publish` below (see HOOK). `publish` downloads every artifact named `release-*`, so no other line changes.
-#   2. Manual, until then: after windows.yml or android.yml passes its own smoke on this tag's commit, download its artifact and run
-#        gh release upload "$TAG" <file> <file>.sha256 --repo gvitolocs/LucinaNet
-#      and add the README row only in the same change.
+# Windows and Android: their workflows (windows.yml, android.yml) are written separately and run by hand today, and nothing here builds
+# them. A release carries the Linux and macOS files only: `publish` downloads the artifacts named `release-*` of the two jobs above and
+# attaches exactly those. No Windows or Android file is attached by any step, and none is attached by hand: windows.yml uploads a
+# probe zip (the shipped, non-harness binary, checked by tests/harness-gate/check-release-binary.sh) that is not a release file. Such a
+# workflow joins a release only when it is callable (`workflow_call`): add a job `build-windows` (or `build-android`) that uses it,
+# uploads its zip/apk, sha256 and linked-library list as an artifact named `release-windows` (or `release-android`), then add that job
+# to `needs:` of `publish` below (see HOOK). `publish` downloads every artifact named `release-*`, so no other line changes; add the
+# README row only in the same change. The preflight job refuses a harness build in this file and in windows.yml
+# (tools/release/check-workflow-builds.sh) unless it is tagged `harness-smoke`.
 name: release
 
 on:
@@ -82,6 +83,12 @@ jobs:
           n=$(gh api "repos/$REPO/actions/workflows/ci.yml/runs?head_sha=$SHA&event=push&status=success&per_page=5" --jq '.total_count')
           echo "successful ci runs on $SHA: $n"
           if [ "$n" -lt 1 ]; then echo "::error::no green ci.yml run on this commit: a release is cut only from a commit whose CI is green"; exit 1; fi
+      - name: No shipped build names the harness feature
+        run: |
+          # Every cargo build of this file and of windows.yml (the two workflows that upload a build) is read, whatever the order of its
+          # flags, and none may name `harness` unless it carries the tag `harness-smoke` (the smoke builds, never packaged or attached).
+          # tools/release/harness-guard.sh decides what names the feature (docs/harness-doors.md).
+          tools/release/check-workflow-builds.sh .github/workflows/release.yml .github/workflows/windows.yml
 
   build-linux:
     needs: preflight
@@ -123,6 +130,11 @@ jobs:
             -w /src lucinanet-linux-desktop-build:debian12 \
             cargo build --release --locked -j 4 -p lucinanet-servo --features desktop,media
           test -x "$RUNNER_TEMP/target/out/release/lucinanet-servo"
+      - name: The shipped binary holds no harness door (fails the release)
+        run: |
+          # Static check of the built file (tests/harness-gate/check-release-binary.sh <binary>): none of the doors' names and not the
+          # harness marker may be in it. Nothing is packaged or attached before this passes.
+          tests/harness-gate/check-release-binary.sh "$RUNNER_TEMP/target/out/release/lucinanet-servo"
       - name: glibc floor and linked libraries
         run: |
           bin="$RUNNER_TEMP/target/out/release/lucinanet-servo"
@@ -155,12 +167,29 @@ jobs:
           epoch=$(git log -1 --format=%ct)
           tar -C "$RUNNER_TEMP/pkg" --sort=name --owner=0 --group=0 --numeric-owner --mtime="@$epoch" -cf - "$name" | gzip -n > "$RUNNER_TEMP/dist/$name.tar.gz"
           (cd "$RUNNER_TEMP/dist" && sha256sum "$name.tar.gz" > "$name.tar.gz.sha256" && cat "$name.tar.gz.sha256")
+      - name: Build the smoke binary (a harness build, never packaged or attached)
+        run: |
+          # `--render` exists only in a harness build, so the smoke needs one. It reuses the target directory (the engine crates are
+          # already built), overwrites the shipped binary there (the tar above is already made from it) and is used by the smoke only.
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -v "$GITHUB_WORKSPACE:/src:ro" \
+            -v "$RUNNER_TEMP/target:/target" \
+            -e CARGO_HOME=/target/cargo-home -e CARGO_TARGET_DIR=/target/out -e RUSTUP_HOME=/opt/rustup -e HOME=/target/home \
+            -e CC=clang -e CXX=clang++ -e PYTHON3=python3 -e CARGO_INCREMENTAL=0 -e CARGO_NET_RETRY=10 \
+            -w /src lucinanet-linux-desktop-build:debian12 \
+            cargo build --locked --release -j 4 -p lucinanet-servo --features desktop,media,harness # harness-smoke: never packaged or attached
+          mkdir -p "$RUNNER_TEMP/smoke-bin"
+          install -m 0755 "$RUNNER_TEMP/target/out/release/lucinanet-servo" "$RUNNER_TEMP/smoke-bin/lucinanet"
+          # the positive control: the check proves something only if it finds every door in a harness build
+          tests/harness-gate/check-release-binary.sh --harness --desktop "$RUNNER_TEMP/smoke-bin/lucinanet"
       - name: Smoke, from the extracted tar (starts and renders a local page)
         run: |
           name="lucinanet-$VERSION-linux-x86_64"
           rm -rf "$RUNNER_TEMP/smoke" && mkdir -p "$RUNNER_TEMP/smoke/x"
           tar -C "$RUNNER_TEMP/smoke/x" -xzf "$RUNNER_TEMP/dist/$name.tar.gz"
           bin="$RUNNER_TEMP/smoke/x/$name/bin/lucinanet"
+          # the tar's layout (fonts beside bin/) is what is tested; the engine is the harness build of the same commit, which has `--render`
+          install -m 0755 "$RUNNER_TEMP/smoke-bin/lucinanet" "$bin"
           out="$RUNNER_TEMP/smoke"
           printf '%s\n' '<!doctype html><meta charset="utf-8"><title>blank</title>' > "$out/blank.html"
           cat > "$out/smoke.html" <<'HTML'
@@ -218,6 +247,10 @@ jobs:
         run: |
           cargo build --release --locked -p lucinanet-servo --features desktop,media
           test -x target/release/lucinanet-servo
+      - name: The shipped binary holds no harness door (fails the release)
+        run: |
+          # Static check of the built file; nothing is packaged or attached before this passes (docs/harness-doors.md).
+          tests/harness-gate/check-release-binary.sh target/release/lucinanet-servo
       - name: Linked libraries (system frameworks only)
         run: |
           bin=target/release/lucinanet-servo
@@ -249,13 +282,27 @@ jobs:
           codesign -dv "$app" 2>&1 | grep -q 'Signature=adhoc' || { echo "::error::the app is not ad-hoc signed"; exit 1; }
           ditto -c -k --keepParent "$stage" "$RUNNER_TEMP/dist/$name.zip"
           (cd "$RUNNER_TEMP/dist" && shasum -a 256 "$name.zip" > "$name.zip.sha256" && cat "$name.zip.sha256")
+      - name: Build the smoke binary (a harness build, never packaged or attached)
+        run: |
+          # `--render` exists only in a harness build. The zip above is made; this overwrites target/release/lucinanet-servo and
+          # is used by the smoke only.
+          # harness-smoke: never packaged or attached
+          cargo build --locked --release -p lucinanet-servo --features desktop,media,harness
+          mkdir -p "$RUNNER_TEMP/smoke-bin"
+          cp target/release/lucinanet-servo "$RUNNER_TEMP/smoke-bin/lucinanet-servo"
+          # the positive control: the check proves something only if it finds every door in a harness build
+          tests/harness-gate/check-release-binary.sh --harness --desktop "$RUNNER_TEMP/smoke-bin/lucinanet-servo"
       - name: Smoke, from the unzipped app (starts and renders a local page)
         run: |
           name="lucinanet-$VERSION-macos-arm64"
           out="$RUNNER_TEMP/smoke"
           rm -rf "$out" && mkdir -p "$out/x"
           ditto -x -k "$RUNNER_TEMP/dist/$name.zip" "$out/x"
-          bin="$out/x/$name/LucinaNet.app/Contents/MacOS/lucinanet-servo"
+          # the app must unpack and hold its engine; the render runs the harness build of the same commit (replacing the engine in
+          # the app would break its signature), with the fonts the app bundles
+          test -x "$out/x/$name/LucinaNet.app/Contents/MacOS/lucinanet-servo"
+          bin="$RUNNER_TEMP/smoke-bin/lucinanet-servo"
+          export LUCINANET_FONT_DIRS="$GITHUB_WORKSPACE/$FONT_DIR"
           test -x "$bin"
           printf '%s\n' '<!doctype html><meta charset="utf-8"><title>blank</title>' > "$out/blank.html"
           cat > "$out/smoke.html" <<'HTML'
@@ -354,7 +401,9 @@ jobs:
       - name: Every row of the README download table names an uploaded file
         run: |
           trim() { local v=$1; v=${v#"${v%%[![:space:]]*}"}; v=${v%"${v##*[![:space:]]}"}; printf '%s' "${v//\`/}"; }
-          rows=$(awk '/^## Download/{f=1;next} f && /^###? /{exit} f && /^\|/' README.md)
+          # the rows of the FIRST table under "## Download": the table ends at its first line that is not a row (the README has a second
+          # table, of libraries, in the same section; its rows are not files)
+          rows=$(awk '/^## Download/{f=1;next} f && /^\|/{t=1;print;next} f && t{exit} f && /^###? /{exit}' README.md)
           count=0
           while IFS='|' read -r _ platform file _ size sha _; do
             platform=$(trim "$platform")
@@ -380,7 +429,7 @@ jobs:
       - name: Every link of the README download table resolves
         run: |
           trim() { local v=$1; v=${v#"${v%%[![:space:]]*}"}; v=${v%"${v##*[![:space:]]}"}; printf '%s' "${v//\`/}"; }
-          rows=$(awk '/^## Download/{f=1;next} f && /^###? /{exit} f && /^\|/' README.md)
+          rows=$(awk '/^## Download/{f=1;next} f && /^\|/{t=1;print;next} f && t{exit} f && /^###? /{exit}' README.md)
           count=0
           while IFS='|' read -r _ platform file _; do
             platform=$(trim "$platform")

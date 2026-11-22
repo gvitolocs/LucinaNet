@@ -9,7 +9,7 @@ description = "Renders the LucinaNet browser chrome mockups (docs/design/browser
 [workspace]
 
 [dependencies]
-# The glass kit of LucinaOS (the build host path; build with CARGO_TARGET_DIR of an existing LucinaOS target).
+# The glass kit of LucinaOS, as vendored in this tree under `lucinaos/`.
 lucina-glass = { path = "../../../../lucinaos/crates/lucina-glass" }
 
 

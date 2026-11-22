@@ -1,8 +1,9 @@
 #!/bin/bash
 # Static aarch64 musl LucinaNet from the Alpine sysroot + host clang + rust-lld.
 # Set WORK_DIR to a scratch directory for the sysroot, wrap scripts and build output.
+# Builds a binary that runs on a Juno device; the device itself is not needed to build.
 WORK_DIR=${WORK_DIR:-$(mktemp -d)}
-cd "${LUCINANET_REPO:-/home/user/Projects/Lucina/LucinaNet}"
+cd "${LUCINANET_REPO:-$(cd "$(dirname "$0")/.." && pwd)}"
 S=$WORK_DIR/lucinanet/sysroot
 T=aarch64-unknown-linux-musl
 L=$(rustc +1.99.1 --print sysroot)/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld

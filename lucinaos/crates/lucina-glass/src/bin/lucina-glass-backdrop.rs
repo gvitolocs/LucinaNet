@@ -1,7 +1,7 @@
 //! lucina-glass-backdrop: writes the home dashboard's backdrop and its blurred copy for a panel size as raw little-endian XRGB
 //! pixels. The shell makes the sky itself at start; files written by this tool into the image (/usr/share/lucina/home) replace it,
 //! for a picture other than the generated sky. Not part of the image build
-//! (scripts/gui-initramfs.sh puts it in /usr/share/lucina/home). Made on the build host so the laptop's first frame copies it
+//! (scripts/gui-initramfs.sh puts it in /usr/share/lucina/home). Made on a Linux desktop so the laptop's first frame copies it
 //! instead of spending most of a second generating it.
 //!
 //! ```text

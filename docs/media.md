@@ -35,7 +35,7 @@ player::Presenter ◀── pace (Video app) ◀── Clock (audio master, Veru
 
 ## The original, and what was kept
 
-Porting guidelines (our porting guidelines): the GStreamer backend is the behavioural original for the player's
+The GStreamer backend is the behavioural original for the player's
 contract with Servo; the Video app (`lucina-app-video`) is the original for playing on Juno.
 
 | Piece | Decision | Notes |
@@ -47,17 +47,17 @@ contract with Servo; the Video app (`lucina-app-video`) is the original for play
 | `lucina-app-video` decode thread, pacing, clock, decoders (LucinaOS) | **adopt** | Moved unchanged into the library `lucina-video-play` (LucinaOS commit 7399e1c45) and used as they are |
 | `lucina_video` demuxers and `limits` | **adopt** | Containers at most 5 M samples, 32 MB a frame, pictures at most 4096x2304, VP9 sizes checked before the decoder |
 | `lucina_audio_decode` (symphonia 0.6.1 MPL-2.0, syom 0.9.0 MIT) | **adopt** | Sound decoded to 48 kHz stereo |
-| Decoders: rav1d (BSD-2-Clause), rusty_h264-decoder 0.17.0 (BSD-2-Clause), filmcraft-vp9 0.9.0 (MIT OR Apache-2.0) | **adopt** | As the Video app, each checked frame by frame against FFmpeg in LucinaOS (`docs/research/juno-media.md`) |
+| Decoders: rav1d (BSD-2-Clause), rusty_h264-decoder 0.17.0 (BSD-2-Clause), filmcraft-vp9 0.9.0 (MIT OR Apache-2.0) | **adopt** | As the Video app, each checked frame by frame against FFmpeg in LucinaOS |
 | mp4parse (Mozilla) | **reject** for now | `lucina_video::mp4` already reads plain and fragmented MP4 with Juno's limits; a second MP4 parser would be two to keep right |
 | GStreamer itself | **reject** | C, does not fit the static musl build |
-| `opus1` 0.3.0 (BSD-3-Clause, pure Rust, libopus 1.6 port) | **adopt** | Measured against libopus (FFmpeg) on the build host: CELT music 103-110 dB SNR, 530-2280x real time; its README says bit-exact with libopus on 64-bit ARM, which the laptop test checks. Being wired into `lucina_audio_decode` for files and MSE packets |
+| `opus1` 0.3.0 (BSD-3-Clause, pure Rust, libopus 1.6 port) | **adopt** | Measured against libopus (FFmpeg) on Linux x86_64: CELT music 103-110 dB SNR, 530-2280x real time; its README says bit-exact with libopus on 64-bit ARM, which the laptop test checks. Being wired into `lucina_audio_decode` for files and MSE packets |
 | `opus-pure` 0.2.2 (BSD-3) | reference | As accurate (110-113 dB), 25% slower; has an Ogg reader |
-| `opus-decoder` 0.1.1 (MIT/Apache, no `unsafe`) | **reject** | Right, but 1.7x real time on the build host's desktop CPU: too slow for the laptop |
+| `opus-decoder` 0.1.1 (MIT/Apache, no `unsafe`) | **reject** | Right, but 1.7x real time on a Linux x86_64 desktop CPU: too slow for the laptop |
 | `rusty-opus` 1.0.2 (BSD-3) | **reject** | 69-83 dB on CELT, worse than the others |
 | GStreamer's `servosrc`/`qtdemux` for MSE | reference | MSE is not in upstream Servo at all; the spec is the original (below) |
 
-Licences: everything linked is MPL-2.0, MIT, Apache-2.0 or BSD-2-Clause; LucinaOS code is the owner's. New code here is MPL-2.0,
-as LucinaNet.
+Licences: everything linked is MPL-2.0, MIT, Apache-2.0 or BSD-2-Clause, the LucinaOS code included. New code here
+is MPL-2.0, as LucinaNet.
 
 ## Proved, tested
 
@@ -124,13 +124,13 @@ playback position).
   replays a recording (`real_session` with `LUCINANET_MEDIA_MSE_REPLAY`), and `tests/media/laptop/mse-replay.html` replays it
   through the browser's own MediaSource. Recordings of real sites stay out of git.
 
-## Servo patches (with lucinanet, through the patch series)
+## Servo patches (carried by the engine fork)
 
 - **A, small:** a `media-embedder` feature in `components/servo` so LucinaNet installs this backend itself.
 - **B, large:** Media Source Extensions (MediaSource, SourceBuffer, SourceBufferList, `URL.createObjectURL(MediaSource)`), which
   YouTube and most streaming sites need. Upstream Servo has none.
 - **C:** YUV frames into WebRender (`YuvImage`, composited by swgl) in place of BGRA: 0055-0056, below.
-- Numbers (lucinanet's ledger): 0037 = A; 0050 MSE on Player, 0051 MSE DOM, 0052 timeupdate during playback (upstream bug),
+- Numbers: the order the patches apply in the fork, oldest first: 0037 = A; 0050 MSE on Player, 0051 MSE DOM, 0052 timeupdate during playback (upstream bug),
   0053 a same-size video frame is a new frame, not a new display list, 0054 MSE duration from the initialization segment;
   0055 `VideoFrameData::ExternalYuv` and an embedder `Media` image handler, 0056 plane keys and `push_yuv_image` with the
   compositor-surface flags, 0057 `getVideoPlaybackQuality()` (`Player::playback_quality`).
@@ -147,14 +147,14 @@ playback position).
   WebRender reads them. Without the handler (tests, other embedders) the BGRA path is unchanged; `LUCINANET_MEDIA_TRACE`
   says once which way the planes went; and `LUCINANET_MEDIA_YUV=0` keeps a page off this path, on BGRA.
   Adopt: Gecko's software WebRender does video this way (`RenderCompositorSWGL::LockCompositeSurface`).
-- **Planar frames were off by default for a while (flaw `a tracked flaw`, now fixed).** A video that WebRender scales came out
-  as vertical colour bars: one source row repeated over every output row. Measured on the owner's Mac (YouTube's player) and
-  here on the build host x86_64 (a 640x360 frame in a 960x270 box, paused at 1.0 s: 480 of the picture's 480 columns constant down
-  their height, with the Rust rasterizer and with C++ swgl alike, `<work-dir>/lucinanet/copy-planes`, 2026-11-13); the same
+- **Planar frames were off by default for a while (the planar-frames flaw, now fixed).** A video that WebRender scales came out
+  as vertical colour bars: one source row repeated over every output row. Measured on macOS (YouTube's player) and
+  here on Linux x86_64 (a 640x360 frame in a 960x270 box, paused at 1.0 s: 480 of the picture's 480 columns constant down
+  their height, with the Rust rasterizer and with C++ swgl alike, 2026-11-13); the same
   page with BGRA frames, `frames.rs`, was correct (0 of 480), and so was the 1:1 compositor-surface picture. `surfaces.rs`
   therefore started BGRA on every platform in the meantime. The cause was not swgl's sampling but the uv rect of the media
-  planes, handed to it unflipped; the engine pinned here (LucinaNet-servo `engine-next` `40c0ff93c`) hands it flipped, and
-  `tests/media/scaled-planes.sh` passes with the planes on the build host x86_64 and on the owner's Mac. Planes are the default
+  planes, handed to it unflipped; the engine pinned here (`40c0ff93c`) hands it flipped, and
+  `tests/media/scaled-planes.sh` passes with the planes on Linux x86_64 and on macOS. Planes are the default
   again; `LUCINANET_MEDIA_YUV=0` stays as the way to force BGRA frames when debugging.
   `LUCINANET_MEDIA_COPY_PLANES=1` (with the planes) was the experiment that ruled the handover out: `wrap` copies each plane
   into our own buffer, rows exactly `w` apart, kept alive past `unlock`/`unpin` by a registry keyed `(id, plane)`. Measured on
@@ -167,7 +167,7 @@ playback position).
   (`avc1=42,fps=60,av01=8`) overrides them for measuring. To be set from the laptop A/B.
 - **`getVideoPlaybackQuality()` (0057)**: frames shown and dropped from the presenter, so YouTube's player sees drops and
   steps down by itself.
-- **On x86 (the build host, lucinanet's run, watch page with consent):** YouTube took VP9 + Opus (AV1 before the caps), played
+- **On x86 (a Linux desktop, this run, watch page with consent):** YouTube took VP9 + Opus (AV1 before the caps), played
   1.64 to 28.8 s with 60 s buffered, 866 frames, 0 dropped at 854x480. Its SABR session (80 appends) replays in
   `real_session`: 1800 frames, 0 dropped, no append errors.
 - **Opus through MSE:** `vp9_and_opus_webm_as_youtube_play_frame_exact` (WebM split at clusters as YouTube appends) and
@@ -208,7 +208,7 @@ Pages from `tests/media/laptop` with `run-laptop.sh` (sound to the real device a
 ## Open
 
 - `playbackRate` other than 1 is kept and not applied (needs the sound stretched).
-- `media` is off in the Juno build (`scripts/build-juno.sh`): turning it on is lucinanet's call once the laptop numbers below are in.
+- `media` is off in the Juno build (`scripts/build-juno.sh`): turning it on waits on the laptop numbers below.
 - Not proved: a track buffer's byte count, which frames depend on a removed one, and that `join` is given the track's frames.
 - Laptop: the YUV/BGRA and decode-nice A/B at 720p30, 1080p30 and 1080p60 (YouTube's itags 136, 137, 299), the MSE replay of
   the recorded YouTube session, then the caps set from it; power against the Video app; YouTube itself on Juno.

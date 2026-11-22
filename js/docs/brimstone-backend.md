@@ -4,10 +4,10 @@
 with no JIT, modelled on JavaScriptCore's LLInt. See [LucinaJavascript design](lucinajs-design.md). "Brimstone" below is
 historical, or the upstream.
 
-**Resumed audit (2026-11-05):** see [verified iterator milestone and current blockers](resume-2026-11-05.md). The state and measurements below are historical unless reverified there.
+**Resumed audit (2026-11-05):** the state and measurements below are historical unless reverified since.
 
-Started 2026-11-04 (owner: "full go", with Verus and the Lucina porting guidelines). The plan this follows is LucinaNet
-`docs/js-engine-plan.md`; this file records what was decided and measured while doing it. Statements about run-time behaviour
+Started 2026-11-04, at full scope, with Verus and the Lucina porting guidelines. This file records what was decided and
+measured while doing it. Statements about run-time behaviour
 link the test or log that shows them; anything else is labelled as a plan.
 
 ## Engine choice, rechecked 2026-11-04
@@ -16,8 +16,8 @@ Porting guidelines §3: every candidate gets adopt, adapt, reference or reject.
 
 | Engine | Licence (LICENSE file) | test262 | Speed | GC | Verdict |
 |---|---|---|---|---|---|
-| Brimstone (Hans-Halverson/brimstone) | MIT | README ">97% of the language", undated, self-reported. Own run on test262 227d9055: pending (see below) | V8 suite 1799 and 1854 on the build host (2026-11-02); javascript-zoo (2025-12): Richards 122, DeltaBlue 184, Splay 961 | Cheney semispace, moves everything, no nursery | **adapt** (fork `LucinaNet-brimstone`, base 64d6698) |
-| Boa | MIT | 95.60%, v0.22 release notes (2026-08-28), self-reported from its CI | V8 suite 185 on the build host; javascript-zoo Richards 170, DeltaBlue 146 | non-moving mark-sweep with ref counts | **reference** (Intl from it later: ICU4X, MIT) |
+| Brimstone (Hans-Halverson/brimstone) | MIT | README ">97% of the language", undated, self-reported. Own run on test262 227d9055: pending (see below) | V8 suite 1799 and 1854 on the reference Linux development machine (2026-11-02); javascript-zoo (2025-12): Richards 122, DeltaBlue 184, Splay 961 | Cheney semispace, moves everything, no nursery | **adapt** (fork, under `third_party/brimstone`, base 64d6698) |
+| Boa | MIT | 95.60%, v0.22 release notes (2026-08-28), self-reported from its CI | V8 suite 185 on the reference Linux development machine; javascript-zoo Richards 170, DeltaBlue 146 | non-moving mark-sweep with ref counts | **reference** (Intl from it later: ICU4X, MIT) |
 | Nova | MPL-2.0 | no current figure; test262.fyi dropped it on 2026-09-22 (inactive >90 days, resumed 2026-10-18); 79.9% in May | crashed on the V8 suite (RangeError); zoo Richards 51.9 | compacting, lifetime-checked API | **reject**: conformance, RegExp lacks lookbehind and backreferences, API has no raw pointers to map onto |
 | yavashark | MIT | "~81%" README, self-reported | zoo Richards 15.1 | not described | **reject**: an order of magnitude slower, conformance |
 | jsse (pmatos/jsse) | MIT | "Goal: 100%", baselines in repo, no number | not in the zoo | nursery (commit titles) | **reject** for now: tree-walking interpreter by its README, no embedding API, agent-written single-author code; look again if it publishes numbers |
@@ -43,7 +43,7 @@ Decisions:
   int32 (Brimstone's invariant); `PrivateValue` is a double; ids for indices 2^31..2^32-2 are handed to Servo as strings.
 - **Host objects do not move.** Servo turns SpiderMonkey's compacting GC off ("the layout system currently does not work with
   compacting GC", `components/config/prefs.rs:553`), so DOM reflectors, globals and DOM proxies must keep their address. The fork
-  gives them a non-moving, mark-swept space inside the copying collector (`LucinaNet-brimstone` `docs/embedding.md`). Ordinary
+  gives them a non-moving, mark-swept space inside the copying collector (`third_party/brimstone/docs/embedding.md`). Ordinary
   objects keep moving, as SpiderMonkey's nursery moves them; Servo already updates every pointer it traces.
 - **ICU 2.2.0.** Brimstone's baked ICU data is generated for ICU4X 2.2.0 and calls its unstable constructors, so every ICU crate in
   the Rust-engine build is 2.2.0. LucinaNet's SpiderMonkey build has 2.1.x; the Rust-engine build therefore has its own Cargo.lock.
@@ -72,11 +72,11 @@ target directory, inside the shared build lock `/tmp/lucinanet-servo-build.lock`
 | Stage | State |
 |---|---|
 | Spike: `mozjs` examples and tests on Brimstone | 15 of mozjs's 20 tests pass (the rest wait on stack capture, CSP, heap sizes and off-thread jobs in the glue); 100+ glue tests (property, proxy, typed array, promise) |
-| example.com with scripts | **renders** (LucinaNet branch js-rust, `evidence/js-rust/`): dumps byte-identical to SpiderMonkey's, 1.0-1.1 s like SpiderMonkey, 123 MB binary against 152 MB |
+| example.com with scripts | **renders** (the `LUCINANET_JS=rust` build): dumps byte-identical to SpiderMonkey's, 1.0-1.1 s like SpiderMonkey, 123 MB binary against 152 MB |
 | Real sites | next: Wikipedia, Hacker News, GitHub, discord.com |
-| Binary without SpiderMonkey | the js-rust binary has none; the build switch (one lock for both engines) is still to land |
+| Binary without SpiderMonkey | the Rust-engine binary has none; the build switch (one lock for both engines) is still to land |
 
-Fork rounds accepted (LucinaNet-brimstone, merged into branch `combined`):
+Fork rounds accepted (in the engine fork):
 1. host space, natives, proxies, realms, jobs;
 2. uncatchable stop, interrupts, stack limit, string chars without GC;
 3. stack quota by address, compiled scripts, host-driven modules, stack capture, CSP hook, heap statistics;

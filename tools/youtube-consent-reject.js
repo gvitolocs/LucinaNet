@@ -1,4 +1,4 @@
-// Test harness only: answers Google's cookie dialog with "Reject all" (the owner's privacy-preserving choice), as he would
+// Test harness only: answers Google's cookie dialog with "Reject all", the privacy-preserving choice, as a person would
 // once by hand in a fresh profile. YouTube pauses the video while the dialog is open. Nothing else is touched.
 (() => {
   if (location.host !== "www.youtube.com" || window.__lucinaConsent) return;

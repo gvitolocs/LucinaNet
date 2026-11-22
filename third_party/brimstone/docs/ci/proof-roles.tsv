@@ -1,11 +1,11 @@
-# Append-only log of who proved what (docs/ci/PROOF-ROLES.md). Never edit or delete a line; add a new one.
+# Append-only log of who proved what. Never edit or delete a line; add a new one.
 # Fields (tab-separated, none empty, no tab or newline inside): id, date, kind, unit, statement_fp, proof_fp, exec_fp, data_fp,
 #   implementer_model, implementer_family, prover_model, prover_family, prover_class, reviewer_model, reviewer_family,
 #   verdict, verdict_ref, started_before, note
 # kind: statement | proof-edit | recheck | pre-rule | seed. started_before: for a pre-rule, a commit before roles landed; else -.
 #  verdict: accepted | rejected | escalated | not-reviewed-under-rule.
-# prover_class: strong | builder | unknown (derived from prover_model, see roles.rs). verdict_ref: docs/ci/verdicts/<id>.md, or - for a seed.
-# fingerprints: 16 hex digits from `lucina-ci roles --list`, or - for a unit that has none.
+# prover_class: strong | builder | unknown (derived from prover_model). verdict_ref: the verdict record this line rests on, or - for a seed.
+# fingerprints: 16 hex digits computed from the unit's files, or - for a unit that has none.
 seed-mutants.call-position	2026-11-13	seed	mutants/call-position	-	-	-	-	unknown	unknown	unknown	unknown	unknown	-	-	not-reviewed-under-rule	-	-	seeded when the roles rule started: written before the rule, not reviewed under it
 seed-mutants.fncache	2026-11-13	seed	mutants/fncache	-	-	-	-	unknown	unknown	unknown	unknown	unknown	-	-	not-reviewed-under-rule	-	-	seeded when the roles rule started: written before the rule, not reviewed under it
 seed-mutants.gc-accounting	2026-11-13	seed	mutants/gc-accounting	-	-	-	-	unknown	unknown	unknown	unknown	unknown	-	-	not-reviewed-under-rule	-	-	seeded when the roles rule started: written before the rule, not reviewed under it

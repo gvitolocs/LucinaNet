@@ -7,7 +7,7 @@
 //!   `LUCINA_INTENT_REPLY` the file for the [`Reply`]. The runtime checks the arguments against the intent's schema and hands
 //!   the call to the app before its first frame. With `LUCINA_INTENT_HEADLESS=1` (intents that don't show the app) it runs
 //!   with no screen and no input, and ends once it has answered, or after `LUCINA_INTENT_TIMEOUT_MS` (60 s).
-//! * **Already running:** over the app's socket (stage B), through the same [`dispatch`].
+//! * **Already running:** over the app's `lucina-ax` socket, through the same [`dispatch`].
 //! * **In tests:** [`crate::Harness::intent`].
 //!
 //! `<program> --intents` prints the intents as JSON and ends without touching the screen: lucina-devd's listing.

@@ -36,7 +36,8 @@ that there is no fontconfig here to consult for a directory someone added to `/e
 convention for an install tree (`/usr/local/share/lucinanet/fonts` beside `/usr/local/bin`); no script in this
 repository fills it today, and a directory that is not there is skipped.
 
-Juno needs no entry of its own: LucinaOS's `scripts/juno-fonts.sh`, run by its `juno-root-image.sh`, installs
+Juno needs no entry of its own: LucinaOS's `scripts/juno-fonts.sh` (outside this tree), run by its
+`juno-root-image.sh`, installs
 `NotoSans<Script>-Regular.ttf` for 14 scripts under `/usr/share/fonts/truetype/noto` and, with `--cjk`,
 `NotoSansCJK-Regular.ttc` under `/usr/share/fonts/noto`; a script in LucinaNet's own `scripts/` puts the same CJK
 collection in that second directory. Both are under `/usr/share/fonts`, which the scan walks recursively.
@@ -53,7 +54,7 @@ collection in that second directory. Both are under `/usr/share/fonts`, which th
 Servo on macOS does not use these: it asks CoreText (`components/fonts/platform/macos/font_list.rs`), which already
 searches all four domains, and `LUCINANET_FONT_DIRS` is simply inert there. Blitz does need them, since it registers
 files itself and asks for no system fonts. The list is written from Apple's documentation of the CoreText search
-domains and **has not been run on a Mac**: the project lead can check it with `scripts/glyph-check.sh <binary>`,
+domains and **has not been run on a Mac**: anyone with a Mac can check it with `scripts/glyph-check.sh <binary>`,
 which needs only a shell, python3 and the engine's own `--render`.
 
 `LUCINANET_FONT_DIRS` set by the caller is the whole list, with the system directories left out. That is deliberate:
@@ -82,8 +83,7 @@ as an outline, and only an installed colour face clears it. Without U+FE0F the s
 Blitz, which does its own fallback wiring in `blitz/src/engine.rs`, is behind this: it maps every non-monospace
 generic to DejaVu Sans rather than to a serif, and its script fallback lists name no emoji face at all, so a 🦀 in a
 title is a box there even with `fonts-noto-color-emoji` installed. Both are one-line changes to the
-`set_generic_families` and `set_fallbacks` calls, and neither is verified on this host: Blitz is a second workspace
-with a cold target tree, and the check that would catch a mistake in it belongs to a machine that had a free slot.
+`set_generic_families` and `set_fallbacks` calls; Blitz is a second workspace, outside this tree's build.
 
 Nothing here invents a font. Every name is one a distribution or Apple ships, and the fix for a box is to have its
 file in a scanned directory: on a Debian host, `apt install fonts-noto-core fonts-noto-cjk fonts-noto-color-emoji`

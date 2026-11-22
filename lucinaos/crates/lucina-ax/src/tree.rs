@@ -540,7 +540,7 @@ impl Refused {
         matches!(self, Refused::Rule(Refusal::Stale))
     }
 
-    /// The reply's `error`: the same codes as stage F's Servo socket, so that one reader serves both.
+    /// The reply's `error`: the same codes as LucinaNet's Servo socket, so that one reader serves both.
     pub fn code(&self) -> &'static str {
         match self {
             Refused::Rule(Refusal::Stale) => "stale",
@@ -966,7 +966,7 @@ impl Snapshot {
         }
     }
 
-    /// What changed from this tree to `newer`, for stage D's `node.changed` events: nodes added, removed, or whose role, name,
+    /// What changed from this tree to `newer`, for the `node.changed` events: nodes added, removed, or whose role, name,
     /// value, states or children changed. Held-back values and text are in neither tree, so they never show up here.
     pub fn diff(&self, newer: &Snapshot) -> Vec<Change> {
         let old: HashMap<u64, &Node> = self.update.nodes.iter().map(|(i, n)| (i.0, n)).collect();

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Verus on the shipped files (the rule): verification/ftcompat.rs (crates/lucina-ftcompat/src/lib.rs) and
-# verification/fontsan_bounds.rs (crates/lucina-fontsan/src/bounds.rs). The verification script runs
-# one verification at a time on a shared host; this script calls Verus directly.
+# Verus on the shipped files: verification/ftcompat.rs (crates/lucina-ftcompat/src/lib.rs) and
+# verification/fontsan_bounds.rs (crates/lucina-fontsan/src/bounds.rs). Each harness is run on its own,
+# calling Verus directly.
 # Exits non-zero when Verus reports any error, and also when a harness does not print
 # "verification results:: N verified, 0 errors" with N >= 1 (a run that verifies nothing must not pass).
 set -uo pipefail

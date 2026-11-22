@@ -2,7 +2,7 @@
 # LucinaNet's media pages, in the real engine: each page plays a clip (or WebAudio) and logs "media-test: ..." lines to the
 # console, which LUCINANET_CONSOLE=1 sends to stderr. Pass: every page ends with "media-test: PASS".
 #   tests/media/run.sh [lucinanet binary] [pages...]
-# On the build host the sound plays to nowhere at real time (no /dev/lucina-audio); LUCINANET_MEDIA_WAV writes the mix to a file.
+# On a machine with no sound device the sound plays to nowhere at real time (no /dev/lucina-audio); LUCINANET_MEDIA_WAV writes the mix to a file.
 # The backend's "lucinanet-media: played ..." line (shown, dropped, decode times, sound_frames) is printed for each video.
 set -u
 # Nothing here listens, so the clips play to the null sink: on a Mac the mixer would otherwise open CoreAudio and the room

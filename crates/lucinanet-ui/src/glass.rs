@@ -57,6 +57,8 @@ const HAIR: f32 = 0.7;
 const PROGRESS: f32 = 2.0;
 /// How long the loading sweep takes to cross the field.
 const SWEEP: f64 = 1.6;
+/// The edge of the field in a refusal's flash (the kit has no red token).
+const REFUSED: Color = Color::hex(0xff453a);
 
 /// The backdrop the glass shows: the page's top rows, mirrored, at half resolution, blurred.
 pub struct Backdrop {
@@ -192,6 +194,11 @@ pub struct State {
     /// The shown page's bookmark, as the engine told the window: the star is filled when it is set.
     pub bookmarked: bool,
     pub note: Option<String>,
+    /// A refusal's shake: how far the field is pushed sideways (points) and how red its edge is (0 to 1), both from
+    /// [`crate::address::shake_offset`] and [`crate::address::shake_flash`] at the frame's time. Part of the frame's key,
+    /// so the canvas is drawn again while it moves.
+    pub shake: f32,
+    pub flash: f32,
     /// The inactive tab whose close mark the pointer is over: a full tab shows it, a compact one has no room.
     pub close_hover: Option<usize>,
 }
@@ -363,8 +370,14 @@ impl GlassChrome {
         p.cv.fill_rrect(R::new(0.0, band.h - HAIR, band.w, HAIR), 0.0, color::HAIR);
         // The field's capsule first: it is the row's brighter layer. The parts never overlap, so one pass in the
         // layout's order draws every capsule before any of the text on top of them.
+        // A refusal's shake pushes the whole field - capsule, text, icons - sideways by `st.shake`, and its edge flashes red.
+        let push = |r: R| R::new(r.x + st.shake, r.y, r.w, r.h);
         if let Some(c) = l.field_capsule() {
-            capsule(&mut p, &a, dp(&c, k), true);
+            let cap = push(dp(&c, k));
+            capsule(&mut p, &a, cap, true);
+            if st.flash > 0.0 {
+                p.cv.stroke_rrect(cap, radius::PILL, 1.8, REFUSED.alpha(st.flash.clamp(0.0, 1.0)));
+            }
         }
         for b in &l.parts {
             let r = dp(b, k);
@@ -378,10 +391,11 @@ impl GlassChrome {
                     text_centre(&mut p, Font::Semibold, ty::SMALL, r.cx(), r.cy(), a.ink2, &n);
                 },
                 Part::NewTab => button(&mut p, r, Icon::Plus, a.ink2),
-                Part::Field => field(&mut p, st, l, r, &a, scroll, caret, k),
-                Part::FieldIcon => field_icon(&mut p, st, r, &a),
+                Part::Field => field(&mut p, st, l, push(r), &a, scroll, caret, k),
+                Part::FieldIcon => field_icon(&mut p, st, push(r), &a),
                 // Reload is not a bar button: it is this icon, at the field's right end inside the capsule, a stop while loading.
                 Part::FieldReload => {
+                    let r = push(r);
                     let icon = if st.loading { Icon::Close } else { Icon::Reload };
                     icons::draw(p.cv, icon, r.cx(), r.cy(), 18.0, a.ink2);
                 },
@@ -569,7 +583,7 @@ fn boundary(s: &str, at: usize) -> usize {
 #[allow(clippy::too_many_arguments)]
 fn field(p: &mut Paint, st: &State, l: &BarLayout, t: R, a: &Adapt, scroll: &mut f32, caret: bool, k: f32) {
     let Some(cap) = l.field_capsule() else { return };
-    let cap = dp(&cap, k);
+    let cap = R::new(dp(&cap, k).x + st.shake, dp(&cap, k).y, dp(&cap, k).w, dp(&cap, k).h);
     let cy = t.cy();
     let main = ty::LEAD;
     if st.typing {
@@ -841,6 +855,30 @@ mod tests {
         let mut st3 = st.clone();
         st3.domain = None;
         assert_ne!(st3, st);
+    }
+
+    /// a refusal's shake moves the field's capsule and its flash inks the edge red, both from `State`.
+    #[test]
+    fn a_refusal_pushes_the_field_sideways_and_flashes_its_edge() {
+        let l = wide(3, 1, false);
+        let cap = l.field_capsule().unwrap();
+        let k = 1.0;
+        let (w, h) = band_px(&l);
+        let p = page(400, 200, |_, _| 0xf5f5f0);
+        let mut g = GlassChrome::new();
+        g.backdrop.sample(&p, 400, 200, w, h, k);
+        let calm = State { address: "https://example.org/".into(), ..State::default() };
+        g.frame(&calm, &l);
+        let edge = (cap.x as u32 + 2, cap.cy() as u32);
+        let top = (cap.cx() as u32, cap.y as u32 + 1);
+        let (calm_edge, calm_top) = (g.pixel(edge.0, edge.1), g.pixel(top.0, top.1));
+        let redness = |px: u32| ((px >> 16) & 0xff) as i32 - (px & 0xff) as i32;
+        let pushed = State { shake: 6.0, ..calm.clone() };
+        assert!(g.frame(&pushed, &l).redrawn, "the shake is part of what the frame shows");
+        assert_ne!(g.pixel(edge.0, edge.1), calm_edge, "the capsule's left edge moved right");
+        let flashing = State { flash: 1.0, ..calm.clone() };
+        assert!(g.frame(&flashing, &l).redrawn);
+        assert!(redness(g.pixel(top.0, top.1)) > redness(calm_top) + 40, "the capsule's top edge is red");
     }
 
     #[test]

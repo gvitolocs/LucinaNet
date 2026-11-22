@@ -9,7 +9,7 @@
 // serialises the VALUE by the same rules as the top-level value, so a nested function is refused, a getter
 // that throws propagates, and a nested Date or host object reaches the branch it reaches at the top level.
 //
-// The WPT corpus in this checkout (LucinaNet-servo/tests/wpt/tests/html/webappapis/structured-clone/)
+// The WPT corpus (`tests/wpt/tests/html/webappapis/structured-clone/` of a Servo checkout)
 // carries no spec text, so what is asserted is cited by test line where a line exists:
 //   structured-clone-battery-of-tests.js:516-530 'Object with a getter that throws' — the battery compares
 //       the rejection with `promise_rejects_exactly(t, exception, ...)`, i.e. against the identity of the
@@ -720,17 +720,17 @@ fn a_thousand_level_chain_is_skipped_because_the_reader_overflows_the_rust_stack
     // The numbers below are those of the UNCAPPED code, before the clone writer and reader recursed
     // in Rust (mozjs-sys/src/engine/clone.rs, `write_value` / `write_object_props` / `read_value` /
     // `read_object`) with no depth counter and no budget of their own, so a deeply nested chain did not come
-    // back as a refusal: it ran the stack out and the process aborted. Measured in this worktree, in this debug
+    // back as a refusal: it ran the stack out and the process aborted. Measured in this tree, in this debug
     // build, on the thread the test harness runs tests on:
     //   512 levels  write true, read true;
     //   640 levels  write true, then "has overflowed its stack / fatal runtime error: stack overflow,
     //               aborting" and the process dies with signal 6 (SIGABRT) — the READER failed first;
     //   1,024 levels write true;
     //   1,536 levels the WRITE itself overflowed, before it could report anything.
-    // (logs/nested-probe-depths.log, logs/nested-probe-writer.log; the numbers are stack-size dependent,
-    // the shape is not.) clone-depth-cap replaced that abort with a refusal: the walk is bounded by the context's
-    // native stack limit, or by the 128-level fallback where the context has no quota, and reports "The object
-    // is nested too deeply to be cloned." — which is what a 1,000-level chain now gets instead of SIGABRT.
+    // (the numbers are stack-size dependent, the shape is not.) clone-depth-cap replaced that abort with a
+    // refusal: the walk is bounded by the context's native stack limit, or by the 128-level fallback where
+    // the context has no quota, and reports "The object is nested too deeply to be cloned." — which is what
+    // a 1,000-level chain now gets instead of SIGABRT.
     // brimstone_clone_depth.rs pins those refusals and the process surviving them, including the 100,000-level
     // cases; this case stays skipped as the record of what the uncapped code did, and checks only what does not
     // round-trip.
@@ -738,7 +738,7 @@ fn a_thousand_level_chain_is_skipped_because_the_reader_overflows_the_rust_stack
         "SKIPPED (case i, 1,000 levels): the structured clone reader runs out of Rust stack between 513 and \
          640 levels of nested plain objects and aborts the process with signal 6; the writer does the same \
          between 1,025 and 1,536. Round-tripping 1,000 levels here would kill the test binary along with \
-         every other case in this file, so the case is skipped rather than run; see NOTES-clone-nested.md."
+         every other case in this file, so the case is skipped rather than run."
     );
     // The 1,000-level object is buildable and walkable in the engine itself, iteratively, so the crash was
     // never a JavaScript depth the engine cannot reach: it was the clone's own recursion. That much is checked

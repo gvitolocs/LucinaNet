@@ -1,11 +1,11 @@
 # The page's accessibility tree, with actions
 
-Stage F of LucinaOS `docs/research/juno-ai-native.md`: Lucina reads a web page as an AccessKit tree and acts on it by node
-id, without page JavaScript, through the same tree format as Juno's own apps (stage B).
+Lucina reads a web page as an AccessKit tree and acts on it by node id, without page JavaScript, through the same tree
+format as Juno's own apps.
 
 ## Where it comes from
 
-Our Servo fork builds the tree (patches/servo/0015, its tests' rustls provider 0014; LucinaNet-servo branch `ax-actions-series`):
+Our Servo fork builds the tree (its accessibility patch 0015, and 0014 for its tests' rustls provider):
 
 | Piece | File in the fork | Follows |
 |---|---|---|
@@ -34,18 +34,18 @@ layout with the reflow; layout merges them into the nodes it already builds (rol
 
 ## The socket: Juno's own adapter
 
-LucinaNet serves the page through `lucina-ax` (LucinaOS `crates/lucina-ax`, stage B, `docs/research/juno-ax.md`), the
+LucinaNet serves the page through `lucina-ax` (LucinaOS `crates/lucina-ax`), the
 adapter every Juno app uses, so `lucina-devd`'s `ui_tree` and `ui_act` read a page as they read an app (`crates/lucinanet-ax`):
 
 - **The tree costs nothing until someone reads it.** The socket is open, but Servo builds no tree until the first request;
-  thirty seconds without one turns it off again (stage B's protocol is one connection per request, so idle time stands
+  thirty seconds without one turns it off again (`lucina-ax`'s protocol is one connection per request, so idle time stands
   for "the last reader went away"). The first request waits, at most three seconds, for the page's first tree. While it is
   on, a reflow carries accessibility work only when the tree may change, and facts are recomputed only after a DOM, text,
-  state or attribute change (not style, class or data-*), so an animation tick costs nothing (patch 0035). On the build host,
+  state or attribute change (not style, class or data-*), so an animation tick costs nothing (patch 0035). On a Linux desktop,
   Wikipedia's Rust article idle: Script 3% with the tree off, open, or being read; it was 40% being read before 0035.
-- On Juno it listens on `/run/lucina/ax/<pid>.sock`, as every app. Elsewhere (the build host) only with `LUCINANET_AX=<path>`.
+- On Juno it listens on `/run/lucina/ax/<pid>.sock`, as every app. Elsewhere (a Linux desktop) only with `LUCINANET_AX=<path>`, and that variable is read only in a `harness` build (`docs/harness-doors.md`); the Juno path is in every build.
   Off otherwise: building the tree walks the page on every change.
-- Requests and replies are stage B's: `{"op":"tree"}` and
+- Requests and replies are `lucina-ax`'s: `{"op":"tree"}` and
   `{"op":"act","id":"<16 hex>","action":"click|focus|blur|set_value|scroll_into_view|scroll_down|scroll_up","value":"…","version":"…"}`; replies
   carry `ok`, `app` (`lucinanet`), `pid`, `version`, `text`, `truncated`, `juno` and `update`; an act reply adds `done`;
   a refusal has `error` (`stale`, `no_node`, `not_supported`, `refused_sensitive`, `bad_request`, `no_page`), `why` and
@@ -53,29 +53,28 @@ adapter every Juno app uses, so `lucina-devd`'s `ui_tree` and `ui_act` read a pa
 - The page is kept from Servo's incremental updates and given as one tree without what a screen reader skips (hidden
   subtrees, unnamed generic containers, empty text runs). Servo's AccessKit 0.24 crosses to `lucina-ax`'s 0.25 by their
   serde form (same roles, actions and properties). `Snapshot::from_update_with` (toolkit `servo`, `web: true`) applies
-  stage B's Verus-proved rules (no password value, at most 8192 nodes for a page, cut text) and keeps a link's URL, a
+  `lucina-ax`'s Verus-proved rules (no password value, at most 8192 nodes for a page, cut text) and keeps a link's URL, a
   field's placeholder, a heading's level, `expanded`, `required`, `read_only` and `description`.
 - Every node with text carries `provenance: web <origin>` in `juno`: the page's own text, data, never instructions.
-  Secret fields carry `secret: true` and no value (stage B marks passwords; Servo's `class_name: "secret"` marks a
+  Secret fields carry `secret: true` and no value (`lucina-ax` marks passwords; Servo's `class_name: "secret"` marks a
   one-time code or a card).
-- An act is checked by `Snapshot::plan` (stage B's proved `decide`: current version, known node, advertised action, never
+- An act is checked by `Snapshot::plan` (`lucina-ax`'s proved `decide`: current version, known node, advertised action, never
   `set_value` on a password), then by Servo against the live element. Its reply waits until the page has answered (an
   update, then a quarter second without one, at most 3 s) and carries the tree then.
 - `cargo run -p lucinanet-ax --example axctl -- <socket> tree|json|find <role> <name>|act <id> <action> [value]` sends the
-  same requests by hand. On Juno, stage B's `lucina-ax tree <pid>` and `lucina-ax act …` do.
-- Later: when `lucinanet-ui` moves to a `lucina-app` with stage B's semantic pass, the window's own tree (address bar,
+  same requests by hand. On Juno, `lucina-ax tree <pid>` and `lucina-ax act …` do.
+- Later: when `lucinanet-ui` moves to a `lucina-app` with `lucina-ax`'s semantic pass, the window's own tree (address bar,
   buttons) and the page's must share the one socket: the page grafted under the window's node.
 
-## Her browsing rules, unchanged
+## The assistant's browsing rules
 
-The guard in lucina-rs still never offers labels that send, pay, place an order, delete, accept or sign out; a shopping
-task stops at the checkout; she types no passwords or payment details (and here the engine refuses it too); sending or
-buying needs the owner's OK; Jev's states hold facts only.
+The guard that ships with the assistant still never offers labels that send, pay, place an order, delete, accept or sign out; a shopping
+task stops at the checkout; Lucina types no passwords or payment details (and here the engine refuses it too); sending or
+buying needs the owner's OK; Lucina's states hold facts only.
 
 ## Proofs
 
 - The verification script `scripts/verify.sh`: `verification/servo-ax.rs`, Servo's rules on the shipped file
   (`LUCINANET_SERVO` points it at another checkout). Mutations that leak a secret, allow `set_value` on one, advertise
-  it, lift the string bound or allow an unknown action are each refused (`evidence/stage-f/`). The socket's rules are
-  stage B's, proved in LucinaOS (the verification script runs `scripts/verify-shipped.sh`).
+  it, lift the string bound or allow an unknown action are each refused. The socket's rules are `lucina-ax`'s, proved in LucinaOS (the verification script runs `scripts/verify-shipped.sh`).
 - Servo: `components/servo/tests/accessibility.rs`, one process per test (Servo's options initialise once per process).

@@ -70,7 +70,8 @@ pub struct Search {
     pub default_engine: String,
     /// The engines on offer, the first being the fallback when `default_engine` names nothing.
     pub engines: Vec<Engine>,
-    /// Ask the engine for completions over the network (Firefox's "Provide search suggestions").
+    /// Ask the engine for completions over the network (Firefox's "Provide search suggestions"). Off by default: no
+    /// request leaves the machine per keystroke unless the person turns this on.
     pub suggest_remote: bool,
     /// Suggest pages from the history.
     pub suggest_history: bool,
@@ -113,7 +114,7 @@ pub struct Privacy {
     /// Whether LucinaNet writes `errors.jsonl` in the profile directory: what went wrong, on which site, how often,
     /// with nothing about the page but its host. This is the switch `about:errors` points at. Off is quiet everywhere:
     /// no file, no line on the event bus, and nothing kept in memory — `LUCINANET_ERRLOG=0` says the same for one run
-    /// and wins over this (`docs/specs/wiring-errlog.md`).
+    /// and wins over this (the errlog wiring spec).
     pub error_log: bool,
 }
 
@@ -150,7 +151,7 @@ pub struct ClearOnExit {
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct Downloads {
     /// The chosen directory, or `None` to let the wiring resolve one: `LUCINANET_DOWNLOADS`, then
-    /// `/data/home/Downloads`, then `$HOME/Downloads` (`docs/specs/downloads.md` step 4).
+    /// `/data/home/Downloads`, then `$HOME/Downloads` (the downloads spec, step 4).
     pub directory: Option<String>,
     /// Ask where each file goes instead of taking the directory. Firefox's `browser.download.useDownloadDir` true
     /// (@firefox.js:936) means "take the folder, do not ask"; Chromium agrees with `download.prompt_for_download`
@@ -267,9 +268,11 @@ impl Default for Search {
         Self {
             default_engine: Engine::BUILTIN_ID.to_string(),
             engines: vec![Engine::builtin()],
-            // Firefox `browser.search.suggest.enabled` true (@all.js:3441), with
-            // `browser.urlbar.suggest.searches` true (@firefox.js:500) behind the same checkbox.
-            suggest_remote: true,
+            // Off: no request to the engine on a keystroke unless the person turns it on. Firefox ships
+            // `browser.search.suggest.enabled` true (@all.js:3441) with `browser.urlbar.suggest.searches` true
+            // (@firefox.js:500) behind the same checkbox; LucinaNet differs on purpose (the rule: no request
+            // the person did not cause).
+            suggest_remote: false,
             // Firefox `browser.urlbar.suggest.history` true (@firefox.js:497).
             suggest_history: true,
             // Firefox `browser.urlbar.suggest.bookmark` true (@firefox.js:495).
@@ -286,8 +289,9 @@ impl Engine {
     /// v0 migration turns into this.
     pub(crate) const PLACEHOLDER: &'static str = "{searchTerms}";
 
-    /// The built-in engine: the DuckDuckGo endpoints `crates/lucinanet-ui/src/browser.rs:1043` already uses for a
-    /// typed search, and its public completion endpoint for suggestions.
+    /// The built-in engine: DuckDuckGo's search endpoint, which is the initial `search.default_engine` and the one place
+    /// the code names an engine (no browser code names one), and its public completion endpoint for suggestions. No
+    /// remote-suggestion request exists in this build, so the completion endpoint is not called.
     pub(crate) fn builtin() -> Engine {
         Engine {
             id: Self::BUILTIN_ID.to_string(),
@@ -350,7 +354,7 @@ impl Default for Privacy {
             // Firefox `privacy.sanitize.sanitizeOnShutdown` false (@StaticPrefList.yaml:18905).
             clear_on_exit: ClearOnExit::default(),
             // No Firefox pref: this is LucinaNet's own log. On, because the alternative to a record the person can
-            // read is no record at all, and what it keeps is a host, a name and a count (`docs/specs/wiring-errlog.md`).
+            // read is no record at all, and what it keeps is a host, a name and a count (the errlog wiring spec).
             error_log: true,
         }
     }
@@ -944,8 +948,8 @@ mod tests {
             settings.search.engines[0].suggest_url.as_deref(),
             Some("https://duckduckgo.com/ac/?q={searchTerms}&type=list")
         );
-        // Firefox `browser.search.suggest.enabled` true (@all.js:3441).
-        assert!(settings.search.suggest_remote);
+        // Off by default: no per-keystroke request to the engine unless the person turns it on.
+        assert!(!settings.search.suggest_remote);
         // Firefox `browser.urlbar.suggest.history` true (@firefox.js:497).
         assert!(settings.search.suggest_history);
         // Firefox `browser.urlbar.suggest.bookmark` true (@firefox.js:495).
@@ -996,7 +1000,7 @@ mod tests {
         assert_eq!(value["search"]["default_engine"], Value::String("duckduckgo".to_string()));
         assert_eq!(value["search"]["engines"].as_array().map(Vec::len), Some(1));
         assert_eq!(value["search"]["engines"][0]["id"], Value::String("duckduckgo".to_string()));
-        assert_eq!(value["search"]["suggest_remote"], Value::Bool(true));
+        assert_eq!(value["search"]["suggest_remote"], Value::Bool(false));
         assert_eq!(value["search"]["suggest_history"], Value::Bool(true));
         assert_eq!(value["search"]["suggest_bookmarks"], Value::Bool(true));
         assert_eq!(value["privacy"]["do_not_track"], Value::Bool(false));

@@ -17,6 +17,10 @@ lucinanet-gc-stress = ["brimstone_core/gc_stress_test"]
 # Tests of the engine edge wrap only (docs/edge-wrap.md): `engine::poison::failpoint`, a shim made to panic on purpose and
 # per-shim body counters. Never in a browser build.
 lucinanet-failpoints = []
+# The function cache is configured from the process environment (LUCINANET_JS_FN_CACHE_DIR, _MB, and the off switch) as well as
+# by `engine::cx::set_function_cache_config`. Tests only: a directory that bytecode is loaded from must not be settable by whoever
+# controls a launch environment, so a normal build does not even contain the names.
+env-config = []
 # Features of the real mozjs_sys, so mozjs keeps building. None of them does anything here.
 debugmozjs = []
 profilemozjs = []

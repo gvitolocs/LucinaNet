@@ -14,6 +14,7 @@ pub(crate) mod layout_dom;
 pub(crate) mod node;
 pub(crate) mod nodeiterator;
 pub(crate) mod nodelist;
+pub(crate) mod pagetext;
 pub(crate) mod traversal;
 pub(crate) mod treewalker;
 pub(crate) mod virtualmethods;

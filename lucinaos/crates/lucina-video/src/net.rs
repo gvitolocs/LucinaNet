@@ -454,7 +454,7 @@ mod tests {
         assert_eq!(p.pts_us / 100_000, 5);
     }
 
-    /// `tests/fixtures/hls/` is what the server's own ffmpeg arguments write for Juno (`secretary-media-stream` `ffmpeg_args`).
+    /// `tests/fixtures/hls/` is what the server's own ffmpeg arguments write for Juno (`ffmpeg_args`).
     #[test]
     fn reads_what_the_servers_ffmpeg_writes() {
         let dir = format!("{}/tests/fixtures/hls", env!("CARGO_MANIFEST_DIR"));

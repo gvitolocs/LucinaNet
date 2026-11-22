@@ -1,7 +1,7 @@
 # lucinanet-bookmarks: porting record
 
 Pure crate: bookmark tree, own JSON format, Netscape HTML and Firefox places JSON import/export. No UI, no file I/O, no favicons.
-Originals read at the pinned revisions (fetched into `<work-dir>/lucinanet/batch1/src/bm/` on the build host, not in the repo):
+Originals read at the pinned revisions (fetched into a scratch directory outside this repo, not in the repo):
 Firefox `mozilla-firefox/firefox@33abb900fc16` (MPL-2.0, short `@33abb90`), Chromium `chromium/chromium@e9a46735de97` (BSD-3-Clause, short `@e9a4673`).
 All paths below returned 200 at the pinned sha.
 
@@ -32,7 +32,7 @@ The "Netscape bookmark file" format is an informal de-facto format without a lic
 - `set_url` on a non-bookmark returns `InvalidUrl("not a bookmark")`; `set_tags`, `set_keyword` and `rename` on a node of the wrong kind return `Format(..)`. The spec's error enum has no better fit and is kept as written.
 - Importers cap folder nesting at 48 levels (deeper folders are filled into the deepest allowed one), so the recursive writers cannot be driven into a stack overflow by a hostile file. Own-format and places JSON are bounded by serde_json's recursion limit.
 
-## Deviations from the brief or spec (original wins, or a gap in the spec)
+## Deviations from the spec (original wins, or a gap in the spec)
 
 1. `<HR>`: Firefox writes `<HR>` with no line break (`_writeSeparator` never calls `_writeLine`, so the next `<DT>` lands on the same line). We write a newline after it. The file parses identically and stays readable.
 2. Firefox omits an empty Toolbar or Unfiled folder from the HTML export (`if (root.children && root.children.length)`). We follow that; the spec only said "then Toolbar and Other as flagged folders".

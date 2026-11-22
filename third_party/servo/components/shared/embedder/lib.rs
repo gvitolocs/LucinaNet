@@ -1147,6 +1147,63 @@ pub enum JavaScriptEvaluationError {
     SerializationError(JavaScriptEvaluationResultSerializationError),
 }
 
+/// An identifier for a particular page text request, used to track the request from the embedding
+/// layer to the script layer and then back.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+pub struct PageTextId(pub usize);
+
+/// One text node's text inside a [`TextBlock`].
+///
+/// `Debug` prints only the byte length, never the text: page text must not reach a log by
+/// accident (the constellation traces messages with `{:?}`).
+#[derive(Clone, Deserialize, PartialEq, Serialize)]
+pub struct TextRun {
+    /// An id for the text node, unique among the runs of one [`PageText`] and stable for as long
+    /// as the node lives. It is only for the embedder to tell runs apart and to map a run back
+    /// to its node later; it is not an index.
+    pub node: u64,
+    /// The text node's data, as it is in the DOM (whitespace is not collapsed).
+    pub text: String,
+}
+
+impl std::fmt::Debug for TextRun {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "TextRun {{ bytes: {} }}", self.text.len())
+    }
+}
+
+/// The text of one block-level element (a paragraph-like container), as the consecutive inline
+/// text nodes it directly holds, in document order. A search match may continue from one run to
+/// the next but never from one block to the next.
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+pub struct TextBlock {
+    pub runs: Vec<TextRun>,
+}
+
+/// The text of the shown top document, as blocks of runs, for the embedder's find bar. See
+/// `WebView::request_page_text`.
+///
+/// `Debug` prints only counts, never the text.
+#[derive(Clone, Default, Deserialize, PartialEq, Serialize)]
+pub struct PageText {
+    pub blocks: Vec<TextBlock>,
+    /// True when the byte limit stopped the walk: more text exists than `blocks` holds.
+    pub partial: bool,
+}
+
+impl std::fmt::Debug for PageText {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let runs: usize = self.blocks.iter().map(|block| block.runs.len()).sum();
+        write!(
+            f,
+            "PageText {{ blocks: {}, runs: {}, partial: {} }}",
+            self.blocks.len(),
+            runs,
+            self.partial
+        )
+    }
+}
+
 #[repr(i32)]
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum ScreenshotCaptureError {

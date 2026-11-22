@@ -27,8 +27,8 @@ and the PNG path needs no window.
 - **We added the browser around it.** Fifteen crates in `crates/`: the window and input toolkit, the
   address bar, session history and its on-disk store, bookmarks, find-in-page, zoom, permissions,
   settings, a block list, keyboard shortcuts, an error log, the accessibility bridge, the media backend
-  and the binary itself. Twelve of the fifteen are in the binary's build; find-in-page, the block list and
-  permissions are code and tests that nothing calls yet.
+  and the binary itself. Thirteen of the fifteen are in the binary's build (find-in-page is wired into the
+  browser window); the block list and permissions are code and tests that nothing calls yet.
 - **We replaced the media stack.** `<video>`, `<audio>` and WebAudio run on Rust decoders. GStreamer is not
   used; it does not fit a static build. On macOS the sound sink is CoreAudio, and the media checks run with
   that sink disabled. The Linux build ships without a sound output; the ALSA one is planned for v0.1.1.
@@ -167,10 +167,18 @@ and is the profile CI builds with and the scripts in `scripts/` use.
 
 ```sh
 target/release/lucinanet-servo --desktop https://example.com
-target/release/lucinanet-servo --render https://example.com out.png 1280x800
 ```
 
-`--render` loads one page and writes a PNG; it opens no window.
+`--render` (load one page and write a PNG, with no window) is not in this build: a normal build refuses it as
+an unknown option. It exists only in the test and measurement build, which carries the cargo feature
+`harness` and is never shipped (`docs/harness-doors.md`). Build and run that one with
+`tools/build-harness.sh --run`, which prints the command and the path of the binary, then:
+
+```sh
+tools/build-harness.sh --run
+<printed binary path> --render https://example.com out.png 1280x800
+```
+
 Build time on an 8-core x86_64 machine with 32 GiB of RAM: not measured yet. Disk under `target/`:
 not measured yet.
 
@@ -184,10 +192,10 @@ on, what we changed and its licence, so any directory can be diffed against its 
 `rust-toolchain.toml` pins the compiler to 1.99.1.
 
 `.github/workflows/ci.yml` is the CI: it runs on every push to main and on every pull request, and one
-aggregate check passes only when every job did. The jobs are the rustfmt and clippy ratchets against a
-baseline, a build of the browser in the probe profile and `cargo test` of our crates on Ubuntu and on macOS
-arm64, a `--render` of a local page checked against a blank one, three media pages whose trace is checked
-against the player invariants, the out-of-memory pages, the crates that stand outside the browser, and one
+aggregate check passes only when every job did. The jobs are the rustfmt ratchet against a
+baseline (the clippy ratchet starts when its baseline exists), a build of the browser in the probe profile and `cargo test` of our crates on Ubuntu and on macOS
+arm64, a `--render` of a local page checked against a blank one, three media pages that print their own PASS line
+(the media trace checker runs only on its own tests), the out-of-memory pages, the crates that stand outside the browser, and one
 Verus proof unit per runner. Two further workflows try a Windows and an Android build on the triggers named
 under "Planned" and let them fail, so the job summary lists their blockers. The workflow files are written;
 no run of theirs is recorded on a public runner, and the first green run has no date. The acceptance README,
@@ -242,8 +250,8 @@ Does not work:
 - **No H.265.** It decodes only on a hardware video block, and neither build uses one.
 - **No VP8 video and no Opus audio yet.**
 - **No Windows or Android build**, and no extension API, syncing or autofill.
-- **No find-in-page, block list or permission prompts in the browser.** The three crates are written and
-  tested; nothing calls them yet.
+- **No block list or permission prompts in the browser.** The two crates are written and tested; nothing
+  calls them yet. Find-in-page works: `lucinanet-ui` calls `lucinanet-find`.
 - **The JS engine is experimental.** Web content is untrusted input.
 
 Open defects:

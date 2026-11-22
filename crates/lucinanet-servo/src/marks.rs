@@ -1,5 +1,5 @@
 //! The bookmarks the engine keeps: `lucinanet-bookmarks`' tree over the profile's `bookmarks.json`
-//! (docs/specs/wiring-bookmarks.md). Nothing here touches Servo, so the glue is tested on its own; the engine asks
+//! (the bookmarks wiring spec). Nothing here touches Servo, so the glue is tested on its own; the engine asks
 //! [`Marks`] to toggle the shown page's bookmark, whether an address is bookmarked, and for the bookmarks the address bar
 //! may suggest. Saving is `persist::Saver`, the same as the history's.
 
@@ -161,6 +161,27 @@ impl Marks {
     /// (the widest the ranker narrows from), best first, at most [`CANDIDATES`].
     pub fn candidates(&self, text: &str) -> Vec<BookmarkEntry> {
         entries_for(&self.bm, text, CANDIDATES)
+    }
+
+    /// The bookmarks for the panel, the last added first, at most `limit` and never more than
+    /// [`lucinanet_ui::BOOKMARK_LIST_MAX`].
+    pub fn recent(&self, limit: usize) -> Vec<BookmarkEntry> {
+        let mut found: Vec<(&lucinanet_bookmarks::Node, &str)> = self
+            .bm
+            .walk()
+            .into_iter()
+            .filter_map(|(_, node)| match &node.kind {
+                Kind::Bookmark { url } => Some((node, url.as_str())),
+                _ => None,
+            })
+            .collect();
+        // Newest first by the time added, the later id first among equals (ids are never reused, so they follow insertion).
+        found.sort_by(|a, b| b.0.added_us.cmp(&a.0.added_us).then(b.0.id.cmp(&a.0.id)));
+        found
+            .into_iter()
+            .take(limit.min(lucinanet_ui::BOOKMARK_LIST_MAX))
+            .map(|(node, url)| BookmarkEntry { url: url.to_owned(), title: node.title.clone(), folder_path: folder_path(&self.bm, node.parent) })
+            .collect()
     }
 
     pub fn bookmark_count(&self) -> usize {
@@ -538,5 +559,42 @@ mod tests {
         assert_eq!(found.len(), 10);
         assert_eq!(found[0].folder_path, "Bookmarks Toolbar/Work/Docs");
         assert!(entries_for(&bm, "page", 0).is_empty());
+    }
+
+    #[test]
+    fn the_panel_lists_the_last_added_first_and_capped() {
+        let mut m = Marks::in_memory();
+        assert!(m.recent(10).is_empty(), "an empty store lists nothing");
+        assert_eq!(m.toggle(&url("https://example.com/old"), "Old", 1_000), Toggled::Added);
+        assert_eq!(m.toggle(&url("https://example.org/mid"), "", 2_000), Toggled::Added);
+        assert_eq!(m.toggle(&url("https://example.net/new"), "New", 3_000), Toggled::Added);
+        let urls: Vec<String> = m.recent(10).into_iter().map(|e| e.url).collect();
+        assert_eq!(urls, ["https://example.net/new", "https://example.org/mid", "https://example.com/old"]);
+        let first = &m.recent(1)[0];
+        assert_eq!((first.title.as_str(), first.folder_path.as_str()), ("New", "Other Bookmarks"));
+        assert_eq!(m.recent(2).len(), 2, "the limit is honoured");
+        assert!(m.recent(0).is_empty());
+
+        // Bookmarks added at the same instant: the later one first. Folders and separators are not listed, and a bookmark in
+        // another folder is.
+        let mut bm = Bookmarks::new();
+        let work = bm.add_folder(lucinanet_bookmarks::TOOLBAR, None, "Work", 5).unwrap();
+        bm.add_separator(work, None, 5).unwrap();
+        bm.add_bookmark(work, None, "one", "https://example.com/1", 7).unwrap();
+        bm.add_bookmark(OTHER, None, "two", "https://example.com/2", 7).unwrap();
+        let mut m = Marks::in_memory();
+        m.bm = bm;
+        let titles: Vec<String> = m.recent(10).into_iter().map(|e| e.title).collect();
+        assert_eq!(titles, ["two", "one"], "ties go to the later one; nothing but bookmarks");
+
+        // The cap is the protocol's, whatever the caller asks.
+        let mut big = Bookmarks::new();
+        for i in 0..(lucinanet_ui::BOOKMARK_LIST_MAX as i64 + 50) {
+            big.add_bookmark(OTHER, None, "p", &format!("https://example.com/{i}"), 1_000 + i).unwrap();
+        }
+        m.bm = big;
+        let all = m.recent(usize::MAX);
+        assert_eq!(all.len(), lucinanet_ui::BOOKMARK_LIST_MAX, "never more than the cap");
+        assert_eq!(all[0].url, format!("https://example.com/{}", lucinanet_ui::BOOKMARK_LIST_MAX + 49), "the newest first");
     }
 }

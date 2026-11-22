@@ -44,6 +44,10 @@ pub enum CounterStyle {
 /// wrapped.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct State {
+    /// Which search this is the answer of, from [`Finder::epoch`]. It rises with every [`Finder::search`] and
+    /// [`Finder::refresh`], so the bar can tell a state of its own current find from one a search it has run
+    /// since then left behind -- see [`Finder::is_current`].
+    pub epoch: u64,
     /// Index into the match list, so `None` with `total > 0` means nothing is selected yet. The counter shows
     /// this one-based, as both browsers do.
     pub current: Option<usize>,
@@ -74,6 +78,9 @@ pub struct Finder {
     current: Option<usize>,
     truncated: bool,
     wrapped: Option<Wrapped>,
+    /// Counted up by [`Finder::search`] and [`Finder::refresh`], and stamped on the [`State`] each returns.
+    /// A counter the finder owns, not a clock: nothing here reads the time.
+    epoch: u64,
 }
 
 impl Finder {
@@ -91,7 +98,10 @@ impl Finder {
     /// the same thing from the other side -- the engine searches from the existing selection
     /// (`Finder.sys.mjs`:211-216, `fastFind` always uses `FIND_INITIAL`) -- but it does not restart the count,
     /// so a retype can move the selection; here the caller says where it was.
+    ///
+    /// Every call, the clearing blank one included, stamps its answer with a new epoch ([`Finder::epoch`]).
     pub fn search(&mut self, blocks: &[Block], query: &str, options: Options, from: Option<(usize, Pos)>) -> State {
+        self.epoch += 1;
         self.query = query.to_string();
         self.options = options;
         if query.trim().is_empty() {
@@ -122,11 +132,27 @@ impl Finder {
     /// The current state, without changing it.
     pub fn state(&self) -> State {
         State {
+            epoch: self.epoch,
             current: self.current,
             total: self.matches.len(),
             truncated: self.truncated,
             wrapped: self.wrapped,
         }
+    }
+
+    /// The epoch of the last search: stamp a request to the page with it, and drop the answer if it has moved
+    /// on by the time the answer lands ([`Finder::is_current`]). `next` and `previous` never move it; only
+    /// [`Finder::search`] and [`Finder::refresh`] do, and each of them by one.
+    pub fn epoch(&self) -> u64 {
+        self.epoch
+    }
+
+    /// Whether `state` is the answer of the search the finder is on now, which is the question the bar asks
+    /// before it paints. A state from an earlier epoch came from before a later `search` or `refresh` -- the
+    /// query changed, or the page changed underneath the bar -- so its match ranges point at text the finder no
+    /// longer holds and applying it would highlight where nothing matches.
+    pub fn is_current(&self, state: &State) -> bool {
+        state.epoch == self.epoch
     }
 
     /// The range to select and scroll to, or `None` when nothing is current.
@@ -147,7 +173,11 @@ impl Finder {
     /// is not a step. Firefox has no equivalent -- it re-runs the search and lets the engine's selection fall
     /// where it falls (`Finder.sys.mjs`:254-263, `findAgain` searches on from the current selection) -- so rule
     /// 9 is ours, see PORTING.md.
+    ///
+    /// Every call stamps its answer with a new epoch, blank query included, so [`Finder::is_current`] rejects
+    /// what the search or refresh before it returned.
     pub fn refresh(&mut self, blocks: &[Block]) -> State {
+        self.epoch += 1;
         let from = self.current_match().map(|m| (m.block, m.start));
         if self.query.trim().is_empty() {
             self.clear();
@@ -247,7 +277,7 @@ impl Finder {
 /// - otherwise *3 of 12 matches*, and *1 of 1 match* when there is one match: the plural is chosen by the
 ///   `total`, not by the current index (`findbar.ftl`:60-65). The index is shown one-based, as Firefox counts
 ///   it (`Finder.sys.mjs`:674-691, `++result.current` over the matches up to the selected one).
-/// - a step that wrapped adds its message after the counter, separated by one space. The brief said "instead
+/// - a step that wrapped adds its message after the counter, separated by one space. The spec said "instead
 ///   of", but the findbar has two elements for this and shows both at once: the message goes in
 ///   `find-status` (`findbar.js`:59, set at :1105-1106) and the counter stays in `found-matches` (:57, set at
 ///   :1338-1339), and only *Phrase not found* hides the counter (:1088). `find-status` follows `found-matches`
@@ -310,7 +340,7 @@ mod tests {
             runs: runs
                 .iter()
                 .enumerate()
-                .map(|(i, text)| crate::search::Run { node: i as u32, text: (*text).to_string() })
+                .map(|(i, text)| crate::search::Run { node: i as u64, text: (*text).to_string() })
                 .collect(),
         }
     }
@@ -371,7 +401,7 @@ mod tests {
         let mut f = Finder::new();
         f.search(&[block(&["cat"])], "dog", NO_OPTIONS, None);
         let before = f.state();
-        assert_eq!(before, State { current: None, total: 0, truncated: false, wrapped: None });
+        assert_eq!(before, State { epoch: 1, current: None, total: 0, truncated: false, wrapped: None });
         assert_eq!(f.next(), before);
         assert_eq!(f.previous(), before);
         assert!(f.matches().is_empty());
@@ -451,7 +481,8 @@ mod tests {
     fn refresh_when_query_vanishes_clears_current() {
         let mut f = three();
         f.refresh(&[block(&["dogs dogs dogs"])]);
-        assert_eq!(f.state(), State { current: None, total: 0, truncated: false, wrapped: None });
+        // Epoch 2: the search `three()` ran, then this refresh.
+        assert_eq!(f.state(), State { epoch: 2, current: None, total: 0, truncated: false, wrapped: None });
         assert!(f.matches().is_empty());
         assert_eq!(f.counter_text(CounterStyle::Firefox), NOT_FOUND);
     }
@@ -459,7 +490,7 @@ mod tests {
     #[test]
     fn counter_text_firefox_cases() {
         let state = |current: Option<usize>, total: usize, truncated: bool, wrapped: Option<Wrapped>| {
-            State { current, total, truncated, wrapped }
+            State { epoch: 0, current, total, truncated, wrapped }
         };
         let firefox = |s: State, empty: bool| counter_text(&s, empty, CounterStyle::Firefox);
 
@@ -493,20 +524,111 @@ mod tests {
 
     #[test]
     fn counter_text_chromium_cases() {
-        let firefox_only = State { current: Some(999), total: MATCH_LIMIT, truncated: true, wrapped: None };
-        assert_eq!(counter_text(&State { current: Some(2), total: 12, truncated: false, wrapped: None }, false, CounterStyle::Chromium), "3/12");
+        // The stamp is not part of the wording, so every case here is epoch 0.
+        let firefox_only = State { epoch: 0, current: Some(999), total: MATCH_LIMIT, truncated: true, wrapped: None };
+        assert_eq!(counter_text(&State { epoch: 0, current: Some(2), total: 12, truncated: false, wrapped: None }, false, CounterStyle::Chromium), "3/12");
         // The limit is not shown, and the wrap message never is: `find_in_page` reports the ordinal and the
         // total and nothing else.
         assert_eq!(counter_text(&firefox_only, false, CounterStyle::Chromium), "1000/1000");
         assert_eq!(
-            counter_text(&State { current: Some(0), total: 1, truncated: false, wrapped: Some(Wrapped::ToTop) }, false, CounterStyle::Chromium),
+            counter_text(&State { epoch: 0, current: Some(0), total: 1, truncated: false, wrapped: Some(Wrapped::ToTop) }, false, CounterStyle::Chromium),
             "1/1"
         );
         // No matches, and an empty query.
-        assert_eq!(counter_text(&State { current: None, total: 0, truncated: false, wrapped: None }, false, CounterStyle::Chromium), "0/0");
-        assert_eq!(counter_text(&State { current: None, total: 0, truncated: false, wrapped: None }, true, CounterStyle::Chromium), "0/0");
+        assert_eq!(counter_text(&State { epoch: 0, current: None, total: 0, truncated: false, wrapped: None }, false, CounterStyle::Chromium), "0/0");
+        assert_eq!(counter_text(&State { epoch: 0, current: None, total: 0, truncated: false, wrapped: None }, true, CounterStyle::Chromium), "0/0");
         // Matches but none selected yet, which is ordinal 0 in Chromium too (`text_finder.cc`:793).
-        assert_eq!(counter_text(&State { current: None, total: 5, truncated: false, wrapped: None }, false, CounterStyle::Chromium), "0/5");
+        assert_eq!(counter_text(&State { epoch: 0, current: None, total: 5, truncated: false, wrapped: None }, false, CounterStyle::Chromium), "0/5");
+    }
+
+    /// Every search stamps its answer with a higher epoch than the one before it, and only a search does: a step
+    /// moves inside the list a search produced, so it keeps that search's epoch.
+    #[test]
+    fn search_then_refresh_advances_the_epoch() {
+        let blocks = [block(&["cat cat cat"])];
+        let mut f = Finder::new();
+        assert_eq!(f.epoch(), 0, "a finder that has never searched");
+        let first = f.search(&blocks, "cat", NO_OPTIONS, None);
+        assert_eq!(first.epoch, 1);
+        assert_eq!(f.epoch(), first.epoch);
+        assert_eq!(f.state().epoch, first.epoch);
+        // Steps are not searches.
+        assert_eq!(f.next().epoch, first.epoch);
+        assert_eq!(f.previous().epoch, first.epoch);
+        // The same query over the same page is still a search, and the epoch rises even though the matches do
+        // not change: the stamp says which run produced the answer, not what the answer holds.
+        let again = f.search(&blocks, "cat", NO_OPTIONS, None);
+        assert_eq!(again.epoch, first.epoch + 1);
+        let refreshed = f.refresh(&blocks);
+        assert_eq!(refreshed.epoch, again.epoch + 1);
+        assert!(f.is_current(&refreshed));
+        // A blank query clears the search, and that answer is stamped too: the bar has to be able to tell a
+        // cleared search from a reply about the page it cleared.
+        let cleared = f.search(&blocks, "  ", NO_OPTIONS, None);
+        assert_eq!(cleared.epoch, refreshed.epoch + 1);
+        assert_eq!((cleared.total, cleared.current), (0, None));
+        // Strictly increasing over a long run of both entry points, one per call and no repeats.
+        let mut seen = vec![cleared.epoch];
+        for i in 0..5 {
+            let state = if i % 2 == 0 { f.search(&blocks, "cat", NO_OPTIONS, None) } else { f.refresh(&blocks) };
+            seen.push(state.epoch);
+        }
+        assert!(seen.windows(2).all(|w| w[1] == w[0] + 1), "{seen:?}");
+    }
+
+    /// The consumer's question, asked of the finder: is this answer still about the find the bar is on?
+    #[test]
+    fn a_state_from_an_old_epoch_is_rejected() {
+        let mut f = three();
+        let held = f.state();
+        assert!(f.is_current(&held), "the answer of the search that is still current");
+        // The page changes under the bar: a refresh re-derives the matches, so the ranges `held` points at are
+        // the old page's.
+        let after_refresh = f.refresh(&[block(&["cat dog cat"])]);
+        assert!(!f.is_current(&held), "a state from before the refresh");
+        assert!(f.is_current(&after_refresh));
+        // A new search invalidates an answer the same way.
+        let before_search = f.state();
+        let after_search = f.search(&[block(&["cat cat"])], "cat", NO_OPTIONS, None);
+        assert!(!f.is_current(&before_search));
+        assert!(f.is_current(&after_search));
+        // A step reports the current search's state, so it is never stale by itself.
+        let stepped = f.next();
+        assert!(f.is_current(&stepped));
+    }
+
+    /// The epoch stamp does not disturb the limit: a truncated search still counts to `MATCH_LIMIT`, says
+    /// *More than*, and is current until the next search.
+    #[test]
+    fn truncation_is_still_reported_with_the_epoch_stamp() {
+        let text = format!("{}cat", "cat ".repeat(MATCH_LIMIT));
+        let blocks = [block(&[text.as_str()])];
+        let mut f = Finder::new();
+        let state = f.search(&blocks, "cat", NO_OPTIONS, None);
+        assert!(state.truncated);
+        assert_eq!(state.total, MATCH_LIMIT);
+        assert_eq!(f.counter_text(CounterStyle::Firefox), "More than 1000 matches");
+        assert!(f.is_current(&state));
+        // And the same page refreshed under the bar: new stamp, same *More than*.
+        let refreshed = f.refresh(&blocks);
+        assert!(refreshed.truncated);
+        assert_eq!(refreshed.total, MATCH_LIMIT);
+        assert_eq!(refreshed.epoch, state.epoch + 1);
+        assert_eq!(f.counter_text(CounterStyle::Firefox), "More than 1000 matches");
+        assert!(f.is_current(&refreshed));
+        assert!(!f.is_current(&state));
+    }
+
+    /// The stamp is for the caller, not for the bar's wording: the counter reads the four visible fields and
+    /// nothing else.
+    #[test]
+    fn the_stamp_does_not_reach_the_counter() {
+        let mut f = three();
+        let plain = f.state();
+        let stamped = State { epoch: 9_999, ..plain.clone() };
+        for style in [CounterStyle::Firefox, CounterStyle::Chromium] {
+            assert_eq!(counter_text(&plain, false, style), counter_text(&stamped, false, style));
+        }
     }
 
     /// A blank query clears the search rather than searching for whitespace (rule 5), and the counter goes
@@ -515,9 +637,14 @@ mod tests {
     fn blank_query_clears_everything() {
         let mut f = three();
         f.next();
-        for query in ["", "  ", "\u{a0}"] {
+        for (i, query) in ["", "  ", "\u{a0}"].into_iter().enumerate() {
             let state = f.search(&[block(&["cat cat cat"])], query, NO_OPTIONS, None);
-            assert_eq!(state, State { current: None, total: 0, truncated: false, wrapped: None }, "{query:?}");
+            // Epoch 1 is the search `three()` ran; each blank search is stamped like any other.
+            assert_eq!(
+                state,
+                State { epoch: 2 + i as u64, current: None, total: 0, truncated: false, wrapped: None },
+                "{query:?}"
+            );
             assert!(f.matches().is_empty());
             assert_eq!(f.counter_text(CounterStyle::Firefox), "");
             assert_eq!(f.counter_text(CounterStyle::Chromium), "0/0");

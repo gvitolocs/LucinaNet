@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The scroll benchmark for one built LucinaNet binary, offscreen: frame times of a page being scrolled, and
-# where the time of each frame went. docs/specs/scroll-bench.md says what the columns mean and what the run
-# answers.
+# where the time of each frame went. `tools/scroll-bench-tables` turns those runs into the findings
+# tables, and its README says what each column means and what the run answers.
 #
 #   scripts/scroll-bench.sh target/probe/lucinanet-servo
 #   scripts/scroll-bench.sh ~/bin/lucinanet-servo --scales 2,1 --runs 3 --out /tmp/sb

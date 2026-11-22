@@ -26,6 +26,8 @@ use crate::{
 const FIELD: &str = "address";
 const PAGE: &str = "page";
 const PROMPT: &str = "prompt";
+/// The find bar's field.
+const FIND: &str = "find";
 
 /// How long a note stays in the strip.
 const NOTE_FOR: std::time::Duration = std::time::Duration::from_secs(4);
@@ -49,6 +51,18 @@ const DOWNLOAD_SHOWN: Duration = Duration::from_secs(10);
 /// Rows in the downloads strip, newest at the bottom; more would hide too much of the page.
 const DOWNLOAD_ROWS: usize = 3;
 const DOWNLOAD_ROW_PX: f32 = 40.0;
+/// What the panel says when the command opens it with nothing downloaded and nothing running.
+const NO_DOWNLOADS: &str = "No downloads";
+/// Rows of the history panel in view at once; the selection scrolls the list when it leaves them.
+const HISTORY_ROWS: usize = 8;
+/// What the history panel says when the store has nothing to list.
+const NO_HISTORY: &str = "No history";
+/// What the bookmarks panel says when the store has nothing to list.
+const NO_BOOKMARKS: &str = "No bookmarks";
+/// The find strip's height in reference pixels, at the top of the page.
+const FIND_STRIP_PX: f32 = 44.0;
+/// What the counter says after the count when the engine's byte limit cut the page's text short.
+const PARTIAL: &str = " (partial)";
 
 pub enum Msg {
     News(News),
@@ -86,13 +100,55 @@ pub struct Browser {
     /// A press closed a `<select>`'s list: its release is not the page's either.
     swallow_up: bool,
     note: Option<(String, std::time::Instant)>,
+    /// When Enter on the bar was last refused: the field shakes and flashes for [`address::SHAKE_FOR`] after it.
+    refused_at: Option<Instant>,
     downloads: Vec<DownloadRow>,
+    /// Whether the downloads panel is put up by the command rather than by a download of its own: the
+    /// `downloads_open` the keymap resolves Esc against, and the reason a strip is drawn over the page with nothing
+    /// in it but the note that says so.
+    downloads_open: bool,
+    /// Whether the history panel is up (Ctrl+H): never together with the downloads panel.
+    history_open: bool,
+    /// The pages the engine last listed for the panel, newest first, and the row Enter would open.
+    history: Vec<lucinanet_omnibox::HistoryEntry>,
+    history_sel: usize,
+    /// The engine has answered the last request, so an empty list is an empty store and not a list still on its way.
+    history_ready: bool,
+    /// The id of the list asked for last; an answer with another id is an old one.
+    history_ask: u64,
+    /// The bookmarks panel (Ctrl+Shift+O, Ctrl+B): the same state as the history panel's, over the bookmarks list.
+    bookmarks_open: bool,
+    bookmarks: Vec<lucinanet_omnibox::BookmarkEntry>,
+    bookmarks_sel: usize,
+    bookmarks_ready: bool,
+    bookmarks_ask: u64,
     /// Where the downloads strip is drawn over the page this pass; the page gets no input there.
     strip: Option<Rect>,
     /// The shown tab's zoom in whole percent, as the engine last told it; 100 draws nothing.
     zoom: u16,
     /// Whether the shown tab's page is bookmarked, as the engine last told it; the star is filled when it is.
     bookmarked: bool,
+    /// Whether the find bar is up: the `find_bar_open` the keymap resolves its find keys against.
+    find_open: bool,
+    /// What the find bar's field holds.
+    find_text: TextEdit,
+    /// The page's text, held here and nowhere else: taken for the open bar, replaced on each request, dropped
+    /// when the bar closes, the page changes, the tab changes or the page crashes.
+    find_blocks: Vec<lucinanet_find::Block>,
+    /// The engine's byte limit cut the text short.
+    find_partial: bool,
+    /// The id of the page text asked for last; an answer with another id is an old one.
+    find_ask: u64,
+    /// A request is out and not answered.
+    find_pending: bool,
+    /// The last request was answered, so the blocks (possibly none) are the page's text and typing searches them.
+    find_ready: bool,
+    /// The matches over `find_blocks` and the current one.
+    finder: lucinanet_find::Finder,
+    /// The address of the shown page, as the engine last told it: another address is another page.
+    page_url: String,
+    /// Where the find strip is drawn this pass; the page gets no input there.
+    find_rect: Option<Rect>,
     /// The address bar's suggestions and the engine it searches with (`address.rs`).
     omni: Omnibox,
     /// Where the dropdown was drawn this pass; a press there picks a row and the page gets nothing.
@@ -161,7 +217,98 @@ fn shown_downloads(rows: &mut Vec<DownloadRow>, now: Instant) -> Option<Instant>
     rows.iter().filter_map(|row| row.ended).min().map(|ended| ended + DOWNLOAD_SHOWN)
 }
 
+/// The rows the panel draws: the last [`DOWNLOAD_ROWS`], newest at the bottom. The one place that decides which of
+/// the chrome's rows reach the page, so a test can read the same slice the draw loops over.
+fn shown_rows(rows: &[DownloadRow]) -> &[DownloadRow] {
+    &rows[rows.len().saturating_sub(DOWNLOAD_ROWS)..]
+}
+
+/// The line an empty panel says, if this one is empty: the command opens the panel on demand, and a bare band over
+/// the page would read as a draw that failed rather than as nothing to show.
+fn panel_note(rows: &[DownloadRow]) -> Option<&'static str> {
+    rows.is_empty().then_some(NO_DOWNLOADS)
+}
+
+/// The rows of the history panel in view: `rows` of the `len` listed, the window that keeps `selected` in sight and
+/// moves no further than it has to.
+fn history_window(len: usize, selected: usize, rows: usize) -> std::ops::Range<usize> {
+    let end = len.min(selected.saturating_add(1).max(rows));
+    end.saturating_sub(rows)..end
+}
+
+/// The line an empty history panel says, if this one is empty.
+fn history_note(entries: &[lucinanet_omnibox::HistoryEntry]) -> Option<&'static str> {
+    entries.is_empty().then_some(NO_HISTORY)
+}
+
+/// What a history row says: the title (the address when the page has none) and the host, dimmed beside it.
+fn history_row(entry: &lucinanet_omnibox::HistoryEntry) -> (String, String) {
+    let host = Url::parse(&entry.url).ok().and_then(|url| url.host_str().map(str::to_owned)).unwrap_or_default();
+    let title = if entry.title.trim().is_empty() { entry.url.clone() } else { entry.title.clone() };
+    (title, host)
+}
+
+/// The line an empty bookmarks panel says, if this one is empty.
+fn bookmark_note(entries: &[lucinanet_omnibox::BookmarkEntry]) -> Option<&'static str> {
+    entries.is_empty().then_some(NO_BOOKMARKS)
+}
+
+/// What a bookmarks row says: the title (the address when it has none) and the host, dimmed beside it.
+fn bookmark_row(entry: &lucinanet_omnibox::BookmarkEntry) -> (String, String) {
+    let host = Url::parse(&entry.url).ok().and_then(|url| url.host_str().map(str::to_owned)).unwrap_or_default();
+    let title = if entry.title.trim().is_empty() { entry.url.clone() } else { entry.title.clone() };
+    (title, host)
+}
+
 impl Browser {
+    /// What the find bar's counter says: the finder's words (Firefox's, the profile the keymap follows), the wrap message
+    /// after the count, and "(partial)" when the engine cut the text. Empty with no query or no text held.
+    fn find_counter(&self) -> String {
+        let mut text = self.finder.counter_text(lucinanet_find::CounterStyle::Firefox);
+        if self.find_partial && !text.is_empty() {
+            text.push_str(PARTIAL);
+        }
+        text
+    }
+
+    /// Let go of the page's text and everything found in it: the blocks, the matches, and any request still out (its answer
+    /// is an old one from now on). The text is held nowhere else, so this is the whole of it.
+    fn drop_find_text(&mut self) {
+        self.find_blocks = Vec::new();
+        self.find_partial = false;
+        self.find_pending = false;
+        self.find_ready = false;
+        self.finder = lucinanet_find::Finder::new();
+        self.find_ask += 1;
+    }
+
+    /// Ask the engine for the shown page's text, dropping what the last request brought: one text at a time.
+    fn find_request(&mut self) {
+        self.drop_find_text();
+        self.find_pending = true;
+        self.send(Cmd::PageText { id: self.find_ask });
+    }
+
+    /// Run the typed query over the blocks, from where the current match starts so a longer query stays put.
+    fn find_search(&mut self) {
+        let from = self.finder.current_match().map(|m| (m.block, m.start));
+        self.finder.search(&self.find_blocks, &self.find_text.text, lucinanet_find::Options::default(), from);
+    }
+
+    /// Enter, Shift+Enter, F3 and Shift+F3: one match on, or back. With no bar up there is nothing to move through.
+    fn find_step(&mut self, forward: bool) {
+        if self.find_open && self.find_ready {
+            if forward { self.finder.next() } else { self.finder.previous() };
+        }
+    }
+
+    /// The bar goes down and takes the page's text with it.
+    fn close_find(&mut self) {
+        self.find_open = false;
+        self.find_rect = None;
+        self.drop_find_text();
+    }
+
     pub fn new(tx: Sender<Msg>, first: Url, start: Start) -> Browser {
         Browser::with_news(Arc::new(move |news| tx.send(Msg::News(news))), first, start)
     }
@@ -172,8 +319,14 @@ impl Browser {
 
     /// As [`with_news`](Self::with_news) with the chrome settings given (they are read from the environment once, by it).
     pub fn with_chrome(tell: Arc<dyn Fn(News) + Send + Sync>, first: Url, start: Start, chrome: chrome::Settings) -> Browser {
-        let mut address = TextEdit::new().placeholder("Search or enter an address");
-        address.set(first.as_str());
+        let omni = Omnibox::default();
+        // The hint an empty field shows is what the engines allow (`address::placeholder_for`); it is read again every
+        // pass below, because the omnibox's engines are what a settings reload hands over.
+        let mut address = TextEdit::new().placeholder(address::placeholder_for(&omni.engines));
+        // The blank start page shows an empty field and the placeholder, not "about:blank".
+        if first.as_str() != "about:blank" {
+            address.set(first.as_str());
+        }
         Browser {
             tell,
             first,
@@ -198,11 +351,33 @@ impl Browser {
             control: None,
             swallow_up: false,
             note: None,
+            refused_at: None,
             downloads: Vec::new(),
+            downloads_open: false,
+            history_open: false,
+            history: Vec::new(),
+            history_sel: 0,
+            history_ready: false,
+            history_ask: 0,
+            bookmarks_open: false,
+            bookmarks: Vec::new(),
+            bookmarks_sel: 0,
+            bookmarks_ready: false,
+            bookmarks_ask: 0,
             strip: None,
             zoom: lucinanet_zoom::DEFAULT,
             bookmarked: false,
-            omni: Omnibox::default(),
+            find_open: false,
+            find_text: TextEdit::new(),
+            find_blocks: Vec::new(),
+            find_partial: false,
+            find_ask: 0,
+            find_pending: false,
+            find_ready: false,
+            finder: lucinanet_find::Finder::new(),
+            page_url: String::new(),
+            find_rect: None,
+            omni,
             omni_at: None,
             deleting: false,
             chrome,
@@ -240,6 +415,22 @@ impl Browser {
 
     fn note(&mut self, text: String) {
         self.note = Some((text, std::time::Instant::now()));
+    }
+
+    /// The bar refused to act on what was typed: nothing is loaded or sent; it says why, and the field shakes.
+    fn refuse(&mut self, why: &str) {
+        self.omni.close();
+        self.note(why.to_owned());
+        self.refused_at = Some(Instant::now());
+    }
+
+    /// The field's sideways push (points) and red flash (0 to 1) at `now`: a pure function of the time since the last
+    /// refusal, `(0.0, 0.0)` when there was none or it is over.
+    fn shake_at(&self, now: Instant) -> (f32, f32) {
+        self.refused_at.map_or((0.0, 0.0), |at| {
+            let elapsed = now.saturating_duration_since(at);
+            (address::shake_offset(elapsed), address::shake_flash(elapsed))
+        })
     }
 
     fn new_tab(&mut self) {
@@ -289,8 +480,8 @@ impl Browser {
     /// the rest goes on to the page or the field.
     fn shortcuts(&mut self, ui: &mut Ui) {
         let Some(Input::Key(press)) = ui.input() else { return };
-        let Some(command) = keymap::command(press, self.loading, ui.is_focused(FIELD)) else { return };
-        let action = keymap::plan(command, &self.tabs, self.active, self.back, self.forward);
+        let Some(command) = keymap::command(press, self.loading, self.find_open, ui.is_focused(FIELD), self.downloads_open || self.history_open || self.bookmarks_open) else { return };
+        let action = keymap::plan(command, self.find_open, self.downloads_open || self.history_open || self.bookmarks_open, &self.tabs, self.active, self.back, self.forward);
         if action == Action::PassToPage {
             return;
         }
@@ -315,9 +506,88 @@ impl Browser {
             Action::Reload => self.send(Cmd::Reload),
             Action::Zoom(step) => self.send(Cmd::Zoom(step)),
             Action::ToggleBookmark => self.send(Cmd::ToggleBookmark),
+            // The bar's own state, and the only thing this pass can do for it: up on Ctrl+F, down when Esc was the
+            // bar's key rather than the load's. The repeat has nothing to move through while there is no bar.
+            // The bar up asks the engine for the page's text, as often as the key is pressed (the text of a page changes), and
+            // the field has the keys; down, the text goes with it and the page has the keys again.
+            Action::FindOpen => {
+                self.find_open = true;
+                self.find_text.select_all();
+                self.find_request();
+                ui.focus(FIND);
+                ui.repaint();
+            },
+            Action::FindClose => {
+                self.close_find();
+                ui.focus(PAGE);
+                ui.repaint();
+            },
+            Action::FindNext => {
+                self.find_step(true);
+                ui.repaint();
+            },
+            Action::FindPrev => {
+                self.find_step(false);
+                ui.repaint();
+            },
+            // The panel's own state, and all this pass can do for it: the command is a toggle, so the key up puts
+            // the rows over the page and the key up again is the way out; Esc while they are up is theirs too. What
+            // is drawn is what the chrome already holds, so the engine is asked for nothing - and the strip keeps
+            // standing on its own rule (a download running or just ended) when the command's flag goes back down.
+            Action::ShowDownloads => {
+                self.downloads_open = !self.downloads_open;
+                // One panel at a time: this one takes the history and bookmarks lists down.
+                self.history_open = false;
+                self.bookmarks_open = false;
+                ui.repaint();
+            },
+            // Esc closes whichever of the two panels is up.
+            Action::CloseDownloads => {
+                self.downloads_open = false;
+                self.history_open = false;
+                self.bookmarks_open = false;
+                ui.repaint();
+            },
+            // The history panel: up on the key (the list is asked of the engine, which reads its local store and
+            // sends nothing out), down on the key again. The page has the focus meanwhile, so the arrows are the
+            // panel's and not the address field's.
+            Action::ShowHistory => {
+                if std::mem::take(&mut self.history_open) {
+                    ui.repaint();
+                    return;
+                }
+                self.downloads_open = false;
+                self.bookmarks_open = false;
+                self.history_open = true;
+                self.history_ready = false;
+                self.history.clear();
+                self.history_sel = 0;
+                self.history_ask += 1;
+                self.send(Cmd::ListHistory { id: self.history_ask, limit: crate::HISTORY_LIST_MAX });
+                ui.focus(PAGE);
+                ui.repaint();
+            },
             // The toolkit's own end: the desktop host reads it as `core.quit_requested()` and exits the event loop,
             // the call a `WindowEvent::CloseRequested` makes. There is no second way out to keep in step with this one.
             Action::Quit => ui.quit(),
+            // The bookmarks panel is the history panel's twin: up on the key (the engine lists its local bookmarks), down on
+            // the key again, and never together with another panel.
+            Action::ShowBookmarks => {
+                if std::mem::take(&mut self.bookmarks_open) {
+                    ui.repaint();
+                    return;
+                }
+                self.downloads_open = false;
+                self.history_open = false;
+                self.bookmarks_open = true;
+                self.bookmarks_ready = false;
+                self.bookmarks.clear();
+                self.bookmarks_sel = 0;
+                self.bookmarks_ask += 1;
+                self.send(Cmd::ListBookmarks { id: self.bookmarks_ask, limit: crate::BOOKMARK_LIST_MAX });
+                ui.focus(PAGE);
+                ui.repaint();
+            },
             Action::Unwired | Action::PassToPage => {},
         }
     }
@@ -501,6 +771,13 @@ impl Browser {
                 self.note = None;
             }
         }
+        if let Some(at) = self.refused_at {
+            if at.elapsed() < address::SHAKE_FOR {
+                ui.wake_after(Duration::from_millis(16));
+            } else {
+                self.refused_at = None;
+            }
+        }
         field
     }
 
@@ -579,6 +856,18 @@ impl Browser {
         let Some(cap) = l.field_capsule() else { return };
         let (cap, text) = (rect(&cap), rect(&l.placed(Part::Field).expect("a field")));
         let t = ui.theme();
+        let (dx, flash) = self.shake_at(Instant::now());
+        let dx = (dx * t.k).round() as i32;
+        let cap = Rect::new(cap.x + dx, cap.y, cap.w, cap.h);
+        if flash > 0.0 {
+            // A red ring round the capsule that fades with the shake: the refusal, seen.
+            let ring = mix(if editing { t.bar } else { t.panel_hi }, t.danger, flash);
+            let w = ui.px(2.0);
+            ui.fill(Rect::new(cap.x, cap.y, cap.w, w), ring);
+            ui.fill(Rect::new(cap.x, cap.bottom() - w, cap.w, w), ring);
+            ui.fill(Rect::new(cap.x, cap.y, w, cap.h), ring);
+            ui.fill(Rect::new(cap.right() - w, cap.y, w, cap.h), ring);
+        }
         if !editing {
             let px = t.pt(15.0);
             let display = crate::address::field_display(&self.address.text, self.field_domain(), text.w as f32, |s| ui.measure(Face::Sans, px, s) as f32);
@@ -687,8 +976,8 @@ impl Browser {
         }
     }
 
-    /// The strip over the bottom of the page while a download runs or has just ended: the page
-    /// keeps its size, as the engine has no way to be resized.
+    /// The strip over the bottom of the page while a download runs or has just ended, and while the command has the
+    /// panel up: the page keeps its size, as the engine has no way to be resized.
     fn downloads_strip(&mut self, ui: &mut Ui) {
         if let Some(next) = shown_downloads(&mut self.downloads, Instant::now()) {
             ui.wake_after(next.saturating_duration_since(Instant::now()));
@@ -699,9 +988,21 @@ impl Browser {
         let row_h = ui.px(DOWNLOAD_ROW_PX);
         let gap = ui.px(8.0);
         let side = row_h - gap;
-        let first = self.downloads.len().saturating_sub(DOWNLOAD_ROWS);
+        if self.history_open {
+            self.history_panel(ui, strip);
+            return;
+        }
+        if self.bookmarks_open {
+            self.bookmarks_panel(ui, strip);
+            return;
+        }
+        if let Some(note) = panel_note(&self.downloads) {
+            let at = Rect::new(strip.x + gap * 2, strip.y + gap / 2, (strip.w - gap * 4).max(0), row_h);
+            ui.text_in(at, Face::Sans, t.pt(15.0), t.dim, note);
+            return;
+        }
         let mut cancel = None;
-        for (i, row) in self.downloads[first..].iter().enumerate() {
+        for (i, row) in shown_rows(&self.downloads).iter().enumerate() {
             let r = Rect::new(strip.x, strip.y + gap / 2 + i as i32 * row_h, strip.w, row_h);
             let name_w = (r.w * 2 / 5).min(ui.px(360.0));
             let name = Rect::new(r.x + gap * 2, r.y, name_w, r.h);
@@ -738,6 +1039,150 @@ impl Browser {
         }
     }
 
+    /// Up, Down, Enter while the history panel is up: the panel's, never the page's or the field's. Enter opens the
+    /// selected page in the shown tab the way an address-bar row is opened, and the panel goes down.
+    fn history_keys(&mut self, ui: &mut Ui) {
+        if !self.history_open || ui.is_focused(FIELD) {
+            return;
+        }
+        let Some(Input::Key(press)) = ui.input() else { return };
+        if press.mods.ctrl || press.mods.alt || press.mods.meta || press.mods.shift {
+            return;
+        }
+        match press.code {
+            keys::KEY_DOWN => self.history_sel = (self.history_sel + 1).min(self.history.len().saturating_sub(1)),
+            keys::KEY_UP => self.history_sel = self.history_sel.saturating_sub(1),
+            keys::KEY_ENTER | keys::KEY_KPENTER => {
+                if let Some(url) = self.history.get(self.history_sel).and_then(|e| Url::parse(&e.url).ok()) {
+                    self.history_open = false;
+                    self.open(Go { url, search: false });
+                }
+            },
+            _ => return,
+        }
+        ui.take_input();
+        ui.repaint();
+    }
+
+    /// Esc while the find bar is up is the bar's own key, whatever else is loading or focused: down it goes, the page's text with
+    /// it, and the page has the keys again.
+    fn find_keys(&mut self, ui: &mut Ui) {
+        if !self.find_open {
+            return;
+        }
+        let Some(Input::Key(press)) = ui.input() else { return };
+        if press.code == keys::KEY_ESC && !(press.mods.ctrl || press.mods.alt || press.mods.meta || press.mods.shift) {
+            ui.take_input();
+            self.close_find();
+            ui.focus(PAGE);
+            ui.repaint();
+        }
+    }
+
+    /// The find strip: the field the query is typed into and the counter after it. Typing searches the page's text the bar
+    /// holds (and asks for it when it holds none); Enter goes to the next match, Shift+Enter to the one before. Nothing is
+    /// highlighted or scrolled to in the page yet: that needs the matches' nodes handed back to it.
+    fn find_strip(&mut self, ui: &mut Ui) {
+        let Some(bar) = self.find_rect else { return };
+        let t = ui.theme();
+        ui.fill(bar, t.bar);
+        let gap = ui.px(8.0);
+        let h = ui.px(32.0);
+        let field = Rect::new(bar.x + gap * 2, bar.y + (bar.h - h) / 2, ui.px(360.0).min(bar.w / 2), h);
+        // The field takes the key with its modifiers, so Shift is read before it does.
+        let shifted = shift_return(ui.input());
+        let typed = ui.text_field_at(field, FIND, &mut self.find_text);
+        if typed.changed {
+            if self.find_ready {
+                self.find_search();
+            } else if !self.find_pending {
+                self.find_request();
+            }
+            ui.repaint();
+        }
+        if typed.submitted {
+            self.find_step(!shifted);
+            ui.repaint();
+        }
+        let x = field.right() + gap * 2;
+        let counter = self.find_counter();
+        ui.text_in(Rect::new(x, bar.y, (bar.right() - gap * 2 - x).max(0), bar.h), Face::Sans, t.pt(14.0), t.dim, &counter);
+    }
+
+    /// Up, Down, Enter while the bookmarks panel is up: the history panel's keys over the bookmarks list.
+    fn bookmarks_keys(&mut self, ui: &mut Ui) {
+        if !self.bookmarks_open || ui.is_focused(FIELD) {
+            return;
+        }
+        let Some(Input::Key(press)) = ui.input() else { return };
+        if press.mods.ctrl || press.mods.alt || press.mods.meta || press.mods.shift {
+            return;
+        }
+        match press.code {
+            keys::KEY_DOWN => self.bookmarks_sel = (self.bookmarks_sel + 1).min(self.bookmarks.len().saturating_sub(1)),
+            keys::KEY_UP => self.bookmarks_sel = self.bookmarks_sel.saturating_sub(1),
+            keys::KEY_ENTER | keys::KEY_KPENTER => {
+                if let Some(url) = self.bookmarks.get(self.bookmarks_sel).and_then(|e| Url::parse(&e.url).ok()) {
+                    self.bookmarks_open = false;
+                    self.open(Go { url, search: false });
+                }
+            },
+            _ => return,
+        }
+        ui.take_input();
+        ui.repaint();
+    }
+
+    /// The bookmarks panel's rows in the strip, drawn as the history panel's are: the title (the address when there is none)
+    /// and the host dimmed beside it; one line when there is nothing.
+    fn bookmarks_panel(&mut self, ui: &mut Ui, strip: Rect) {
+        let t = ui.theme();
+        let row_h = ui.px(DOWNLOAD_ROW_PX);
+        let gap = ui.px(8.0);
+        if let Some(note) = bookmark_note(&self.bookmarks).filter(|_| self.bookmarks_ready) {
+            let at = Rect::new(strip.x + gap * 2, strip.y + gap / 2, (strip.w - gap * 4).max(0), row_h);
+            ui.text_in(at, Face::Sans, t.pt(15.0), t.dim, note);
+            return;
+        }
+        let window = history_window(self.bookmarks.len(), self.bookmarks_sel, HISTORY_ROWS);
+        for (i, at) in window.enumerate() {
+            let r = Rect::new(strip.x, strip.y + gap / 2 + i as i32 * row_h, strip.w, row_h);
+            if at == self.bookmarks_sel {
+                ui.fill(r, t.panel_hi);
+            }
+            let (title, host) = bookmark_row(&self.bookmarks[at]);
+            let title_w = (r.w * 3 / 5).max(0);
+            ui.text_in(Rect::new(r.x + gap * 2, r.y, title_w, r.h), Face::Sans, t.pt(15.0), t.text, &title);
+            let x = r.x + gap * 2 + title_w + gap * 2;
+            ui.text_in(Rect::new(x, r.y, (r.right() - gap * 2 - x).max(0), r.h), Face::Sans, t.pt(13.0), t.dim, &host);
+        }
+    }
+
+    /// The history panel's rows in the strip: the title (the address when there is none) and the host dimmed beside it,
+    /// the selected row on the raised fill; one line when the store has nothing.
+    fn history_panel(&mut self, ui: &mut Ui, strip: Rect) {
+        let t = ui.theme();
+        let row_h = ui.px(DOWNLOAD_ROW_PX);
+        let gap = ui.px(8.0);
+        if let Some(note) = history_note(&self.history).filter(|_| self.history_ready) {
+            let at = Rect::new(strip.x + gap * 2, strip.y + gap / 2, (strip.w - gap * 4).max(0), row_h);
+            ui.text_in(at, Face::Sans, t.pt(15.0), t.dim, note);
+            return;
+        }
+        let window = history_window(self.history.len(), self.history_sel, HISTORY_ROWS);
+        for (i, at) in window.enumerate() {
+            let r = Rect::new(strip.x, strip.y + gap / 2 + i as i32 * row_h, strip.w, row_h);
+            if at == self.history_sel {
+                ui.fill(r, t.panel_hi);
+            }
+            let (title, host) = history_row(&self.history[at]);
+            let title_w = (r.w * 3 / 5).max(0);
+            ui.text_in(Rect::new(r.x + gap * 2, r.y, title_w, r.h), Face::Sans, t.pt(15.0), t.text, &title);
+            let x = r.x + gap * 2 + title_w + gap * 2;
+            ui.text_in(Rect::new(x, r.y, (r.right() - gap * 2 - x).max(0), r.h), Face::Sans, t.pt(13.0), t.dim, &host);
+        }
+    }
+
     fn send(&self, cmd: Cmd) {
         if let Some(engine) = &self.engine {
             engine.send(cmd);
@@ -748,6 +1193,19 @@ impl Browser {
     fn go(&mut self, typed: &str) {
         if let Some(go) = address::go_for(typed, &self.omni.engines) {
             self.open(go);
+        } else if let Some(why) = address::refusal_for(typed, &self.omni.engines) {
+            // Nothing to act on (no engine to search with, or text the bar never opens): nothing is loaded or sent.
+            self.refuse(why);
+        }
+    }
+
+    /// Shift-Return on the typed text: the same refusals as Return, an address opened as Return opens it, and a search sent
+    /// verbatim to the second engine (when there is none this is [`Browser::go`]).
+    fn go_shift(&mut self, typed: &str) {
+        if let Some(go) = address::go_shift_for(typed, &self.omni.engines) {
+            self.open(go);
+        } else if let Some(why) = address::refusal_shift_for(typed, &self.omni.engines) {
+            self.refuse(why);
         }
     }
 
@@ -823,11 +1281,13 @@ impl Browser {
         self.address.cursor = self.address.text.len();
     }
 
-    /// The glass row over `band`: the page's top rows are the backdrop, the pixels go over what the toolkit drew there.
-    fn draw_glass(&mut self, ui: &mut Ui, l: &BarLayout, band: Rect) {
-        let k = ui.theme().k;
-        let (bw, bh) = glass::band_px(l);
-        let state = glass::State {
+    /// What the glass row is drawn from: everything of the browser's that the frame shows, read out of it. The hint of an
+    /// empty field comes from the engines the omnibox holds ([`address::placeholder_for`], the same call the classic field
+    /// makes), so the glass says what the bar can really do. A function of its own so a test can read the frame's inputs
+    /// without a window.
+    fn glass_state(&self) -> glass::State {
+        let shake = self.shake_at(Instant::now());
+        glass::State {
             tabs: self.tabs.clone(),
             active: self.active,
             address: self.address.text.clone(),
@@ -835,13 +1295,22 @@ impl Browser {
             typing: self.typing,
             cursor: self.address.cursor,
             anchor: self.address.anchor,
-            placeholder: self.address.placeholder.clone(),
+            placeholder: address::placeholder_for(&self.omni.engines).to_owned(),
             loading: self.loading,
             close_hover: self.tab_close_hover,
             zoom: (self.zoom != lucinanet_zoom::DEFAULT).then(|| lucinanet_zoom::label(self.zoom)),
             bookmarked: self.bookmarked,
             note: self.note.as_ref().filter(|(_, at)| at.elapsed() < NOTE_FOR).map(|(n, _)| n.clone()),
-        };
+            shake: shake.0,
+            flash: shake.1,
+        }
+    }
+
+    /// The glass row over `band`: the page's top rows are the backdrop, the pixels go over what the toolkit drew there.
+    fn draw_glass(&mut self, ui: &mut Ui, l: &BarLayout, band: Rect) {
+        let k = ui.theme().k;
+        let (bw, bh) = glass::band_px(l);
+        let state = self.glass_state();
         let Some(g) = self.glass.as_mut() else { return };
         {
             let page = self.page.lock().unwrap();
@@ -972,7 +1441,8 @@ impl Browser {
         let r = self.page_rect;
         let input = ui.input();
         let strip = self.strip;
-        let on_strip = |x, y| strip.is_some_and(|strip| strip.contains(x, y));
+        let find = self.find_rect;
+        let on_strip = |x, y| strip.is_some_and(|strip| strip.contains(x, y)) || find.is_some_and(|bar| bar.contains(x, y));
         match input {
             // The strip's own buttons take these.
             Some(Input::Move(x, y) | Input::Down(x, y) | Input::Up(x, y)) if on_strip(x, y) => {},
@@ -1029,12 +1499,22 @@ impl App for Browser {
             // page and does not care how the frame was made.
             Msg::News(News::Painted { .. }) => {},
             // What someone is typing stays.
-            Msg::News(News::Url(url)) if !self.typing => self.address.set(&url),
-            Msg::News(News::Url(_)) => {},
+            // Another address is another page: what the find bar took from the last one is no answer for this one.
+            Msg::News(News::Url(url)) => {
+                if url != self.page_url {
+                    self.page_url.clone_from(&url);
+                    self.drop_find_text();
+                }
+                if !self.typing {
+                    self.address.set(&url);
+                }
+            },
             Msg::News(News::Title(title)) => self.title = title,
             Msg::News(News::Loading(loading)) => {
                 if loading {
                     self.report_frame = true;
+                    // A load that starts replaces the page under the bar, the same address or not.
+                    self.drop_find_text();
                 }
                 self.loading = loading;
             },
@@ -1042,13 +1522,18 @@ impl App for Browser {
                 self.back = back;
                 self.forward = forward;
             },
-            Msg::News(News::Crashed(reason)) => self.crashed = Some(reason),
+            Msg::News(News::Crashed(reason)) => {
+                self.crashed = Some(reason);
+                self.drop_find_text();
+            },
             Msg::News(News::Dumped) => {},
             Msg::News(News::Tabs { tabs, active }) => {
                 if active != self.active {
                     // Another tab's page: its own address, and no crash notice from the last one.
                     self.crashed = None;
                     self.omni.close();
+                    // The bar belonged to the other tab's page, and so does the text it holds.
+                    self.close_find();
                     if let Some(tab) = tabs.iter().find(|t| t.id == active) {
                         if std::mem::take(&mut self.typing_new_tab) {
                             self.address.clear();
@@ -1071,6 +1556,31 @@ impl App for Browser {
             Msg::News(News::Note(note)) => self.note(note),
             Msg::News(News::Zoom(percent)) => self.zoom = percent,
             Msg::News(News::Bookmarked(on)) => self.bookmarked = on,
+            // The page's text, for the bar that asked. An answer to any other request is an old one, and so is one that comes
+            // when no bar is up: dropped here, never kept for later.
+            Msg::News(News::PageText { id, blocks, partial }) => {
+                if self.find_open && self.find_pending && id == self.find_ask {
+                    self.find_blocks = blocks;
+                    self.find_partial = partial;
+                    self.find_pending = false;
+                    self.find_ready = true;
+                    self.find_search();
+                }
+            },
+            Msg::News(News::BookmarkList { id, entries }) => {
+                if self.bookmarks_open && id == self.bookmarks_ask {
+                    self.bookmarks = entries;
+                    self.bookmarks_ready = true;
+                    self.bookmarks_sel = 0;
+                }
+            },
+            Msg::News(News::HistoryList { id, entries }) => {
+                if self.history_open && id == self.history_ask {
+                    self.history = entries;
+                    self.history_ready = true;
+                    self.history_sel = 0;
+                }
+            },
             Msg::News(News::BookmarkHits { id, entries }) => {
                 self.omni.bookmarks_answered(id, entries, now_us());
                 self.complete_inline();
@@ -1113,12 +1623,31 @@ impl App for Browser {
             ui.take_input();
         }
         shown_downloads(&mut self.downloads, Instant::now());
-        self.strip = (!self.downloads.is_empty()).then(|| {
-            let rows = self.downloads.len().min(DOWNLOAD_ROWS) as i32;
+        // The strip is over the page while a download runs or has just ended, and for as long as the command has the
+        // panel up - one row of the note when there is nothing in it, the rows themselves when there is.
+        self.strip = (!self.downloads.is_empty() || self.downloads_open || self.history_open || self.bookmarks_open).then(|| {
+            // The history panel, while it is up, has the strip to itself: its rows or its one line.
+            let rows = if self.history_open {
+                self.history.len().clamp(1, HISTORY_ROWS)
+            } else if self.bookmarks_open {
+                self.bookmarks.len().clamp(1, HISTORY_ROWS)
+            } else {
+                self.downloads.len().clamp(1, DOWNLOAD_ROWS)
+            } as i32;
             let h = rows * ui.px(DOWNLOAD_ROW_PX) + ui.px(8.0);
             let page = self.page_rect;
             Rect::new(page.x, page.bottom() - h, page.w, h)
         });
+        // The find strip is a row along the top of the page while the bar is up: one row in both chromes, over the page.
+        self.find_rect = self.find_open.then(|| {
+            let page = self.page_rect;
+            Rect::new(page.x, page.y, page.w, ui.px(FIND_STRIP_PX))
+        });
+        if self.control.is_none() {
+            self.history_keys(ui);
+            self.bookmarks_keys(ui);
+            self.find_keys(ui);
+        }
         if self.control.is_some() {
             self.control_input(ui);
         } else {
@@ -1130,6 +1659,13 @@ impl App for Browser {
         let editing = ui.is_focused(FIELD);
         let field = self.bar(ui, &l, band);
         let box_rect = if editing || self.chrome.mode == Mode::Glass { field } else { Rect::new(field.x, field.y, 0, 0) };
+        // The hint follows the engines the omnibox holds: read again every pass, so an engine that appears or goes is
+        // said by the next frame rather than frozen at the window's start. The glass takes the same string from the
+        // engines in `glass_state`, so neither chrome can show a hint the other does not.
+        let hint = address::placeholder_for(&self.omni.engines).to_owned();
+        self.address.placeholder = hint;
+        // The field takes the key (and its modifiers with it), so Shift is read before it does.
+        let shifted = shift_return(ui.input());
         let typed = ui.text_field_at(box_rect, FIELD, &mut self.address);
         if typed.changed {
             let text = self.address.text.clone();
@@ -1138,13 +1674,22 @@ impl App for Browser {
                 self.send(query);
             }
         }
-        if typed.submitted {
+        if typed.submitted && shifted {
+            // Shift-Return: the text as typed (no row the arrows moved to, no inline completion) to the second engine.
+            let text = self.omni.literal(&self.address.text).to_owned();
+            self.go_shift(&text);
+            ui.focus(PAGE);
+        } else if typed.submitted {
             // A row the arrows moved to is what Enter opens; on the first row it is the field's text.
             match self.omni.dropdown.as_ref().and_then(Dropdown::chosen) {
                 Some(go) => self.open(go),
                 None => {
                     let text = self.address.text.clone();
-                    self.go(&text);
+                    // A completion left in place opens the origin as stored; any other text is what Enter classifies.
+                    match self.omni.completed_go(&text, now_us()) {
+                        Some(go) => self.open(go),
+                        None => self.go(&text),
+                    }
                 },
             }
             ui.focus(PAGE);
@@ -1190,6 +1735,7 @@ impl App for Browser {
             });
         }
         self.downloads_strip(ui);
+        self.find_strip(ui);
         self.draw_control(ui);
         self.omnibox_draw(ui);
     }
@@ -1461,6 +2007,15 @@ impl Mark {
 /// a page that arrived in the clear is neither. Both chromes mark it in this amber.
 const WARN: Rgb = Rgb::hex(0xff9f0a);
 
+/// `a` towards `b` by `f` (0 to 1), per channel.
+fn mix(a: Rgb, b: Rgb, f: f32) -> Rgb {
+    let ch = |shift: u32| {
+        let (x, y) = (((a.0 >> shift) & 0xff) as f32, ((b.0 >> shift) & 0xff) as f32);
+        ((x + (y - x) * f.clamp(0.0, 1.0)).round() as u32) & 0xff
+    };
+    Rgb::hex((ch(16) << 16) | (ch(8) << 8) | ch(0))
+}
+
 /// The field's left-end mark, in fills: DejaVu has no padlock, no warning and no search glass, and the classic chrome has
 /// no canvas to outline one on. `back` is what the mark sits on, so the shackle, the ring and the exclamation read as
 /// holes. Measures are in `u`, a twelfth of the box: the mark is the glass chrome's 18-point icon's size, not the 28
@@ -1514,6 +2069,14 @@ fn tab_label(tab: &TabInfo) -> String {
         "New tab"
     };
     if tab.loading { format!("\u{21bb} {name}") } else { name.to_owned() }
+}
+
+/// Whether the key the field is about to take is Return with Shift and no other modifier. The text field answers only
+/// "submitted", so this reads the pending key before the field does.
+fn shift_return(input: Option<Input>) -> bool {
+    matches!(input, Some(Input::Key(press))
+        if matches!(press.code, keys::KEY_ENTER | keys::KEY_KPENTER)
+            && press.mods.shift && !press.mods.ctrl && !press.mods.alt && !press.mods.meta)
 }
 
 fn named(name: &str) -> Option<Key> {
@@ -1838,11 +2401,11 @@ mod tests {
         assert!(!sent().iter().any(|c| c.starts_with("Key")));
         assert_eq!(h.app().address.text, "x");
 
-        // A shortcut with no feature behind it is taken: the page never sees Ctrl+Shift+T or Ctrl+F.
+        // A shortcut with no feature behind it is taken: the page never sees Ctrl+Shift+T or Alt+Home
+        // (Ctrl+H moved to the wired ones with the history panel: ; Ctrl+Shift+O with the bookmarks panel: ).
         let mut h = window();
         h.press(code::T, ctrl(true));
-        h.press(code::F, ctrl(false));
-        h.press(code::H, ctrl(false));
+        h.press(code::HOME, alt);
         assert!(sent().is_empty());
         // What is not a shortcut is the page's: Ctrl+C, and Esc (nothing is loading).
         h.press(code::C, ctrl(false));
@@ -1850,10 +2413,97 @@ mod tests {
         tell(&mut h, News::Loading(false));
         h.key(code::ESC);
         assert!(sent().iter().any(|c| c.contains("Escape")));
-        // Esc while loading is the browser's Stop, which the engine cannot do yet: the page keeps it.
+        // Esc while loading is the browser's Stop, which the engine cannot do yet: the page keeps it with no find
+        // bar up.
         tell(&mut h, News::Loading(true));
         h.key(code::ESC);
         assert!(sent().iter().any(|c| c.contains("Escape")));
+        // Ctrl+F is the browser's too, and opens the bar. The same Esc then belongs to the bar: taken, the page
+        // never sees it, and the bar is down again.
+        h.press(code::F, ctrl(false));
+        assert!(!sent().iter().any(|c| c.starts_with("Key")), "the page never sees Ctrl+F (the bar asks the engine for the text: )");
+        assert!(h.app().find_open, "and it opened the bar");
+        h.key(code::ESC);
+        assert!(sent().is_empty(), "the open bar took Esc, not the page");
+        assert!(!h.app().find_open, "and the key closed the bar");
+    }
+
+    /// the downloads command opens the panel the chrome already draws from, and Esc is the panel's own key.
+    /// Windowless, as the rest of them are: the keys go in through the harness, the panel is read from the state both
+    /// chromes draw it from (`strip` over the page and the rows `shown_rows` picks for it), and the fake engine's log
+    /// says nothing was asked of it - the panel reads what the chrome holds.
+    #[test]
+    fn the_downloads_command_opens_the_panel_and_esc_closes_it() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        tell(&mut h, News::Loading(false));
+        assert!(h.app().strip.is_none(), "no download and no command yet, so nothing over the page");
+
+        // The chrome holds a running download. With no load in flight, Esc is still the page's while the panel is
+        // down: the command below is what makes the key the browser's.
+        tell(&mut h, News::Download {
+            id: 7,
+            name: "report.pdf".into(),
+            received: 1 << 20,
+            total: Some(4 << 20),
+            state: DownloadState::Running,
+        });
+        sent();
+        h.key(code::ESC);
+        assert!(sent().iter().any(|c| c.contains("Escape")), "the page keeps Esc while the panel is down");
+
+        // Ctrl+Shift+Y, the downloads key of the profile the keymap follows, puts the panel up.
+        h.press(code::Y, ctrl(true));
+        assert!(h.app().downloads_open, "the command opened the panel");
+        assert!(sent().is_empty(), "the panel asks the engine for nothing");
+        let strip = h.app().strip.expect("and the panel is drawn over the page");
+        assert_eq!(strip.bottom(), h.app().page_rect.bottom(), "at the page's bottom edge, where the strip is");
+        let rows = shown_rows(&h.app().downloads);
+        assert_eq!(rows.len(), 1, "the one download the chrome holds");
+        assert_eq!(rows[0].name, "report.pdf", "the row says which file");
+        assert_eq!(rows[0].status(), "1.0 MB of 4.0 MB", "and how far it has come");
+
+        // Esc is the panel's own close, taken with no load in flight: the page never sees it, and the panel is down.
+        // The strip stays by its own rule, a download still running in it.
+        h.key(code::ESC);
+        assert!(sent().is_empty(), "the panel took the Esc the page had");
+        assert!(!h.app().downloads_open, "Esc closed the panel");
+        assert!(h.app().strip.is_some(), "the running download's strip is up on its own");
+
+        // The key is a toggle: it opens the panel again and closes it once more.
+        h.press(code::Y, ctrl(true));
+        assert!(h.app().downloads_open, "the same key opens it again");
+        h.press(code::Y, ctrl(true));
+        assert!(!h.app().downloads_open, "and takes it down again");
+    }
+
+    /// The command shows the panel on demand, with nothing downloaded and nothing running: it says so in one plain
+    /// line rather than drawing an empty band over the page.
+    #[test]
+    fn the_downloads_panel_says_so_when_there_is_nothing_to_show() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        assert!(h.app().downloads.is_empty(), "no download news at all");
+        assert!(h.app().strip.is_none());
+
+        h.press(code::Y, ctrl(true));
+        assert!(h.app().downloads_open, "the panel is up with nothing in it");
+        let strip = h.app().strip.expect("and it is drawn all the same");
+        let k = h.app().scale;
+        let px = |v: f32| (v * k).round() as i32;
+        assert_eq!(strip.h, px(DOWNLOAD_ROW_PX) + px(8.0), "one row, not the three a full panel takes");
+        assert_eq!(panel_note(&h.app().downloads), Some(NO_DOWNLOADS), "the line that one row says");
+        assert_eq!(NO_DOWNLOADS, "No downloads", "in the words a person reads");
+        assert!(shown_rows(&h.app().downloads).is_empty(), "and nothing to move over");
+        h.key(keys::KEY_PAGEDOWN);
+        assert!(sent().iter().any(|c| c.contains("PageDown")), "the panel is an overlay, not a new focus: the page has its keys");
+
+        h.key(code::ESC);
+        assert!(sent().is_empty(), "the page never sees the panel's Esc");
+        assert!(!h.app().downloads_open, "and Esc takes the empty panel down again");
+        assert!(h.app().strip.is_none(), "with no download of its own nothing is left over the page");
     }
 
     /// The quit reaches the end a window close ends by: `Core::quit_requested()` is what the desktop host reads and
@@ -1920,8 +2570,8 @@ mod tests {
         assert!(!h.app().address.text.ends_with('d'));
         // The page never sees Ctrl+D.
         assert!(!sent().iter().any(|c| c.starts_with("Key")));
-        // Ctrl+Shift+O, the bookmarks list, is still taken and still nothing.
-        h.press(code::O, ctrl(true));
+        // Ctrl+Shift+T, reopen-closed-tab, is still taken and still nothing (Ctrl+Shift+O became the bookmarks panel: ).
+        h.press(code::T, ctrl(true));
         assert!(sent().is_empty());
     }
 
@@ -2142,6 +2792,62 @@ mod tests {
         assert_eq!(h.app().address.text, "https://rust-lang.org/");
     }
 
+    /// A window on the blank page shows an empty field (and its placeholder), not "about:blank".
+    #[test]
+    fn a_window_on_the_blank_page_has_an_empty_address_field() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let classic = chrome::Settings { mode: Mode::Classic, left_inset: 0.0 };
+        let mut h = Harness::new(Browser::with_chrome(Arc::new(|_| {}), crate::address::blank_url(), fake, classic), 1920, 1080);
+        assert!(h.app().address.text.is_empty(), "{:?}", h.app().address.text);
+    }
+
+    /// With no search engine, Enter on text that is not an address loads nothing, sends nothing, and says why.
+    #[test]
+    fn enter_on_a_search_with_no_engine_sends_nothing_and_says_so() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        h.app().omni.engines = crate::address::Engines::none();
+        h.press(KEY_L, ctrl(false));
+        h.type_str("rust lang");
+        sent();
+        h.key(keys::KEY_ENTER);
+        let after = sent();
+        assert!(!after.iter().any(|c| c.starts_with("LoadTyped") || c.starts_with("Load")), "{after:?}");
+        let note = h.app().note.as_ref().map(|(text, _)| text.clone()).expect("the bar says why");
+        assert!(note.contains("No search engine"), "{note}");
+        assert!(h.app().omni.dropdown.is_none());
+    }
+
+    /// `javascript:` in the bar is refused: nothing is loaded or sent, the bar says why, the field shakes.
+    #[test]
+    fn enter_on_javascript_is_refused_and_shakes_the_field() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        assert_eq!(h.app().shake_at(Instant::now()), (0.0, 0.0), "no shake before a refusal");
+        h.press(KEY_L, ctrl(false));
+        h.type_str("javascript:alert(1)");
+        sent();
+        h.key(keys::KEY_ENTER);
+        let after = sent();
+        assert!(!after.iter().any(|c| c.starts_with("LoadTyped") || c.starts_with("Load")), "{after:?}");
+        let note = h.app().note.as_ref().map(|(text, _)| text.clone()).expect("the bar says why");
+        assert!(note.contains("javascript:"), "{note}");
+        // Pure in the time: full flash and no push at the instant, a push in the middle, nothing once it is over.
+        let at = h.app().refused_at.expect("the refusal is remembered");
+        let ms = Duration::from_millis;
+        assert_eq!(h.app().shake_at(at), (0.0, 1.0));
+        let mid = h.app().shake_at(at + ms(60));
+        assert!(mid.0 != 0.0 && mid.1 > 0.0 && mid.1 < 1.0, "{mid:?}");
+        assert!(h.app().shake_at(at + ms(60)) == mid);
+        assert_eq!(h.app().shake_at(at + address::SHAKE_FOR), (0.0, 0.0));
+        // An ordinary address does not shake.
+        let mut h = window();
+        h.press(KEY_L, ctrl(false));
+        h.type_str("example.org");
+        h.key(keys::KEY_ENTER);
+        assert!(h.app().refused_at.is_none());
+    }
+
     #[test]
     fn enter_on_the_first_row_reads_the_field_and_a_search_is_marked_as_one() {
         let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
@@ -2209,6 +2915,100 @@ mod tests {
         h.key(keys::KEY_ENTER);
         let loaded = sent();
         assert!(loaded[0].starts_with("LoadTyped") && loaded[0].contains("example.com"), "{loaded:?}");
+    }
+
+    /// What the fake engine logged for the `LoadTyped`, as `scheme://host/path?query search=<bool>` (its log is the Debug text).
+    fn loaded_typed(log: &[String]) -> String {
+        let line = log.iter().find(|c| c.starts_with("LoadTyped")).unwrap_or_else(|| panic!("nothing was loaded: {log:?}"));
+        let between = |from: &str, to: &str| line.split_once(from).and_then(|(_, rest)| rest.split_once(to)).map_or(String::new(), |(x, _)| x.to_owned());
+        let query = between("query: Some(\"", "\"");
+        format!("{}://{}{}{} {}", between("scheme: \"", "\""), between("Domain(\"", "\""), between("path: \"", "\""), if query.is_empty() { String::new() } else { format!("?{query}") }, between("search: ", " "))
+    }
+
+    #[test]
+    fn enter_on_one_letter_opens_the_most_visited_origin_over_the_scheme_the_history_has() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        // One letter, a most-visited origin: the field shows the completion and Enter opens that origin, not a search.
+        let mut h = typing("w");
+        answer(&mut h, vec![entry("https://wikipedia.org/wiki/Rust", "Rust")]);
+        assert_eq!(h.app().address.text, "wikipedia.org/");
+        sent();
+        h.key(keys::KEY_ENTER);
+        let log = sent();
+        let load = loaded_typed(&log);
+        assert_eq!(load, "https://wikipedia.org/ false");
+        // The origin has only an http entry: it is opened as stored, never over a scheme the history does not have.
+        let mut h = typing("o");
+        answer(&mut h, vec![entry("http://old.example/page", "Old")]);
+        assert_eq!(h.app().address.text, "old.example/");
+        sent();
+        h.key(keys::KEY_ENTER);
+        let log = sent();
+        let load = loaded_typed(&log);
+        assert_eq!(load, "http://old.example/ false");
+    }
+
+    #[test]
+    fn enter_on_one_letter_with_no_history_searches_as_before() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = typing("w");
+        answer(&mut h, vec![]);
+        assert_eq!(h.app().address.text, "w");
+        sent();
+        h.key(keys::KEY_ENTER);
+        let log = sent();
+        let load = loaded_typed(&log);
+        assert_eq!(load, "https://duckduckgo.com/html/?q=w true");
+    }
+
+    #[test]
+    fn a_letter_that_is_a_keyword_is_not_completed_and_enter_keeps_the_keyword() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        // The shipped default engine has the keyword "ddg": history for an origin that starts with it does not take it over.
+        let mut h = typing("ddg");
+        answer(&mut h, vec![entry("https://ddgfan.example/", "Fan")]);
+        assert_eq!(h.app().address.text, "ddg");
+        sent();
+        h.key(keys::KEY_ENTER);
+        let log = sent();
+        let load = loaded_typed(&log);
+        assert_eq!(load, "https://duckduckgo.com/html/?q=ddg true");
+        // With text after the keyword the keyword searches, completion or not.
+        let mut h = typing("ddg rust");
+        answer(&mut h, vec![entry("https://ddgfan.example/", "Fan")]);
+        sent();
+        h.key(keys::KEY_ENTER);
+        let log = sent();
+        assert_eq!(loaded_typed(&log), "https://duckduckgo.com/html/?q=rust true", "{log:?}");
+    }
+
+    #[test]
+    fn delete_on_a_completion_makes_enter_search_the_letter() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = typing("w");
+        answer(&mut h, vec![entry("https://wikipedia.org/", "Wikipedia")]);
+        assert_eq!(h.app().address.text, "wikipedia.org/");
+        // Delete removes the selected tail, as it does for any completion; the same answer again does not bring it back.
+        h.key(keys::KEY_DELETE);
+        answer(&mut h, vec![entry("https://wikipedia.org/", "Wikipedia")]);
+        assert_eq!(h.app().address.text, "w");
+        sent();
+        h.key(keys::KEY_ENTER);
+        let log = sent();
+        let load = loaded_typed(&log);
+        assert_eq!(load, "https://duckduckgo.com/html/?q=w true");
+    }
+
+    #[test]
+    fn two_letters_complete_and_open_the_same_way() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = typing("wi");
+        answer(&mut h, vec![entry("https://wikipedia.org/", "Wikipedia")]);
+        assert_eq!(h.app().address.text, "wikipedia.org/");
+        sent();
+        h.key(keys::KEY_ENTER);
+        let log = sent();
+        assert_eq!(loaded_typed(&log), "https://wikipedia.org/ false", "{log:?}");
     }
 
     #[test]
@@ -2442,5 +3242,744 @@ mod tests {
             h.click(r.x + 10, r.y - 3);
             assert!(!sent().iter().any(|c| c.starts_with("Button")), "glass {glass}");
         }
+    }
+
+    /// two engines, as a later settings wire-up will hand them over (the UI builds `Engines` from the shipped
+    /// settings today, which hold one).
+    fn two_engines() -> crate::address::Engines {
+        let mut settings = lucinanet_settings::Settings::default();
+        settings.search.engines.push(lucinanet_settings::Engine {
+            id: "second".to_owned(),
+            name: "Second".to_owned(),
+            keyword: Some("sec".to_owned()),
+            template: "https://second.test/?q={searchTerms}".to_owned(),
+            suggest_url: None,
+        });
+        crate::address::Engines::from_settings(&settings)
+    }
+
+    fn shift() -> keys::Mods {
+        keys::Mods { shift: true, ..keys::Mods::default() }
+    }
+
+    /// The bar with two engines, `text` typed in it.
+    fn typing_with_two_engines(text: &str) -> Harness<Browser> {
+        let mut h = window();
+        h.app().omni.engines = two_engines();
+        h.press(KEY_L, ctrl(false));
+        h.type_str(text);
+        h
+    }
+
+    #[test]
+    fn shift_return_is_read_from_the_pending_key_and_nothing_else() {
+        let enter = |mods| Some(Input::Key(Press { code: keys::KEY_ENTER, mods }));
+        assert!(shift_return(enter(shift())));
+        assert!(shift_return(Some(Input::Key(Press { code: keys::KEY_KPENTER, mods: shift() }))));
+        assert!(!shift_return(enter(keys::Mods::default())));
+        assert!(!shift_return(enter(keys::Mods { shift: true, ctrl: true, ..keys::Mods::default() })));
+        assert!(!shift_return(Some(Input::Key(Press { code: keys::KEY_DOWN, mods: shift() }))));
+        assert!(!shift_return(Some(Input::Move(1, 1))));
+        assert!(!shift_return(None));
+    }
+
+    #[test]
+    fn shift_enter_in_the_bar_searches_the_second_engine_with_the_typed_text() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = typing_with_two_engines("lucina os");
+        sent();
+        h.press(keys::KEY_ENTER, shift());
+        let log = sent();
+        assert_eq!(loaded_typed(&log), "https://second.test/?q=lucina+os true", "{log:?}");
+        assert_eq!(log.iter().filter(|c| c.starts_with("Load")).count(), 1, "{log:?}");
+        // Plain Enter on the same text still goes to the default engine.
+        let mut h = typing_with_two_engines("lucina os");
+        sent();
+        h.key(keys::KEY_ENTER);
+        assert_eq!(loaded_typed(&sent()), "https://duckduckgo.com/html/?q=lucina+os true");
+    }
+
+    #[test]
+    fn typing_alone_sends_nothing_to_either_engine() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let _h = typing_with_two_engines("lucina os");
+        let log = sent();
+        assert!(!log.iter().any(|c| c.starts_with("Load")), "{log:?}");
+    }
+
+    #[test]
+    fn shift_enter_with_one_engine_is_exactly_enter() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = typing("lucina os");
+        sent();
+        h.press(keys::KEY_ENTER, shift());
+        assert_eq!(loaded_typed(&sent()), "https://duckduckgo.com/html/?q=lucina+os true");
+    }
+
+    #[test]
+    fn shift_enter_on_an_address_opens_it_and_a_completion_or_row_is_not_used_for_a_search() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = typing_with_two_engines("example.com");
+        sent();
+        h.press(keys::KEY_ENTER, shift());
+        assert_eq!(loaded_typed(&sent()), "https://example.com/ false");
+        // An inline completion is left out of the search: the second engine gets "exam".
+        let mut h = typing_with_two_engines("exam");
+        answer(&mut h, vec![entry("https://example.com/", "Example")]);
+        assert_eq!(h.app().address.text, "example.com/");
+        sent();
+        h.press(keys::KEY_ENTER, shift());
+        assert_eq!(loaded_typed(&sent()), "https://second.test/?q=exam true");
+    }
+
+    #[test]
+    fn shift_enter_of_javascript_is_refused_and_shakes_like_enter() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = typing_with_two_engines("javascript:alert(1)");
+        sent();
+        h.press(keys::KEY_ENTER, shift());
+        let after = sent();
+        assert!(!after.iter().any(|c| c.starts_with("Load")), "{after:?}");
+        let note = h.app().note.as_ref().map(|(text, _)| text.clone()).expect("the bar says why");
+        assert!(note.contains("javascript:"), "{note}");
+        assert!(h.app().refused_at.is_some());
+    }
+
+    /// , red first: the hint of an empty field is what the engines make it. Both chromes draw the `TextEdit`'s
+    /// placeholder (classic through the toolkit, glass into its own frame), so this reads the one value the row shows
+    /// after the omnibox's engines change.
+    #[test]
+    fn the_empty_field_hint_follows_the_engines_the_omnibox_holds() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        for glass in [false, true] {
+            let mut h = if glass { glass_window(0.0) } else { window() };
+            assert_eq!(h.app().address.placeholder, "Search or enter an address", "glass {glass}: the shipped engines search");
+            h.app().omni.engines = crate::address::Engines::none();
+            // A key, not `paint` on its own: the core only runs a pass when something has asked for one, and a bare
+            // `paint` after a field the app cannot see change would draw the old frame. Esc with the field not focused
+            // is the one input that takes the row to no action at all.
+            h.key(keys::KEY_ESC);
+            let hint = h.app().address.placeholder.clone();
+            assert!(!hint.contains("Search"), "glass {glass}: no engine, yet the field promises a search: {hint}");
+            assert_eq!(hint, "Enter an address", "glass {glass}");
+        }
+    }
+
+    /// , red first: an engine whose template cannot be filled is no engine for the sake of the hint.
+    #[test]
+    fn an_unusable_template_makes_the_hint_promise_no_search() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        let mut settings = lucinanet_settings::Settings::default();
+        settings.search.engines[0].template = "not a url".to_owned();
+        h.app().omni.engines = crate::address::Engines::from_settings(&settings);
+        h.key(keys::KEY_ESC);
+        let hint = h.app().address.placeholder.clone();
+        assert!(!hint.contains("Search"), "the template cannot be filled, yet the field promises a search: {hint}");
+    }
+
+    /// what each chrome shows is the helper's string for the engines the omnibox holds - the classic field the
+    /// toolkit draws, and the glass frame the row is painted from - for every shape of engine, before and after a change.
+    #[test]
+    fn both_chromes_show_the_helpers_hint_for_the_same_engines() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut broken = lucinanet_settings::Settings::default();
+        broken.search.engines[0].template = "not a url".to_owned();
+        for glass in [false, true] {
+            let mut h = if glass { glass_window(0.0) } else { window() };
+            for (name, engines) in [
+                ("shipped", crate::address::Engines::default()),
+                ("none", crate::address::Engines::none()),
+                ("broken template", crate::address::Engines::from_settings(&broken)),
+            ] {
+                h.app().omni.engines = engines;
+                h.key(keys::KEY_ESC);
+                let want = crate::address::placeholder_for(&h.app().omni.engines).to_owned();
+                let frame = h.app().glass_state();
+                assert_eq!(frame.placeholder, want, "glass {glass}: the frame's hint, {name}");
+                assert_eq!(h.app().address.placeholder, want, "glass {glass}: the field's hint, {name}");
+                if name == "shipped" {
+                    assert_eq!(want, "Search or enter an address", "{name}: the words are unchanged");
+                } else {
+                    assert!(!want.contains("Search"), "{name}: {want} promises a search");
+                }
+            }
+        }
+    }
+
+    /// the downloads panel is one state that both chromes draw - `downloads_strip` runs from `strip` and
+    /// `downloads` at the end of the pass whatever the row at the top of the window looks like - so a glass window
+    /// opens, shows and closes the same panel a classic one does.
+    #[test]
+    fn both_chromes_show_the_same_downloads_panel() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        for glass in [false, true] {
+            let mut h = if glass { glass_window(0.0) } else { window() };
+            if glass {
+                assert!(h.app().glass_stats().is_some_and(|(draws, ..)| draws >= 1), "the glass row was drawn");
+            } else {
+                assert!(h.app().glass.is_none(), "the classic row draws no glass");
+            }
+            tell(&mut h, News::Loading(false));
+            tell(&mut h, News::Download {
+                id: 11,
+                name: "clip.mp4".into(),
+                received: 1 << 20,
+                total: Some(2 << 20),
+                state: DownloadState::Running,
+            });
+            sent();
+
+            h.press(code::Y, ctrl(true));
+            assert!(h.app().downloads_open, "glass {glass}: the command opened the panel");
+            let strip = h
+                .app()
+                .strip
+                .unwrap_or_else(|| panic!("glass {glass}: the panel is over the page in both chromes"));
+            assert_eq!(strip.bottom(), h.app().page_rect.bottom(), "glass {glass}: at the page's bottom edge");
+            let names: Vec<&str> = shown_rows(&h.app().downloads).iter().map(|row| row.name.as_str()).collect();
+            assert_eq!(names, ["clip.mp4"], "glass {glass}: the same rows either chrome shows");
+
+            h.key(code::ESC);
+            assert!(sent().is_empty(), "glass {glass}: the page never sees the panel's Esc");
+            assert!(!h.app().downloads_open, "glass {glass}: and Esc closes it in both");
+        }
+    }
+
+    /// Ctrl+H puts the history panel up, asks the engine for the list (and only then), shows it newest first and
+    /// moves over it with Up and Down; Enter opens the row in the shown tab the way an address-bar row does, Esc closes.
+    #[test]
+    fn the_history_command_lists_the_pages_and_enter_opens_one() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        tell(&mut h, News::Loading(false));
+        assert!(!h.app().history_open && h.app().strip.is_none(), "nothing up before the command");
+
+        h.press(code::H, ctrl(false));
+        assert!(h.app().history_open, "Ctrl+H opened the panel");
+        let asked = sent();
+        assert_eq!(asked.len(), 1, "one request, to the engine: {asked:?}");
+        assert!(asked[0].starts_with("ListHistory") && asked[0].contains("limit: 200"), "{asked:?}");
+        assert!(h.app().strip.is_some(), "the panel is over the page while it waits for the list");
+        let id = h.app().history_ask;
+
+        // An answer to another request is an old one.
+        tell(&mut h, News::HistoryList { id: id + 1, entries: vec![entry("https://old.example.org/", "Old")] });
+        assert!(h.app().history.is_empty(), "a stale answer is dropped");
+
+        let entries = vec![
+            entry("https://c.example.com/page", "Third"),
+            entry("https://b.example.org/", ""),
+            entry("https://a.example.net/x", "First"),
+        ];
+        tell(&mut h, News::HistoryList { id, entries: entries.clone() });
+        let urls: Vec<&str> = h.app().history.iter().map(|e| e.url.as_str()).collect();
+        assert_eq!(urls, ["https://c.example.com/page", "https://b.example.org/", "https://a.example.net/x"], "in the order given");
+        assert_eq!(h.app().history_sel, 0, "the first row is the one Enter would open");
+        assert_eq!(history_note(&h.app().history), None, "a list says nothing");
+        let strip = h.app().strip.expect("the panel is drawn");
+        assert_eq!(strip.bottom(), h.app().page_rect.bottom(), "at the page's bottom edge, as the downloads panel is");
+        assert!(sent().is_empty(), "listing asks for nothing more");
+
+        // Up and Down are the panel's, not the page's.
+        h.key(keys::KEY_DOWN);
+        h.key(keys::KEY_DOWN);
+        assert_eq!(h.app().history_sel, 2, "two Downs reached the third row");
+        h.key(keys::KEY_DOWN);
+        assert_eq!(h.app().history_sel, 2, "and the list does not wrap past its end");
+        h.key(keys::KEY_UP);
+        h.key(keys::KEY_DOWN);
+        assert_eq!(h.app().history_sel, 2);
+        assert!(sent().is_empty(), "the page never saw an arrow");
+
+        h.key(keys::KEY_ENTER);
+        let went = sent();
+        assert_eq!(went.len(), 1, "{went:?}");
+        assert!(went[0].starts_with("LoadTyped") && went[0].contains("a.example.net") && went[0].contains("path: \"/x\"") && went[0].contains("search: false"), "{went:?}");
+        assert!(!h.app().history_open, "Enter closed the panel");
+        assert!(h.app().strip.is_none(), "and nothing is left over the page");
+    }
+
+    /// Esc closes the panel and is not the page's; an empty store says so in one line; the key is a toggle.
+    #[test]
+    fn the_history_panel_closes_on_esc_and_says_so_when_empty() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        h.press(code::H, ctrl(false));
+        sent();
+        let id = h.app().history_ask;
+        tell(&mut h, News::HistoryList { id, entries: Vec::new() });
+        assert!(h.app().history_open);
+        assert_eq!(history_note(&h.app().history), Some(NO_HISTORY), "an empty list says so");
+        assert_eq!(NO_HISTORY, "No history", "in the words a person reads");
+        let k = h.app().scale;
+        let strip = h.app().strip.expect("drawn all the same");
+        assert_eq!(strip.h, (DOWNLOAD_ROW_PX * k).round() as i32 + (8.0 * k).round() as i32, "one row, as the downloads note");
+        h.key(keys::KEY_ENTER);
+        assert!(sent().is_empty() && h.app().history_open, "Enter with nothing to open does nothing");
+
+        h.key(code::ESC);
+        assert!(sent().is_empty(), "the page never sees the panel's Esc");
+        assert!(!h.app().history_open, "Esc closed it");
+        assert!(h.app().strip.is_none());
+
+        h.press(code::H, ctrl(false));
+        assert!(h.app().history_open, "the key opens it again, and asks again");
+        assert_eq!(sent().len(), 1);
+        h.press(code::H, ctrl(false));
+        assert!(!h.app().history_open, "and takes it down again");
+        assert!(sent().is_empty(), "closing asks for nothing");
+    }
+
+    /// One panel at a time: each command takes the other one down.
+    #[test]
+    fn the_history_and_downloads_panels_are_never_up_together() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        h.press(code::Y, ctrl(true));
+        assert!(h.app().downloads_open && !h.app().history_open);
+        h.press(code::H, ctrl(false));
+        assert!(h.app().history_open && !h.app().downloads_open, "history took the downloads panel down");
+        h.press(code::Y, ctrl(true));
+        assert!(h.app().downloads_open && !h.app().history_open, "and downloads took history down");
+    }
+
+    /// What the panel draws: which rows are in view, and what a row says.
+    #[test]
+    fn history_rows_are_windowed_and_read_title_then_host() {
+        assert_eq!(history_window(3, 0, 8), 0..3, "a short list is all of it");
+        assert_eq!(history_window(0, 0, 8), 0..0);
+        assert_eq!(history_window(200, 0, 8), 0..8);
+        assert_eq!(history_window(200, 7, 8), 0..8, "the last row in view does not scroll");
+        assert_eq!(history_window(200, 8, 8), 1..9, "one past it scrolls by one");
+        assert_eq!(history_window(200, 199, 8), 192..200, "the end of the list");
+        assert_eq!(
+            history_row(&entry("https://www.example.com/a/b?q=1", "A title")),
+            ("A title".to_owned(), "www.example.com".to_owned())
+        );
+        assert_eq!(
+            history_row(&entry("https://example.org/path", "")),
+            ("https://example.org/path".to_owned(), "example.org".to_owned()),
+            "no title: the address stands in for it"
+        );
+        assert_eq!(history_row(&entry("about:blank", "")).1, "", "no host, nothing dimmed");
+    }
+
+    /// Both chromes draw the one history state, as they do the downloads panel's.
+    #[test]
+    fn both_chromes_show_the_same_history_panel() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        for glass in [false, true] {
+            let mut h = if glass { glass_window(0.0) } else { window() };
+            tell(&mut h, News::Loading(false));
+            sent();
+            h.press(code::H, ctrl(false));
+            assert!(h.app().history_open, "glass {glass}: the command opened the panel");
+            let id = h.app().history_ask;
+            tell(&mut h, News::HistoryList { id, entries: vec![entry("https://a.example.com/", "A"), entry("https://b.example.com/", "B")] });
+            let strip = h.app().strip.unwrap_or_else(|| panic!("glass {glass}: over the page in both chromes"));
+            assert_eq!(strip.bottom(), h.app().page_rect.bottom(), "glass {glass}");
+            assert_eq!(h.app().history.len(), 2, "glass {glass}");
+            sent();
+            h.key(keys::KEY_DOWN);
+            h.key(keys::KEY_ENTER);
+            let went = sent();
+            assert!(went.len() == 1 && went[0].contains("b.example.com"), "glass {glass}: {went:?}");
+            assert!(!h.app().history_open, "glass {glass}: Enter closes it in both");
+        }
+    }
+
+    fn bentry(url: &str, title: &str) -> lucinanet_omnibox::BookmarkEntry {
+        lucinanet_omnibox::BookmarkEntry { url: url.into(), title: title.into(), folder_path: "Other Bookmarks".into() }
+    }
+
+    /// Ctrl+Shift+O (and Ctrl+B) put the bookmarks panel up, ask the engine for the list (and only then), and move
+    /// over it with Up and Down; Enter opens the row in the shown tab the way an address-bar row does, Esc closes.
+    #[test]
+    fn the_bookmarks_command_lists_the_bookmarks_and_enter_opens_one() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        tell(&mut h, News::Loading(false));
+        assert!(!h.app().bookmarks_open && h.app().strip.is_none(), "nothing up before the command");
+
+        h.press(code::O, ctrl(true));
+        assert!(h.app().bookmarks_open, "Ctrl+Shift+O opened the panel");
+        let asked = sent();
+        assert_eq!(asked.len(), 1, "one request, to the engine: {asked:?}");
+        assert!(asked[0].starts_with("ListBookmarks") && asked[0].contains("limit: 200"), "{asked:?}");
+        assert!(h.app().strip.is_some(), "the panel is over the page while it waits for the list");
+        let id = h.app().bookmarks_ask;
+
+        // An answer to another request is an old one.
+        tell(&mut h, News::BookmarkList { id: id + 1, entries: vec![bentry("https://old.example.org/", "Old")] });
+        assert!(h.app().bookmarks.is_empty(), "a stale answer is dropped");
+
+        let entries = vec![
+            bentry("https://c.example.com/page", "Third"),
+            bentry("https://b.example.org/", ""),
+            bentry("https://a.example.net/x", "First"),
+        ];
+        tell(&mut h, News::BookmarkList { id, entries });
+        let urls: Vec<&str> = h.app().bookmarks.iter().map(|e| e.url.as_str()).collect();
+        assert_eq!(urls, ["https://c.example.com/page", "https://b.example.org/", "https://a.example.net/x"], "in the order given");
+        assert_eq!(h.app().bookmarks_sel, 0, "the first row is the one Enter would open");
+        assert_eq!(bookmark_note(&h.app().bookmarks), None, "a list says nothing");
+        let strip = h.app().strip.expect("the panel is drawn");
+        assert_eq!(strip.bottom(), h.app().page_rect.bottom(), "at the page's bottom edge, as the other panels are");
+        assert!(sent().is_empty(), "listing asks for nothing more");
+
+        h.key(keys::KEY_DOWN);
+        h.key(keys::KEY_DOWN);
+        assert_eq!(h.app().bookmarks_sel, 2, "two Downs reached the third row");
+        h.key(keys::KEY_DOWN);
+        assert_eq!(h.app().bookmarks_sel, 2, "and the list does not wrap past its end");
+        h.key(keys::KEY_UP);
+        h.key(keys::KEY_DOWN);
+        assert_eq!(h.app().bookmarks_sel, 2);
+        assert!(sent().is_empty(), "the page never saw an arrow");
+
+        h.key(keys::KEY_ENTER);
+        let went = sent();
+        assert_eq!(went.len(), 1, "{went:?}");
+        assert!(went[0].starts_with("LoadTyped") && went[0].contains("a.example.net") && went[0].contains("path: \"/x\"") && went[0].contains("search: false"), "{went:?}");
+        assert!(!h.app().bookmarks_open, "Enter closed the panel");
+        assert!(h.app().strip.is_none(), "and nothing is left over the page");
+    }
+
+    /// Esc closes the panel and is not the page's; an empty store says so in one line; the key is a toggle; Ctrl+B is the same.
+    #[test]
+    fn the_bookmarks_panel_closes_on_esc_and_says_so_when_empty() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        h.press(code::B, ctrl(false));
+        assert!(h.app().bookmarks_open, "Ctrl+B is the other key for it");
+        sent();
+        let id = h.app().bookmarks_ask;
+        tell(&mut h, News::BookmarkList { id, entries: Vec::new() });
+        assert!(h.app().bookmarks_open);
+        assert_eq!(bookmark_note(&h.app().bookmarks), Some(NO_BOOKMARKS), "an empty list says so");
+        assert_eq!(NO_BOOKMARKS, "No bookmarks", "in the words a person reads");
+        let k = h.app().scale;
+        let strip = h.app().strip.expect("drawn all the same");
+        assert_eq!(strip.h, (DOWNLOAD_ROW_PX * k).round() as i32 + (8.0 * k).round() as i32, "one row, as the other notes");
+        h.key(keys::KEY_ENTER);
+        assert!(sent().is_empty() && h.app().bookmarks_open, "Enter with nothing to open does nothing");
+
+        h.key(code::ESC);
+        assert!(sent().is_empty(), "the page never sees the panel's Esc");
+        assert!(!h.app().bookmarks_open, "Esc closed it");
+        assert!(h.app().strip.is_none());
+
+        h.press(code::O, ctrl(true));
+        assert!(h.app().bookmarks_open, "the key opens it again, and asks again");
+        assert_eq!(sent().len(), 1);
+        h.press(code::O, ctrl(true));
+        assert!(!h.app().bookmarks_open, "and takes it down again");
+        assert!(sent().is_empty(), "closing asks for nothing");
+    }
+
+    /// One panel at a time: each of the three commands takes the others down, and the history panel still works.
+    #[test]
+    fn the_three_panels_are_never_up_together() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        let up = |h: &mut Harness<Browser>| {
+            let a = h.app();
+            (a.downloads_open, a.history_open, a.bookmarks_open)
+        };
+        h.press(code::Y, ctrl(true));
+        assert_eq!(up(&mut h), (true, false, false));
+        h.press(code::O, ctrl(true));
+        assert_eq!(up(&mut h), (false, false, true), "bookmarks took the downloads panel down");
+        h.press(code::H, ctrl(false));
+        assert_eq!(up(&mut h), (false, true, false), "history took the bookmarks panel down");
+        h.press(code::O, ctrl(true));
+        assert_eq!(up(&mut h), (false, false, true), "and bookmarks took history down");
+        h.press(code::Y, ctrl(true));
+        assert_eq!(up(&mut h), (true, false, false), "and downloads took bookmarks down");
+
+        // The history panel works as before after the others have come and gone.
+        sent();
+        h.press(code::H, ctrl(false));
+        let asked = sent();
+        assert!(asked.len() == 1 && asked[0].starts_with("ListHistory"), "{asked:?}");
+        let id = h.app().history_ask;
+        tell(&mut h, News::HistoryList { id, entries: vec![entry("https://h.example.com/", "H")] });
+        h.key(keys::KEY_ENTER);
+        let went = sent();
+        assert!(went.len() == 1 && went[0].contains("h.example.com"), "{went:?}");
+
+        // An answer for the bookmarks panel does nothing while it is not up, and a history answer is not a bookmarks one.
+        h.press(code::O, ctrl(true));
+        sent();
+        let bid = h.app().bookmarks_ask;
+        h.press(code::H, ctrl(false));
+        sent();
+        tell(&mut h, News::BookmarkList { id: bid, entries: vec![bentry("https://late.example.com/", "Late")] });
+        assert!(h.app().bookmarks.is_empty(), "a bookmarks answer arriving after the panel went down is dropped");
+    }
+
+    /// What the panel says in a row: the title (the address when there is none) and the host, dimmed beside it.
+    #[test]
+    fn bookmark_rows_read_title_then_host() {
+        assert_eq!(
+            bookmark_row(&bentry("https://www.example.com/a/b?q=1", "A title")),
+            ("A title".to_owned(), "www.example.com".to_owned())
+        );
+        assert_eq!(
+            bookmark_row(&bentry("https://example.org/path", "")),
+            ("https://example.org/path".to_owned(), "example.org".to_owned()),
+            "no title: the address stands in for it"
+        );
+        assert_eq!(bookmark_row(&bentry("https://example.org/path", "  ")).0, "https://example.org/path", "a blank title is none");
+        assert_eq!(bookmark_row(&bentry("about:blank", "")).1, "", "no host, nothing dimmed");
+    }
+
+    /// Both chromes draw the one bookmarks state, as they do the other panels'.
+    #[test]
+    fn both_chromes_show_the_same_bookmarks_panel() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        for glass in [false, true] {
+            let mut h = if glass { glass_window(0.0) } else { window() };
+            tell(&mut h, News::Loading(false));
+            sent();
+            h.press(code::O, ctrl(true));
+            assert!(h.app().bookmarks_open, "glass {glass}: the command opened the panel");
+            let id = h.app().bookmarks_ask;
+            tell(&mut h, News::BookmarkList { id, entries: vec![bentry("https://a.example.com/", "A"), bentry("https://b.example.com/", "B")] });
+            let strip = h.app().strip.unwrap_or_else(|| panic!("glass {glass}: over the page in both chromes"));
+            assert_eq!(strip.bottom(), h.app().page_rect.bottom(), "glass {glass}");
+            assert_eq!(h.app().bookmarks.len(), 2, "glass {glass}");
+            sent();
+            h.key(keys::KEY_DOWN);
+            h.key(keys::KEY_ENTER);
+            let went = sent();
+            assert!(went.len() == 1 && went[0].contains("b.example.com"), "glass {glass}: {went:?}");
+            assert!(!h.app().bookmarks_open, "glass {glass}: Enter closes it in both");
+        }
+    }
+
+    // ---- the find bar over the page's text ----
+
+    fn tblock(texts: &[&str]) -> lucinanet_find::Block {
+        lucinanet_find::Block {
+            runs: texts.iter().enumerate().map(|(i, t)| lucinanet_find::Run { node: i as u64 + 1, text: (*t).to_string() }).collect(),
+        }
+    }
+
+    /// Answer the text request that is out, the way the engine does.
+    fn answer_text(h: &mut Harness<Browser>, blocks: Vec<lucinanet_find::Block>, partial: bool) {
+        let id = h.app().find_ask;
+        tell(h, News::PageText { id, blocks, partial });
+    }
+
+    fn shift_mods() -> keys::Mods {
+        keys::Mods { shift: true, ..keys::Mods::default() }
+    }
+
+    /// An open bar over a page that says "alpha beta alpha" and a typed "alpha".
+    fn find_window(glass: bool) -> Harness<Browser> {
+        use lucinanet_shortcuts::code;
+        let mut h = if glass { glass_window(0.0) } else { window() };
+        tell(&mut h, News::Loading(false));
+        tell(&mut h, News::Url("https://example.com/1".into()));
+        sent();
+        h.press(code::F, ctrl(false));
+        answer_text(&mut h, vec![tblock(&["alpha beta alpha"])], false);
+        h.type_str("alpha");
+        sent();
+        h
+    }
+
+    /// Ctrl+F puts the bar up and asks the engine for the page's text, once per press; the page never sees the key, and the
+    /// find keys with no bar up do nothing at all.
+    #[test]
+    fn ctrl_f_opens_the_bar_and_asks_for_the_page_text() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        tell(&mut h, News::Loading(false));
+        sent();
+        h.press(code::F3, keys::Mods::default());
+        h.press(code::F3, shift_mods());
+        assert!(sent().is_empty(), "F3 with no bar up asks for nothing and the page does not see it");
+        assert!(!h.app().find_open);
+
+        h.press(code::F, ctrl(false));
+        assert!(h.app().find_open);
+        let first = h.app().find_ask;
+        assert_eq!(sent(), vec![format!("PageText {{ id: {first} }}")], "one request, no key to the page");
+        h.press(code::F, ctrl(false));
+        let second = h.app().find_ask;
+        assert_ne!(first, second, "Ctrl+F again asks again, with a new id");
+        assert_eq!(sent(), vec![format!("PageText {{ id: {second} }}")]);
+    }
+
+    /// Typing runs the search over the blocks, Enter and F3 go to the next match, Shift+Enter and Shift+F3 to the previous
+    /// one, and the counter says "n of m" in Firefox's words, the wrap after it. None of it reaches the page.
+    #[test]
+    fn typing_searches_the_text_and_enter_and_f3_step_through_the_matches() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        tell(&mut h, News::Loading(false));
+        sent();
+        h.press(code::F, ctrl(false));
+        // Typed before the text came: nothing to show yet, and the answer runs the search by itself.
+        h.type_str("alpha");
+        assert_eq!(h.app().find_counter(), "", "no text yet, nothing said");
+        answer_text(&mut h, vec![tblock(&["alpha beta alpha"]), tblock(&["gamma"])], false);
+        assert_eq!(h.app().find_counter(), "1 of 2 matches");
+        h.key(keys::KEY_ENTER);
+        assert_eq!(h.app().find_counter(), "2 of 2 matches");
+        h.key(keys::KEY_ENTER);
+        assert_eq!(h.app().find_counter(), "1 of 2 matches Reached end of page, continued from top");
+        h.press(keys::KEY_ENTER, shift_mods());
+        assert_eq!(h.app().find_counter(), "2 of 2 matches Reached top of page, continued from bottom");
+        h.press(code::F3, shift_mods());
+        assert_eq!(h.app().find_counter(), "1 of 2 matches");
+        h.press(code::F3, keys::Mods::default());
+        assert_eq!(h.app().find_counter(), "2 of 2 matches");
+        // Backspace re-runs it: "alph" still matches twice, "alphax" none.
+        h.key(keys::KEY_BACKSPACE);
+        assert_eq!(h.app().find_counter().split(' ').nth(2), Some("2"), "{}", h.app().find_counter());
+        h.type_str("ax");
+        assert_eq!(h.app().find_counter(), "Phrase not found");
+        assert!(!sent().iter().any(|c| c.starts_with("Key")), "the page saw none of it");
+    }
+
+    /// The engine's limit is said in the counter.
+    #[test]
+    fn a_partial_text_says_so_in_the_counter() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        tell(&mut h, News::Loading(false));
+        h.press(lucinanet_shortcuts::code::F, ctrl(false));
+        h.type_str("alpha");
+        answer_text(&mut h, vec![tblock(&["alpha beta alpha"])], true);
+        assert_eq!(h.app().find_counter(), "1 of 2 matches (partial)");
+        h.type_str("zz");
+        assert_eq!(h.app().find_counter(), "Phrase not found (partial)", "a miss in a cut text may be a miss of the cut");
+    }
+
+    /// An answer to another request is an old one, and so is one that comes after the bar went down.
+    #[test]
+    fn an_old_answer_is_dropped() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        tell(&mut h, News::Loading(false));
+        h.press(lucinanet_shortcuts::code::F, ctrl(false));
+        let id = h.app().find_ask;
+        tell(&mut h, News::PageText { id: id + 1, blocks: vec![tblock(&["alpha"])], partial: false });
+        assert!(h.app().find_blocks.is_empty(), "another request's answer is dropped");
+        h.key(keys::KEY_ESC);
+        tell(&mut h, News::PageText { id, blocks: vec![tblock(&["alpha"])], partial: false });
+        assert!(h.app().find_blocks.is_empty(), "an answer after the bar closed is dropped, not kept for later");
+    }
+
+    /// Esc (the bar's own key, with the page's text held) closes the bar and drops every block and match; the page never
+    /// sees the key; opening again asks again and shows the new text only.
+    #[test]
+    fn closing_the_bar_drops_the_text() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = find_window(false);
+        assert_eq!(h.app().find_counter(), "1 of 2 matches");
+        assert!(!h.app().find_blocks.is_empty());
+        h.key(keys::KEY_ESC);
+        assert!(!sent().iter().any(|c| c.starts_with("Key")), "Esc was the bar's");
+        assert!(!h.app().find_open, "the bar is down");
+        assert!(h.app().find_blocks.is_empty(), "the blocks are gone with it");
+        assert_eq!(h.app().find_counter(), "", "and so are the matches");
+        assert!(h.app().finder.matches().is_empty());
+        // Up again: the text is asked for afresh, and what comes is what is searched.
+        h.press(lucinanet_shortcuts::code::F, ctrl(false));
+        assert_eq!(h.app().find_counter(), "", "nothing from the last time");
+        answer_text(&mut h, vec![tblock(&["alpha"])], false);
+        assert_eq!(h.app().find_counter(), "1 of 1 match", "the query stayed in the field, the text is the new one");
+    }
+
+    /// A page that changes under an open bar leaves it with no stale result: another address, a new load, another tab and a
+    /// crash each drop the blocks, and an answer to the request made before is dropped. Typing then asks again.
+    #[test]
+    fn navigation_a_new_load_a_tab_change_and_a_crash_drop_the_text() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let events: [(&str, News); 4] = [
+            ("another address", News::Url("https://example.com/elsewhere".into())),
+            ("a load starting", News::Loading(true)),
+            ("another tab", News::Tabs { tabs: tabs(2), active: 2 }),
+            ("a crash", News::Crashed("boom".into())),
+        ];
+        for (what, news) in events {
+            let mut h = find_window(false);
+            // The same address again is the same page.
+            let old = h.app().find_ask;
+            tell(&mut h, News::Url("https://example.com/1".into()));
+            assert!(!h.app().find_blocks.is_empty(), "{what}: the same address keeps the text");
+            tell(&mut h, news);
+            assert!(h.app().find_blocks.is_empty(), "{what}: the blocks are dropped");
+            assert_eq!(h.app().find_counter(), "", "{what}: no stale result");
+            assert!(h.app().finder.matches().is_empty(), "{what}: no stale matches");
+            tell(&mut h, News::PageText { id: old, blocks: vec![tblock(&["alpha alpha alpha"])], partial: false });
+            assert!(h.app().find_blocks.is_empty(), "{what}: the old request's answer is dropped");
+        }
+        // A bar still up asks again when typing resumes.
+        let mut h = find_window(false);
+        tell(&mut h, News::Url("https://example.com/other".into()));
+        sent();
+        h.type_str("a");
+        let asked = sent();
+        assert!(asked.iter().any(|c| c.starts_with("PageText")), "typing on a bar with no text asks for it: {asked:?}");
+        // The field still holds "alpha", and the typed "a" made it "alphaa".
+        answer_text(&mut h, vec![tblock(&["alphaa b alphaa"])], false);
+        assert_eq!(h.app().find_counter(), "1 of 2 matches");
+        // Another tab closes the bar: it was the other page's.
+        tell(&mut h, News::Tabs { tabs: tabs(2), active: 2 });
+        assert!(!h.app().find_open, "the tab change took the bar down");
+    }
+
+    /// Both chromes hold the one find state.
+    #[test]
+    fn both_chromes_hold_the_same_find_state() {
+        use lucinanet_shortcuts::code;
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        for glass in [false, true] {
+            let mut h = find_window(glass);
+            assert!(h.app().find_open, "glass {glass}");
+            assert_eq!(h.app().find_counter(), "1 of 2 matches", "glass {glass}");
+            h.press(code::F3, keys::Mods::default());
+            assert_eq!(h.app().find_counter(), "2 of 2 matches", "glass {glass}");
+            let bar = h.app().find_rect.unwrap_or_else(|| panic!("glass {glass}: the strip is drawn over the page"));
+            assert!(h.app().page_rect.contains(bar.x, bar.y), "glass {glass}: over the page");
+            h.key(keys::KEY_ESC);
+            assert!(!h.app().find_open && h.app().find_blocks.is_empty() && h.app().find_rect.is_none(), "glass {glass}");
+        }
+    }
+
+    /// A page with no text, or none yet: the finder's own words, and nothing breaks on an empty block.
+    #[test]
+    fn a_page_without_text_says_what_the_finder_says() {
+        let _serial = SERIAL.lock().unwrap_or_else(|e| e.into_inner());
+        let mut h = window();
+        tell(&mut h, News::Loading(false));
+        h.press(lucinanet_shortcuts::code::F, ctrl(false));
+        assert_eq!(h.app().find_counter(), "", "no query, no counter");
+        h.type_str("x");
+        answer_text(&mut h, Vec::new(), false);
+        assert_eq!(h.app().find_counter(), "Phrase not found");
+        h.key(keys::KEY_ENTER);
+        h.press(lucinanet_shortcuts::code::F3, shift_mods());
+        assert_eq!(h.app().find_counter(), "Phrase not found", "stepping over nothing changes nothing");
+        h.press(lucinanet_shortcuts::code::F, ctrl(false));
+        answer_text(&mut h, vec![lucinanet_find::Block { runs: Vec::new() }, tblock(&[""])], false);
+        assert_eq!(h.app().find_counter(), "Phrase not found");
     }
 }

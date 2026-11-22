@@ -18,9 +18,24 @@ pub mod fixup;
 pub mod history_score;
 pub mod rank;
 
-pub use classify::{Action, Context, SearchEngine, classify, to_url};
+pub use classify::{Action, Context, NoEngineReason, Refusal, SearchEngine, classify, to_url};
 pub use fixup::fix_scheme_typos;
 pub use history_score::{history_score, history_score_among};
 pub use rank::{
-    BookmarkEntry, HistoryEntry, Kind, MAX_SUGGESTIONS, RankInput, Suggestion, suggest,
+    BookmarkEntry, HistoryEntry, InlineOrigin, Kind, MAX_SUGGESTIONS, RankInput, Suggestion, inline_origin, suggest,
 };
+
+/// Test data only: the engine this crate's tests search with. The engine a person searches with comes from the
+/// settings (`lucinanet-settings`); no code that builds a search request names one.
+#[cfg(test)]
+pub(crate) mod testing {
+    use crate::SearchEngine;
+
+    pub(crate) fn engine() -> SearchEngine {
+        SearchEngine {
+            name: "Test".to_owned(),
+            keyword: None,
+            template: "https://duckduckgo.com/html/?q={searchTerms}".to_owned(),
+        }
+    }
+}

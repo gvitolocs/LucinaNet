@@ -14,10 +14,12 @@ vello_cpu 0.3.0 draws the scene of ../paint-bench.html (the same boxes, gradient
 
 ## Building and Running
 
-1. Set the target directory:
+1. Set a scratch directory for the build and the images, and point the target directory at it:
 
 ```sh
-export CARGO_TARGET_DIR=$WORK_DIR/lucinanet-raster/target-bench
+export WORK_DIR=$(mktemp -d)
+export CARGO_TARGET_DIR=$WORK_DIR/target-bench
+mkdir -p $WORK_DIR/m2
 ```
 
 2. Build the project:
@@ -29,7 +31,7 @@ nice -n 15 cargo build --release -j 4
 3. Run the benchmark:
 
 ```sh
-$CARGO_TARGET_DIR/release/vello-bench --threads 0 --runs 5 --out $WORK_DIR/lucinanet-raster/m2/vello-1t.png --compare $WORK_DIR/lucinanet-raster/m2/swgl-3.png --diff $WORK_DIR/lucinanet-raster/m2/diff-1t.png
+$CARGO_TARGET_DIR/release/vello-bench --threads 0 --runs 5 --out $WORK_DIR/m2/vello-1t.png --compare $WORK_DIR/m2/swgl-3.png --diff $WORK_DIR/m2/diff-1t.png
 $CARGO_TARGET_DIR/release/vello-bench --threads 8 --runs 5
 ```
 

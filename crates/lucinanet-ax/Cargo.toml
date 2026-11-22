@@ -7,9 +7,9 @@ publish = false
 license = "MPL-2.0"
 
 [dependencies]
-# The version Servo pins (LucinaNet-servo Cargo.toml), so its TreeUpdates pass through unchanged.
+# The version Servo pins (`third_party/servo/Cargo.toml`), so its TreeUpdates pass through unchanged.
 accesskit = { version = "=0.24.0", features = ["serde"] }
-# Juno's AccessKit adapter (LucinaOS stage B): the socket, its requests and replies, the version and the rules every
+# Juno's AccessKit adapter (`lucina-ax`): the socket, its requests and replies, the version and the rules every
 # Juno app goes through. It is on AccessKit 0.25; the tree crosses by its serde form.
 lucina-ax = { path = "../../lucinaos/crates/lucina-ax" }
 

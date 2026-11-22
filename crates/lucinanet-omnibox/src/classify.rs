@@ -23,40 +23,24 @@ pub struct SearchEngine {
 
 impl SearchEngine {
     /// The search URL for `terms`. Terms are encoded like `application/x-www-form-urlencoded` (space as `+`,
-    /// `&` as `%26`). A template that does not parse after filling falls back to the DuckDuckGo URL, so the result
-    /// is always a usable address.
-    pub fn url_for(&self, terms: &str) -> Url {
+    /// `&` as `%26`). A template that does not parse after filling gives `None`: a search is never sent to an engine
+    /// the person did not choose.
+    pub fn url_for(&self, terms: &str) -> Option<Url> {
         let encoded: String = url::form_urlencoded::byte_serialize(terms.as_bytes()).collect();
         let filled = if self.template.contains("{searchTerms}") {
             self.template.replace("{searchTerms}", &encoded)
         } else {
             self.template.replace("%s", &encoded)
         };
-        match Url::parse(&filled) {
-            Ok(url) => url,
-            Err(_) => fallback_search_url(&encoded),
-        }
+        Url::parse(&filled).ok()
     }
-
-    /// DuckDuckGo's HTML page, the address bar's search engine today.
-    pub fn duckduckgo_html() -> SearchEngine {
-        SearchEngine {
-            name: "DuckDuckGo".to_owned(),
-            keyword: None,
-            template: "https://duckduckgo.com/html/?q={searchTerms}".to_owned(),
-        }
-    }
-}
-
-fn fallback_search_url(encoded: &str) -> Url {
-    // `encoded` holds only unreserved characters and %XX, so this literal-prefixed URL always parses.
-    Url::parse(&format!("https://duckduckgo.com/html/?q={encoded}")).expect("static URL with encoded query")
 }
 
 /// What `classify` needs besides the typed text.
 pub struct Context<'a> {
-    /// Engine for plain searches.
-    pub default_engine: &'a SearchEngine,
+    /// Engine for plain searches, from the settings. `None` when none is configured: typed text that would be a
+    /// search is then [`Action::NoEngine`] and goes nowhere.
+    pub default_engine: Option<&'a SearchEngine>,
     /// Engines that can be selected by a keyword.
     pub keywords: &'a [SearchEngine],
     /// Whether a single label such as `intranet` is a host rather than a search (default false).
@@ -75,6 +59,28 @@ pub enum Action {
     Search { engine: SearchEngine, terms: String, url: Url },
     /// "keyword rest": a search with the engine named by the keyword.
     Keyword { engine: SearchEngine, terms: String, url: Url },
+    /// The text is a search but there is no engine to send it to (none configured, or its template is unusable).
+    /// Nothing is loaded and nothing is sent; the UI says so.
+    NoEngine { terms: String, reason: NoEngineReason },
+    /// The text is something the bar never acts on (see [`Refusal`]). Nothing is loaded, searched or sent; the UI says
+    /// so and shakes the field.
+    Refused { reason: Refusal },
+}
+
+/// What the bar refuses to do with typed text, whatever engine is configured.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Refusal {
+    /// `javascript:` text: it is never run from the bar and never sent to an engine as a search.
+    Javascript,
+}
+
+/// Why a search has no engine to go to.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NoEngineReason {
+    /// No default engine is configured.
+    Missing,
+    /// An engine is configured but its template cannot be filled into an address.
+    Unusable,
 }
 
 // Firefox browser/components/urlbar/UrlbarProviderHeuristicFallback.sys.mjs @33abb90 and docshell/base/URIFixup.sys.mjs
@@ -88,8 +94,8 @@ const AUTHORITY_SCHEMES: [&str; 3] = ["http", "https", "ftp"];
 ///
 /// Order of tests: (a) a leading `?` forces a search of the rest; (b) a first word equal to an engine keyword with
 /// text after it runs that engine (a lone keyword is a plain search); (c) text with a navigable scheme opens as typed
-/// after [`fix_scheme_typos`], except `javascript:` which is searched; (d) an absolute path becomes a `file://` URL;
-/// (e) host-like text gets `https://` (`http://` for `localhost` and IP literals); (f) everything else is a search.
+/// after [`fix_scheme_typos`], except `javascript:` which is refused ([`Action::Refused`]); (d) an absolute path becomes a `file://` URL;
+/// (e) host-like text gets `https://` (`http://` for `localhost` and IP literals; `0.0.0.0` and `::` become `localhost`); (f) everything else is a search.
 pub fn classify(typed: &str, cx: &Context<'_>) -> Action {
     classify_at(typed, cx, 0)
 }
@@ -97,7 +103,7 @@ pub fn classify(typed: &str, cx: &Context<'_>) -> Action {
 /// Today's `to_url`: the address `classify` would open, `None` for blank text.
 pub fn to_url(typed: &str, cx: &Context<'_>) -> Option<Url> {
     match classify(typed, cx) {
-        Action::Empty => None,
+        Action::Empty | Action::NoEngine { .. } | Action::Refused { .. } => None,
         Action::Navigate { url, .. } | Action::Search { url, .. } | Action::Keyword { url, .. } => Some(url),
     }
 }
@@ -140,9 +146,13 @@ fn classify_at(typed: &str, cx: &Context<'_>, depth: u8) -> Action {
 }
 
 fn search(cx: &Context<'_>, terms: &str) -> Action {
-    let engine = cx.default_engine.clone();
-    let url = engine.url_for(terms);
-    Action::Search { engine, terms: terms.to_owned(), url }
+    let Some(engine) = cx.default_engine else {
+        return Action::NoEngine { terms: terms.to_owned(), reason: NoEngineReason::Missing };
+    };
+    match engine.url_for(terms) {
+        Some(url) => Action::Search { engine: engine.clone(), terms: terms.to_owned(), url },
+        None => Action::NoEngine { terms: terms.to_owned(), reason: NoEngineReason::Unusable },
+    }
 }
 
 fn keyword_action(text: &str, cx: &Context<'_>) -> Option<Action> {
@@ -158,7 +168,9 @@ fn keyword_action(text: &str, cx: &Context<'_>) -> Option<Action> {
     if terms.is_empty() {
         return Some(search(cx, text));
     }
-    let url = engine.url_for(terms);
+    let Some(url) = engine.url_for(terms) else {
+        return Some(Action::NoEngine { terms: terms.to_owned(), reason: NoEngineReason::Unusable });
+    };
     Some(Action::Keyword { engine: engine.clone(), terms: terms.to_owned(), url })
 }
 
@@ -171,9 +183,10 @@ fn scheme_action(candidate: &str, original: &str, cx: &Context<'_>, depth: u8) -
         return None;
     }
     let scheme = name.to_ascii_lowercase();
-    // Chromium autocomplete_input.cc: javascript: is never run from the bar; Firefox strips it.
+    // Chromium autocomplete_input.cc: javascript: is never run from the bar; Firefox strips it. Here it is not searched
+    // either: it is refused, so the text is not sent to an engine nobody asked about it.
     if scheme == "javascript" {
-        return Some(search(cx, original));
+        return Some(Action::Refused { reason: Refusal::Javascript });
     }
     if !NAVIGABLE_SCHEMES.contains(&scheme.as_str()) {
         return None;
@@ -201,6 +214,7 @@ fn view_source(candidate: &str, name_end: usize, original: &str, cx: &Context<'_
             Ok(url) => Action::Navigate { url, typed_scheme },
             Err(_) => search(cx, original),
         },
+        refused @ Action::Refused { .. } => refused,
         _ => search(cx, original),
     }
 }
@@ -214,11 +228,31 @@ fn host_action(text: &str, cx: &Context<'_>) -> Option<Action> {
     if authority.is_empty() || authority.contains(char::is_whitespace) || authority.contains('@') {
         return None;
     }
-    let (host, port) = split_host_port(authority)?;
+    // A bare `::` has no brackets and so is no `host:port`; it is still the all-zeros literal.
+    let (host, port) = if authority == "::" { ("::", None) } else { split_host_port(authority)? };
+    // The all-zeros "this host" literal is not an address a person can reach: it goes to loopback, over plain http like
+    // every other numeric host, so no socket is opened to 0.0.0.0 from the bar.
+    if is_all_zeros(host) {
+        let port = port.map(|port| format!(":{port}")).unwrap_or_default();
+        let url = Url::parse(&format!("http://localhost{port}{tail}")).ok()?;
+        return Some(Action::Navigate { url, typed_scheme: false });
+    }
     let plain_http = host_kind(host, port.is_some(), tail, cx)?;
     let scheme = if plain_http { "http" } else { "https" };
     let url = Url::parse(&format!("{scheme}://{body}")).ok()?;
     Some(Action::Navigate { url, typed_scheme: false })
+}
+
+/// `0.0.0.0` (four zero octets) and the IPv6 unspecified address (`::`, `[::]`, `[0:0:0:0:0:0:0:0]`).
+fn is_all_zeros(host: &str) -> bool {
+    if host == "::" {
+        return true;
+    }
+    if let Some(inner) = host.strip_prefix('[') {
+        return inner.strip_suffix(']').and_then(|inner| inner.parse::<Ipv6Addr>().ok()).is_some_and(|ip| ip.is_unspecified());
+    }
+    let parts: Vec<&str> = host.split('.').collect();
+    parts.len() == 4 && parts.iter().all(|p| !p.is_empty() && p.len() <= 3 && p.parse::<u8>() == Ok(0))
 }
 
 /// `Some(true)` for a host that is opened over plain http (localhost, IP literals), `Some(false)` for a name that gets
@@ -306,22 +340,22 @@ mod tests {
             keyword: Some("w".to_owned()),
             template: "https://en.wikipedia.org/w/index.php?search={searchTerms}".to_owned(),
         };
-        (SearchEngine::duckduckgo_html(), vec![wiki])
+        (crate::testing::engine(), vec![wiki])
     }
 
     fn run(typed: &str) -> Action {
         let (default_engine, keywords) = engines();
-        classify(typed, &Context { default_engine: &default_engine, keywords: &keywords, allow_single_label_hosts: false })
+        classify(typed, &Context { default_engine: Some(&default_engine), keywords: &keywords, allow_single_label_hosts: false })
     }
 
     fn run_intranet(typed: &str) -> Action {
         let (default_engine, keywords) = engines();
-        classify(typed, &Context { default_engine: &default_engine, keywords: &keywords, allow_single_label_hosts: true })
+        classify(typed, &Context { default_engine: Some(&default_engine), keywords: &keywords, allow_single_label_hosts: true })
     }
 
     fn url_of(typed: &str) -> String {
         let (default_engine, keywords) = engines();
-        let cx = Context { default_engine: &default_engine, keywords: &keywords, allow_single_label_hosts: false };
+        let cx = Context { default_engine: Some(&default_engine), keywords: &keywords, allow_single_label_hosts: false };
         to_url(typed, &cx).map(|u| u.to_string()).unwrap_or_default()
     }
 
@@ -379,7 +413,7 @@ mod tests {
         assert_eq!(url_of("lucina os"), "https://duckduckgo.com/html/?q=lucina+os");
         assert_eq!(url_of("foo bar"), "https://duckduckgo.com/html/?q=foo+bar");
         let (default_engine, keywords) = engines();
-        let cx = Context { default_engine: &default_engine, keywords: &keywords, allow_single_label_hosts: false };
+        let cx = Context { default_engine: Some(&default_engine), keywords: &keywords, allow_single_label_hosts: false };
         assert!(to_url("   ", &cx).is_none());
     }
 
@@ -471,10 +505,54 @@ mod tests {
         navigates("htps://x.org/a", "https://x.org/a", true);
     }
 
+    fn refused(typed: &str) {
+        assert_eq!(run(typed), Action::Refused { reason: Refusal::Javascript }, "{typed:?}");
+        // The same without an engine: a refusal is not "no engine", and there is nothing to send either way.
+        assert_eq!(run_without_engine(typed), Action::Refused { reason: Refusal::Javascript }, "{typed:?}");
+        assert_eq!(url_of(typed), "", "{typed:?}");
+    }
+
+    /// `javascript:` is refused (it was a search before), never run and never sent to an engine.
     #[test]
-    fn javascript_is_not_navigated() {
-        searches("javascript:alert(1)", "javascript:alert(1)");
-        searches("JavaScript:void(0)", "JavaScript:void(0)");
+    fn javascript_is_refused_not_searched() {
+        for typed in ["javascript:alert(1)", "JavaScript:void(0)", "JAVASCRIPT:alert(1)", "  javascript:alert(1)  ", "\tJAVASCRIPT:x", "view-source:javascript:alert(1)"] {
+            refused(typed);
+        }
+        // The ways to ask for a search on purpose are still searches.
+        searches("?javascript:alert(1)", "javascript:alert(1)");
+        // Words that merely mention it are words.
+        searches("javascript tutorial", "javascript tutorial");
+    }
+
+    /// the all-zeros "this host" literal never reaches a socket from the bar: it is loopback.
+    #[test]
+    fn zero_zero_zero_zero_is_localhost() {
+        navigates("0.0.0.0", "http://localhost/", false);
+        navigates("  0.0.0.0  ", "http://localhost/", false);
+        navigates("0.0.0.0:8080", "http://localhost:8080/", false);
+        navigates("0.0.0.0:8080/path?q=1#f", "http://localhost:8080/path?q=1#f", false);
+        navigates("0.0.0.0/a/b", "http://localhost/a/b", false);
+        navigates("//0.0.0.0:3000/x", "http://localhost:3000/x", false);
+        navigates("0.0.0.0:80", "http://localhost/", false);
+        // Every other numeric host is untouched.
+        navigates("127.0.0.1", "http://127.0.0.1/", false);
+        navigates("127.0.0.1:8080/x", "http://127.0.0.1:8080/x", false);
+        navigates("10.0.0.0", "http://10.0.0.0/", false);
+        navigates("0.0.0.1", "http://0.0.0.1/", false);
+        navigates("255.255.255.255", "http://255.255.255.255/", false);
+    }
+
+    #[test]
+    fn double_colon_is_localhost() {
+        navigates("::", "http://localhost/", false);
+        navigates("[::]", "http://localhost/", false);
+        navigates("[::]:80", "http://localhost/", false);
+        navigates("[::]:8080/path", "http://localhost:8080/path", false);
+        navigates("::/x", "http://localhost/x", false);
+        navigates("[0:0:0:0:0:0:0:0]:9000", "http://localhost:9000/", false);
+        // Other IPv6 literals are untouched.
+        navigates("[::1]:8080", "http://[::1]:8080/", false);
+        navigates("[2001:db8::1]", "http://[2001:db8::1]/", false);
     }
 
     #[test]
@@ -545,11 +623,45 @@ mod tests {
     fn engine_template_supports_both_placeholders() {
         let chromium = SearchEngine { name: "c".into(), keyword: None, template: "https://s.example/?q={searchTerms}&x=1".into() };
         let firefox = SearchEngine { name: "f".into(), keyword: None, template: "https://s.example/?q=%s&x=1".into() };
-        assert_eq!(chromium.url_for("x y").as_str(), "https://s.example/?q=x+y&x=1");
-        assert_eq!(firefox.url_for("x y").as_str(), "https://s.example/?q=x+y&x=1");
+        assert_eq!(chromium.url_for("x y").unwrap().as_str(), "https://s.example/?q=x+y&x=1");
+        assert_eq!(firefox.url_for("x y").unwrap().as_str(), "https://s.example/?q=x+y&x=1");
         // "%s" inside the terms is encoded, never taken for a placeholder.
-        assert_eq!(firefox.url_for("100%s").as_str(), "https://s.example/?q=100%25s&x=1");
+        assert_eq!(firefox.url_for("100%s").unwrap().as_str(), "https://s.example/?q=100%25s&x=1");
         let broken = SearchEngine { name: "b".into(), keyword: None, template: "not a url {searchTerms}".into() };
-        assert_eq!(broken.url_for("a b").as_str(), "https://duckduckgo.com/html/?q=a+b");
+        // An unusable template is no search: it never falls back to some other engine.
+        assert_eq!(broken.url_for("a b"), None);
+    }
+
+    fn run_without_engine(typed: &str) -> Action {
+        classify(typed, &Context { default_engine: None, keywords: &[], allow_single_label_hosts: false })
+    }
+
+    /// With no engine configured a typed non-URL is refused, never sent anywhere.
+    #[test]
+    fn no_engine_refuses_a_search() {
+        for text in ["rust lang", "?rust", "rust"] {
+            assert!(matches!(run_without_engine(text), Action::NoEngine { .. }), "{text}");
+        }
+        assert_eq!(run_without_engine("some words"), Action::NoEngine { terms: "some words".to_owned(), reason: NoEngineReason::Missing });
+        let cx = Context { default_engine: None, keywords: &[], allow_single_label_hosts: false };
+        assert_eq!(to_url("some words", &cx), None);
+    }
+
+    /// Addresses and blank text do not need an engine.
+    #[test]
+    fn no_engine_still_opens_addresses() {
+        assert!(matches!(run_without_engine("example.org/a"), Action::Navigate { .. }));
+        assert!(matches!(run_without_engine("https://example.org/"), Action::Navigate { .. }));
+        assert_eq!(run_without_engine("   "), Action::Empty);
+    }
+
+    /// An engine whose template cannot be filled is no engine, for the default and for a keyword.
+    #[test]
+    fn unusable_template_is_no_engine() {
+        let broken = SearchEngine { name: "b".into(), keyword: Some("b".into()), template: "not a url {searchTerms}".into() };
+        let keywords = [broken.clone()];
+        let cx = Context { default_engine: Some(&broken), keywords: &keywords, allow_single_label_hosts: false };
+        assert!(matches!(classify("a b", &cx), Action::NoEngine { reason: NoEngineReason::Unusable, .. }), "{:?}", classify("a b", &cx));
+        assert!(matches!(classify("b x y", &cx), Action::NoEngine { reason: NoEngineReason::Unusable, .. }), "{:?}", classify("b x y", &cx));
     }
 }

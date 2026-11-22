@@ -5,13 +5,13 @@
 #   `-> T //@ret`   becomes `-> (ret: T)`
 #   `... //@omit`   is dropped (a derive Verus does not check, and that holds no logic)
 #   `//@ proof`     becomes `proof`
-# SERVO is the Servo checkout with our patches (default ../LucinaNet-servo). Run on the build host through
+# SERVO is the Servo checkout with our patches (default third_party/servo). Run it through
 # the verification script:
 #   scripts/verify-shipped.sh
 set -euo pipefail
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-servo=${SERVO:-$root/../LucinaNet-servo}
+servo=${SERVO:-$root/third_party/servo}
 source "$root/scripts/verus-pin.sh"   # resolves `verus`, prints it, and refuses a version other than verification/verus.version
 files=(${FILES:-components/profile_store/rules/bounds.rs components/profile_store/rules/evict.rs components/zstd/window.rs crates/lucinanet-media/src/rules/flow.rs crates/lucinanet-media/src/rules/clock.rs crates/lucinanet-servo/src/rules/pacing.rs crates/lucinanet-media/src/rules/buffered.rs crates/lucinanet-media/src/rules/caps.rs}) # crates/… is this repo, the rest the Servo checkout
 work=$(mktemp -d "${TMPDIR:-/tmp}/lucinanet-verify.XXXXXX")

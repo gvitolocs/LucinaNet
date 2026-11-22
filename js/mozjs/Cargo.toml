@@ -41,6 +41,8 @@ libz-sys = ["mozjs_sys/libz-sys"]
 profilemozjs = ["mozjs_sys/profilemozjs"]
 # LucinaNet: tests of the engine edge wrap only (docs/edge-wrap.md); never in a browser build.
 lucinanet-failpoints = ["mozjs_sys/lucinanet-failpoints"]
+# LucinaNet tests only; never in a browser build: the function cache is configured from the process environment (mozjs_sys/env-config).
+env-config = ["mozjs_sys/env-config"]
 
 [lib]
 name = "mozjs"
@@ -248,6 +250,7 @@ path = "tests/brimstone_lazy_reparse.rs"
 
 [[test]]
 name = "brimstone_fn_cache_env"
+required-features = ["env-config"]
 
 [[test]]
 name = "brimstone_store_buffer"
@@ -256,6 +259,15 @@ path = "tests/brimstone_store_buffer.rs"
 [[test]]
 name = "brimstone_cache_partition"
 path = "tests/brimstone_cache_partition.rs"
+required-features = ["env-config"]
+
+[[test]]
+name = "brimstone_fn_cache_no_env"
+path = "tests/brimstone_fn_cache_no_env.rs"
+
+[[test]]
+name = "brimstone_fn_cache_api"
+path = "tests/brimstone_fn_cache_api.rs"
 
 [[test]]
 name = "brimstone_realm_principals"
@@ -301,3 +313,11 @@ path = "tests/brimstone_wasm_option.rs"
 name = "brimstone_edge_wrap"
 path = "tests/brimstone_edge_wrap.rs"
 required-features = ["lucinanet-failpoints"]
+
+[[test]]
+name = "brimstone_external_buffer"
+path = "tests/brimstone_external_buffer.rs"
+
+[[test]]
+name = "brimstone_fn_cache_late"
+path = "tests/brimstone_fn_cache_late.rs"

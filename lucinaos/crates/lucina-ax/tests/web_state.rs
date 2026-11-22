@@ -1,4 +1,4 @@
-//! A page's tree through `Snapshot::from_update_with` (LucinaNet, stage F), and an app's own published state (`Builder::state`).
+//! A page's tree through `Snapshot::from_update_with` (LucinaNet), and an app's own published state (`Builder::state`).
 
 use lucina_ax::accesskit::{Action, Node, NodeId, Role, TreeId, TreeInfo, TreeUpdate};
 use lucina_ax::tree::{Builder, id_text};

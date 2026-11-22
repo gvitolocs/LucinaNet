@@ -2,7 +2,7 @@
 name = "heatpause"
 version = "0.1.0"
 edition = "2021"
-description = "Freeze a systemd user unit while Tctl is hot (the build host background-work rule)"
+description = "Freeze a systemd user unit while Tctl is hot (a background-work thermal rule)"
 license = "MIT"
 
 [workspace]

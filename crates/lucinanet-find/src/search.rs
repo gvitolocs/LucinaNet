@@ -21,11 +21,20 @@
 
 use crate::fold;
 
-/// One piece of text inside a block-level element (a text node). `node` is the caller's id for it (opaque here).
-#[derive(Clone, Debug, PartialEq, Eq)]
+/// One piece of text inside a block-level element (a text node). `node` is the caller's id for it (opaque here;
+/// 64 bits, because that is what the engine numbers its text nodes with).
+#[derive(Clone, PartialEq, Eq)]
 pub struct Run {
-    pub node: u32,
+    pub node: u64,
     pub text: String,
+}
+
+/// The page's text must not reach a log by accident (a `{:?}` of the news that carries it, of a block, of a test's failed
+/// assertion on a real page): `Debug` says the node and how many bytes the text is, and nothing else.
+impl std::fmt::Debug for Run {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Run {{ node: {}, bytes: {} }}", self.node, self.text.len())
+    }
 }
 
 /// The runs of one block (paragraph, list item, table cell...) in document order. A match may continue across
@@ -282,7 +291,7 @@ mod tests {
             runs: runs
                 .iter()
                 .enumerate()
-                .map(|(i, text)| Run { node: i as u32, text: (*text).to_string() })
+                .map(|(i, text)| Run { node: i as u64, text: (*text).to_string() })
                 .collect(),
         }
     }
@@ -502,6 +511,17 @@ mod tests {
         // "for\xadmatted" reads "formatted" to the matcher: f0 o1 r2 SHY3 m4 a5 t6 t7 e8 d9.
         assert_eq!(find("for\u{ad}matted", "formatted").matches, vec![m(0, 0, 10)]);
         assert_eq!(find("formatted", "for\u{ad}matted").matches, vec![m(0, 0, 9)]);
+    }
+
+    /// A run is the page's text and a log line must never carry it: `Debug` says how long the text is and nothing else
+    /// (the fork's `TextRun` does the same), and a node id wider than 32 bits is kept whole.
+    #[test]
+    fn a_run_debug_prints_no_text_and_the_node_id_is_64_bits() {
+        let run = Run { node: u64::from(u32::MAX) + 7, text: "marker-secret-text".to_string() };
+        assert_eq!(run.node, 4_294_967_302);
+        let shown = format!("{run:?} {:?}", Block { runs: vec![run.clone()] });
+        assert!(!shown.contains("marker-secret-text"), "page text reached a Debug line: {shown}");
+        assert!(shown.contains("18"), "the byte length is there instead: {shown}");
     }
 
     /// An empty run (an empty text node) contributes nothing and does not shift the offsets, which are per run.
